@@ -1013,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateMedicalIdUI();
 
   // Partilha de descobertas clínicas com Familiar (ICE) com GPS, Google Maps e Waze
-  async function shareClinicalUpdateWithICE(mode = 'info') {
+  function shareClinicalUpdateWithICE(mode = 'info') {
     const ice = getMedicalId();
     if (!ice.contactPhone) {
       alert('Para partilhar com o seu familiar, configure primeiro o contacto de emergência na Ficha Médica ICE.');
@@ -1028,18 +1028,23 @@ document.addEventListener('DOMContentLoaded', () => {
       diagSummary = diagMatch[1].replace(/\[Fonte:[^\]]+\]/gi, '').trim();
     }
 
-    // Obter localização GPS em tempo real com link direto de pino universal
-    const loc = await GeoManager.getLocationAsync();
-    let locLine = '';
+    // Obter localização instantaneamente sem bloqueio assíncrono ou rede
+    const loc = GeoManager.currentLocation;
+    const lat = loc.lat || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lat') : null);
+    const lon = loc.lon || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lon') : null);
+    const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado'))
+      ? loc.address
+      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || '') : '');
 
-    if (loc && loc.lat && loc.lon) {
-      const latShort = Number(loc.lat).toFixed(4);
-      const lonShort = Number(loc.lon).toFixed(4);
+    let locLine = '';
+    if (lat && lon) {
+      const latShort = Number(lat).toFixed(4);
+      const lonShort = Number(lon).toFixed(4);
       const mapPinUrl = `https://maps.google.com/?q=${latShort},${lonShort}`;
-      const addressShort = loc.address ? `\n📍 Local: ${loc.address}` : '';
+      const addressShort = address ? `\n📍 Local: ${address}` : '';
       locLine = `${addressShort}\n🗺️ Ver no Mapa: ${mapPinUrl}`;
-    } else if (loc && loc.address) {
-      locLine = `\n📍 Local: ${loc.address}`;
+    } else if (address) {
+      locLine = `\n📍 Local: ${address}`;
     }
 
     const patientName = ice.name || 'Eu';
@@ -1052,13 +1057,66 @@ document.addEventListener('DOMContentLoaded', () => {
       messageBody = `Olá ${contactName}, ponto de situação via Socorro 112:\n- Avaliação clínica: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
     }
 
-    const cleanPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+    const rawPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+    const cleanDigits = rawPhone.replace(/\+/g, '');
+    let waPhone = cleanDigits;
+    if (cleanDigits.length === 9 && cleanDigits.startsWith('9')) {
+      waPhone = '351' + cleanDigits;
+    }
+
     const encoded = encodeURIComponent(messageBody);
 
-    const proceed = confirm(`Deseja abrir o envio de SMS para ${ice.contactName || cleanPhone}?\n\nPré-visualização:\n\"${messageBody}\"`);
-    if (proceed) {
-      window.location.href = `sms:${cleanPhone}?body=${encoded}`;
+    // Formato universal iOS vs Android
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const smsSeparator = isIOS ? '&' : '?';
+    const smsUrl = `sms:${rawPhone}${smsSeparator}body=${encoded}`;
+    const waUrl = `https://wa.me/${waPhone}?text=${encoded}`;
+
+    // Atualizar elementos do modal de envio
+    const modal = document.getElementById('modal-share-ice');
+    const modalContact = document.getElementById('share-modal-contact');
+    const modalPreview = document.getElementById('share-modal-preview');
+    const linkSms = document.getElementById('share-modal-sms-link');
+    const linkWa = document.getElementById('share-modal-wa-link');
+
+    if (modalContact) modalContact.textContent = ice.contactName ? `${ice.contactName} (${rawPhone})` : rawPhone;
+    if (modalPreview) modalPreview.textContent = messageBody;
+    if (linkSms) linkSms.href = smsUrl;
+    if (linkWa) linkWa.href = waUrl;
+
+    if (modal) {
+      modal.classList.remove('hidden');
     }
+
+    // Se for smartphone / tátil, abrir logo o intent de SMS
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = smsUrl;
+    }
+  }
+
+  const btnCloseShareModal = document.getElementById('btn-close-share-modal');
+  if (btnCloseShareModal) {
+    btnCloseShareModal.addEventListener('click', () => {
+      document.getElementById('modal-share-ice')?.classList.add('hidden');
+    });
+  }
+
+  const btnCopyShareMsg = document.getElementById('btn-copy-share-msg');
+  if (btnCopyShareMsg) {
+    btnCopyShareMsg.addEventListener('click', async () => {
+      const textToCopy = document.getElementById('share-modal-preview')?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        const copyLabel = document.getElementById('btn-copy-label');
+        if (copyLabel) {
+          copyLabel.textContent = 'Mensagem Copiada! ✅';
+          setTimeout(() => { copyLabel.textContent = 'Copiar Mensagem'; }, 2500);
+        }
+      } catch (_) {
+        alert('Mensagem pronta a colar na sua aplicação de mensagens.');
+      }
+    });
   }
 
   const btnShareInfo = document.getElementById('btn-share-info');

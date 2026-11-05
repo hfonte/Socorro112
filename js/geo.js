@@ -1,10 +1,10 @@
 // MOTOR DE GEOLOCALIZAÇÃO E APOIO DE COMUNICAÇÃO CODU (112)
 const GeoManager = {
   currentLocation: {
-    lat: null,
-    lon: null,
+    lat: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_lat')) || null,
+    lon: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_lon')) || null,
     accuracy: null,
-    address: 'A obter localização...',
+    address: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_address')) || 'A obter localização...',
     landmark: 'A calcular referências...'
   },
 
@@ -66,6 +66,11 @@ const GeoManager = {
         this.currentLocation.accuracy = Math.round(pos.coords.accuracy);
 
         try {
+          localStorage.setItem('cached_gps_lat', lat);
+          localStorage.setItem('cached_gps_lon', lon);
+        } catch (_) {}
+
+        try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18`, {
             headers: { 'Accept': 'application/json' }
           });
@@ -79,6 +84,9 @@ const GeoManager = {
             
             this.currentLocation.address = `${road}${num} - ${locality} (${district})`;
             this.currentLocation.landmark = addr.suburb || addr.neighbourhood || addr.amenity || 'Junto ao centro da localidade';
+            try {
+              localStorage.setItem('cached_gps_address', this.currentLocation.address);
+            } catch (_) {}
           }
         } catch (_) {
           this.currentLocation.address = `Coordenadas fixadas: ${lat}, ${lon}`;
