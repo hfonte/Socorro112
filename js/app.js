@@ -995,16 +995,18 @@ document.addEventListener('DOMContentLoaded', () => {
       diagSummary = diagMatch[1].replace(/\[Fonte:[^\]]+\]/gi, '').trim();
     }
 
-    // Obter ou assegurar localização GPS em tempo real (com Lat, Lon, Google Maps e Waze)
+    // Obter localização GPS em tempo real com link direto de pino universal
     const loc = await GeoManager.getLocationAsync();
-    let locDetails = '';
+    let locLine = '';
 
     if (loc && loc.lat && loc.lon) {
-      const gmaps = `https://www.google.com/maps?q=${loc.lat},${loc.lon}`;
-      const waze = `https://waze.com/ul?ll=${loc.lat},${loc.lon}&navigate=yes`;
-      locDetails = `\n📍 Morada/Ref: ${loc.address || 'Localização fixada'}\n🌐 GPS: Lat ${loc.lat}, Lon ${loc.lon}\n🗺️ Google Maps: ${gmaps}\n🚗 Waze: ${waze}`;
-    } else {
-      locDetails = `\n📍 Localização: ${loc?.address || 'Sinal GPS a determinar'}`;
+      const latShort = Number(loc.lat).toFixed(4);
+      const lonShort = Number(loc.lon).toFixed(4);
+      const mapPinUrl = `https://maps.google.com/?q=${latShort},${lonShort}`;
+      const addressShort = loc.address ? `\n📍 Local: ${loc.address}` : '';
+      locLine = `${addressShort}\n🗺️ Ver no Mapa: ${mapPinUrl}`;
+    } else if (loc && loc.address) {
+      locLine = `\n📍 Local: ${loc.address}`;
     }
 
     const patientName = ice.name || 'Eu';
@@ -1012,15 +1014,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let messageBody = '';
 
     if (mode === 'urgent') {
-      messageBody = `🚨 ALERTA SOCORRO 112: Situação urgente para ${patientName}.\n- Diagnóstico/Situação: ${diagSummary}${locDetails}\n- Contacto 112 solicitado/em curso. Por favor venha ao meu encontro.`;
+      messageBody = `🚨 ALERTA SOCORRO 112: Situação urgente (${patientName}).\n- Situação: ${diagSummary}${locLine}\n- 112 solicitado/em curso. Por favor vem ter comigo.`;
     } else {
-      messageBody = `Olá ${contactName}. Envio este ponto de situação através do Socorro 112:\n- Avaliação clínica: ${diagSummary}${locDetails}\nEncontro-me estável a vigiar sintomas. Contactarei se necessitar.`;
+      messageBody = `Olá ${contactName}, ponto de situação via Socorro 112:\n- Avaliação clínica: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
     }
 
     const cleanPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
     const encoded = encodeURIComponent(messageBody);
 
-    const proceed = confirm(`Deseja abrir o envio de mensagem para ${ice.contactName || cleanPhone} com as suas coordenadas GPS e links para Google Maps e Waze?\n\nPré-visualização:\n\"${messageBody}\"`);
+    const proceed = confirm(`Deseja abrir o envio de SMS para ${ice.contactName || cleanPhone}?\n\nPré-visualização:\n\"${messageBody}\"`);
     if (proceed) {
       window.location.href = `sms:${cleanPhone}?body=${encoded}`;
     }
