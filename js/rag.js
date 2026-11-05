@@ -27,6 +27,7 @@ const RagEngine = {
       let score = 0;
 
       // Correspondência com título
+      const normTitle = this.normalize(entry.title);
       const titleTokens = normTitle.split(/\s+/);
       for (const token of queryTokens) {
         if (titleTokens.includes(token)) {
