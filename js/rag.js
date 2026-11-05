@@ -84,15 +84,16 @@ REGRA DE RIGOR CLÍNICO:
 1. Responde à situação descrita fundamentando-te nas regras, sinais de alarme e atuações descritas no excerto oficial acima.
 2. NUNCA assumas mecanismos de trauma (como pancada na cabeça, queda ou acidente) que a vítima não tenha mencionado explicitamente.
 3. No início do Bloco 1 (DIAGNÓSTICO E GRAVIDADE), inclui obrigatoriamente a citação da fonte: [Fonte: ${matchedEntry.source}].
-4. Sê rápido, direto e cirúrgico.`;
+4. Para situações de gravidade moderada ou ligeira (sem risco de vida iminente), o encaminhamento de eleição em Portugal é a Linha SNS 24 (808 24 24 24). Reserva o 112 EXCLUSIVAMENTE para risco vital ou emergência médica comprovada.
+5. Sê rápido, direto e cirúrgico.`;
   },
 
   // Resposta de emergência de recurso (Fallback) se a API da Google falhar ou estiver sobrecarregada
   generateOfflineProtocolResponse(matchedEntry) {
     if (!matchedEntry) {
       return `1. 🩺 DIAGNÓSTICO E GRAVIDADE:
-[Triagem Básica Inicial • Protocolo INEM]
-Situação que requer avaliação presencial das funções vitais.
+[Triagem Básica Inicial • Protocolo INEM / SNS 24]
+Classificação: **🟡 URGÊNCIA MODERADA** para avaliação presencial das funções vitais.
 
 2. 🟢 AÇÃO IMEDIATA (O QUE FAZER):
 • Garanta a segurança do local e da vítima;
@@ -104,17 +105,18 @@ Situação que requer avaliação presencial das funções vitais.
 • Nunca dê comida ou líquidos na fase aguda;
 • Não faça movimentos bruscos na coluna se houver suspeita de trauma ou queda.
 
-4. 📞 CONDUTA 112:
-• Ligue 112 imediatamente caso a vítima apresente prostração, dor intensa ou perda de consciência.`;
+4. 📞 ENCAMINHAMENTO RECOMENDADO:
+• Caso não haja risco de vida iminente, contacte a **Linha SNS 24 (808 24 24 24)** para triagem clínica e encaminhamento para o centro de saúde.
+• Ligue **112** imediatamente APENAS se a vítima apresentar perda de consciência, dificuldade respiratória grave ou dores no peito.`;
     }
 
-    let conduta112 = '• Ligue 112 se houver alteração do estado de consciência, desmaio, vómitos, dores intensas ou hemorragia ativa.';
+    let encaminhamento = `• Situação clínica estável (sem critérios de emergência vital imediata). Contacte a **Linha SNS 24 (808 24 24 24)** para aconselhamento clínico e encaminhamento para o Centro de Saúde.\n• Ligar **112** de emergência APENAS se surgirem sinais de alarme: perda de consciência, dificuldade respiratória grave, dor opressiva no peito ou hemorragia ativa.`;
     let gravidadeLabel = '🟡 URGÊNCIA MODERADA';
 
     const criticalIds = ['sbv', 'ova', 'avc', 'dor_toracica', 'tce', 'anafilaxia', 'tvm', 'trauma_toracico_abdominal', 'amputacao_esmagamento', 'eap_insuficiencia_cardiaca', 'parto_iminente'];
     if (criticalIds.includes(matchedEntry.id)) {
       gravidadeLabel = '🔴 EMERGÊNCIA CRÍTICA';
-      conduta112 = `🚨 **LIGAR 112 DE IMEDIATO!**\nSituação clínica ou traumática com risco iminente de agravamento vital segundo o manual de TAS / INEM. Ligue 112 em alta-voz enquanto presta os primeiros socorros.`;
+      encaminhamento = `🚨 **LIGAR 112 DE IMEDIATO (INEM)!**\nSituação clínica ou traumática com risco vital eminente segundo o manual de TAS / INEM. Ligue 112 em alta-voz enquanto presta os primeiros socorros.`;
     }
 
     return `1. 🩺 DIAGNÓSTICO E GRAVIDADE:
@@ -131,7 +133,7 @@ Classificação: **${gravidadeLabel}** para **${matchedEntry.title}**.
 • Não permitir que a vítima adormeça sem vigilância nos primeiros minutos;
 • Não sacudir nem mexer na vítima se estiver inconsciente (proteger e vigiar respiração).
 
-4. 📞 CONDUTA 112:
-${conduta112}`;
+4. 📞 ENCAMINHAMENTO RECOMENDADO:
+${encaminhamento}`;
   }
 };

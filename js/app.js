@@ -761,7 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formattedHtml += `<div class="mt-3 mb-1 text-red-400 font-black text-sm flex items-center gap-1.5 border-b border-red-800/60 pb-1">${clean}</div>`;
         return;
       }
-      if (/^[1-4]\.\s+.*CONDUTA 112/i.test(clean)) {
+      if (/^[1-4]\.\s+.*(CONDUTA|ENCAMINHAMENTO)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
         formattedHtml += `<div class="mt-3 mb-1 text-amber-400 font-black text-sm flex items-center gap-1.5 border-b border-amber-800/60 pb-1">${clean}</div>`;
@@ -800,11 +800,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (inList) formattedHtml += '</ul>';
 
-    if (/LIGAR 112 DE IMEDIATO|EMERGÊNCIA CRÍTICA|🚨 LIGAR 112/i.test(rawText)) {
+    // Raciocínio Clínico de Triagem: Selecionar o canal e botão de contacto correto (112 vs SNS 24 vs CIAV)
+    const diagMatch = rawText.match(/1\.\s+.*?DIAGNÓSTICO.*?(?:\n|$)(.*?)(?:\n2\.|$)/is);
+    const diagSection = diagMatch ? diagMatch[0] : rawText.substring(0, 350);
+
+    const isCritical = (/🔴|EMERGÊNCIA CRÍTICA/i.test(diagSection)) && !(/URGÊNCIA MODERADA|SITUAÇÃO LIGEIRA/i.test(diagSection));
+    const isModerateOrMild = (/🟡|URGÊNCIA MODERADA|🟢|SITUAÇÃO LIGEIRA/i.test(diagSection)) || (/SNS 24|Saúde 24|808\s*24\s*24\s*24/i.test(rawText));
+    const mentionsCIAV = /CIAV|800\s*250\s*250|antivenenos/i.test(rawText);
+
+    if (isCritical) {
       formattedHtml += `
         <div class="mt-4 pt-3 border-t border-red-500/40">
           <a href="tel:112" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-red-900/60 flex items-center justify-center gap-2 animate-pulse">
-            <span>🚨</span> LIGAR 112 AGORA (Critério Mandatório de Emergência)
+            <span>🚨</span> LIGAR 112 AGORA (Emergência Médica INEM)
+          </a>
+        </div>
+      `;
+    } else if (isModerateOrMild) {
+      formattedHtml += `
+        <div class="mt-4 pt-3 border-t border-emerald-500/40 space-y-2">
+          <div class="p-2.5 bg-emerald-950/60 border border-emerald-600/50 rounded-xl text-emerald-200 text-xs flex items-start gap-2">
+            <span class="text-base">🟢</span>
+            <div>
+              <strong class="text-emerald-300 block mb-0.5">Sem Critérios de Emergência Vital (112):</strong>
+              Para preservar os meios de socorro do INEM, a triagem não urgente e encaminhamento médico são efetuados pela <strong>Linha SNS 24 (808 24 24 24)</strong>.
+            </div>
+          </div>
+          <a href="tel:808242424" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-emerald-900/60 flex items-center justify-center gap-2">
+            <span>📞</span> LIGAR LINHA SNS 24 (808 24 24 24)
+          </a>
+        </div>
+      `;
+    }
+
+    if (mentionsCIAV) {
+      formattedHtml += `
+        <div class="mt-2">
+          <a href="tel:800250250" class="w-full py-2.5 bg-purple-700 hover:bg-purple-600 text-white font-bold text-center text-xs rounded-xl shadow-md flex items-center justify-center gap-2">
+            <span>🧪</span> LIGAR CIAV (800 250 250 - Antivenenos)
           </a>
         </div>
       `;
