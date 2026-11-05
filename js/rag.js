@@ -27,9 +27,9 @@ const RagEngine = {
       let score = 0;
 
       // Correspondência com título
-      const normTitle = this.normalize(entry.title);
+      const titleTokens = normTitle.split(/\s+/);
       for (const token of queryTokens) {
-        if (normTitle.includes(token)) {
+        if (titleTokens.includes(token)) {
           score += 5;
         }
       }
@@ -38,11 +38,14 @@ const RagEngine = {
       for (const kw of entry.keywords) {
         const normKw = this.normalize(kw);
         if (normQuery.includes(normKw)) {
-          score += 10;
+          score += 12;
         } else {
+          const kwTokens = normKw.split(/\s+/);
           for (const token of queryTokens) {
-            if (normKw.includes(token) || token.includes(normKw)) {
-              score += 3;
+            if (token === normKw) {
+              score += 6;
+            } else if (token.length >= 4 && kwTokens.includes(token)) {
+              score += 2;
             }
           }
         }
