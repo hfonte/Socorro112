@@ -111,12 +111,10 @@ Situação que requer avaliação presencial das funções vitais.
     let conduta112 = '• Ligue 112 se houver alteração do estado de consciência, desmaio, vómitos, dores intensas ou hemorragia ativa.';
     let gravidadeLabel = '🟡 URGÊNCIA MODERADA';
 
-    if (matchedEntry.id === 'tce') {
+    const criticalIds = ['sbv', 'ova', 'avc', 'dor_toracica', 'tce', 'anafilaxia', 'tvm', 'trauma_toracico_abdominal', 'amputacao_esmagamento', 'eap_insuficiencia_cardiaca', 'parto_iminente'];
+    if (criticalIds.includes(matchedEntry.id)) {
       gravidadeLabel = '🔴 EMERGÊNCIA CRÍTICA';
-      conduta112 = '🚨 **LIGAR 112 DE IMEDIATO!**\nO embate na cabeça com perda de consciência (desmaio, amnésia ou desorientação) constitui critério mandatório de emergência hospitalar segundo o manual de TAS/INEM. Informe o tempo estimado de desmaio ao operador do 112.';
-    } else if (matchedEntry.id === 'sbv' || matchedEntry.id === 'ova' || matchedEntry.id === 'avc' || matchedEntry.id === 'dor_toracica') {
-      gravidadeLabel = '🔴 EMERGÊNCIA CRÍTICA';
-      conduta112 = '🚨 **LIGAR 112 DE IMEDIATO!**\nSituação com risco iminente de paragem ou lesão neurológica/cardíaca grave. Ligue 112 em alta-voz enquanto inicia as manobras.';
+      conduta112 = `🚨 **LIGAR 112 DE IMEDIATO!**\nSituação clínica ou traumática com risco iminente de agravamento vital segundo o manual de TAS / INEM. Ligue 112 em alta-voz enquanto presta os primeiros socorros.`;
     }
 
     return `1. 🩺 DIAGNÓSTICO E GRAVIDADE:
