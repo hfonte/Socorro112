@@ -81,9 +81,10 @@ ${matchedEntry.excerpt}
 \"\"\"
 ==================================================
 REGRA DE RIGOR CLÍNICO:
-1. Responde à situação descrita fundamentando-te ESTRITAMENTE nas regras, sinais de alarme e atuações descritas no excerto oficial acima.
-2. No início do Bloco 1 (DIAGNÓSTICO E GRAVIDADE), inclui obrigatoriamente a citação da fonte: [Fonte: ${matchedEntry.source}].
-3. Não divagues nem adiciones teorias externas não contempladas no manual. Sê rápido, direto e cirúrgico.`;
+1. Responde à situação descrita fundamentando-te nas regras, sinais de alarme e atuações descritas no excerto oficial acima.
+2. NUNCA assumas mecanismos de trauma (como pancada na cabeça, queda ou acidente) que a vítima não tenha mencionado explicitamente.
+3. No início do Bloco 1 (DIAGNÓSTICO E GRAVIDADE), inclui obrigatoriamente a citação da fonte: [Fonte: ${matchedEntry.source}].
+4. Sê rápido, direto e cirúrgico.`;
   },
 
   // Resposta de emergência de recurso (Fallback) se a API da Google falhar ou estiver sobrecarregada

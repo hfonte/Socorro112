@@ -1,4 +1,4 @@
-const CACHE_NAME = 'socorro112-v20';
+const CACHE_NAME = 'socorro112-v21';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
