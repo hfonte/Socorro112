@@ -8,6 +8,48 @@ const GeoManager = {
     landmark: 'A calcular referências...'
   },
 
+  get lastLocation() {
+    return this.currentLocation;
+  },
+
+  async getLocationAsync() {
+    if (this.currentLocation.lat && this.currentLocation.lon) {
+      return this.currentLocation;
+    }
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        return resolve(this.currentLocation);
+      }
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          this.currentLocation.lat = pos.coords.latitude.toFixed(5);
+          this.currentLocation.lon = pos.coords.longitude.toFixed(5);
+          this.currentLocation.accuracy = Math.round(pos.coords.accuracy);
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.currentLocation.lat}&lon=${this.currentLocation.lon}&zoom=18`, {
+              headers: { 'Accept': 'application/json' }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              const addr = data.address || {};
+              const road = addr.road || addr.pedestrian || addr.street || 'Rua sem nome';
+              const num = addr.house_number ? `, Nº ${addr.house_number}` : '';
+              const locality = addr.city || addr.town || addr.village || addr.municipality || '';
+              const district = addr.county || addr.state_district || '';
+              this.currentLocation.address = `${road}${num} - ${locality} (${district})`;
+              this.currentLocation.landmark = addr.suburb || addr.neighbourhood || addr.amenity || 'Junto ao centro da localidade';
+            }
+          } catch (_) {
+            this.currentLocation.address = `Coordenadas: ${this.currentLocation.lat}, ${this.currentLocation.lon}`;
+          }
+          resolve(this.currentLocation);
+        },
+        () => resolve(this.currentLocation),
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 15000 }
+      );
+    });
+  },
+
   init(onUpdateCallback) {
     if (!navigator.geolocation) {
       this.currentLocation.address = 'GPS não suportado neste equipamento';
