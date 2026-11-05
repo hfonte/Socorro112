@@ -1,0 +1,134 @@
+// MOTOR RAG (RETRIEVAL-AUGMENTED GENERATION) - BASEADO NOS MANUAIS UFCD 9988 / TAS (HUGO FONTE)
+const RagEngine = {
+  // Normalizar texto para correspondência semântica e por palavras-chave
+  normalize(str) {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/[^\w\s]/g, ' ')
+      .trim();
+  },
+
+  // Pesquisar na base de conhecimento oficial o módulo mais relevante
+  search(queryText) {
+    if (!queryText || typeof CLINICAL_KNOWLEDGE_BASE === 'undefined') {
+      return null;
+    }
+
+    const normQuery = this.normalize(queryText);
+    const queryTokens = normQuery.split(/\s+/).filter(t => t.length > 2);
+
+    let bestMatch = null;
+    let highestScore = 0;
+
+    for (const entry of CLINICAL_KNOWLEDGE_BASE) {
+      let score = 0;
+
+      // Correspondência com título
+      const normTitle = this.normalize(entry.title);
+      for (const token of queryTokens) {
+        if (normTitle.includes(token)) {
+          score += 5;
+        }
+      }
+
+      // Correspondência com palavras-chave clínicas do manual
+      for (const kw of entry.keywords) {
+        const normKw = this.normalize(kw);
+        if (normQuery.includes(normKw)) {
+          score += 10;
+        } else {
+          for (const token of queryTokens) {
+            if (normKw.includes(token) || token.includes(normKw)) {
+              score += 3;
+            }
+          }
+        }
+      }
+
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = entry;
+      }
+    }
+
+    // Só devolve correspondência se tiver score mínimo relevante
+    return highestScore >= 5 ? { entry: bestMatch, score: highestScore } : null;
+  },
+
+  // Construir o contexto fundamentado para injetar no Gemini
+  buildGroundedSystemInstruction(baseSystemInstruction, matchedEntry) {
+    if (!matchedEntry) {
+      return baseSystemInstruction;
+    }
+
+    return `${baseSystemInstruction}
+
+==================================================
+DOCUMENTO CLÍNICO OFICIAL DE REFERÊNCIA:
+${matchedEntry.source}
+TEMA: ${matchedEntry.title}
+==================================================
+EXCERTO OFICIAL DO MANUAL:
+\"\"\"
+${matchedEntry.excerpt}
+\"\"\"
+==================================================
+REGRA DE RIGOR CLÍNICO:
+1. Responde à situação descrita fundamentando-te ESTRITAMENTE nas regras, sinais de alarme e atuações descritas no excerto oficial acima.
+2. No início do Bloco 1 (DIAGNÓSTICO E GRAVIDADE), inclui obrigatoriamente a citação da fonte: [Fonte: ${matchedEntry.source}].
+3. Não divagues nem adiciones teorias externas não contempladas no manual. Sê rápido, direto e cirúrgico.`;
+  },
+
+  // Resposta de emergência de recurso (Fallback) se a API da Google falhar ou estiver sobrecarregada
+  generateOfflineProtocolResponse(matchedEntry) {
+    if (!matchedEntry) {
+      return `1. 🩺 DIAGNÓSTICO E GRAVIDADE:
+[Triagem Básica Inicial • Protocolo INEM]
+Situação que requer avaliação presencial das funções vitais.
+
+2. 🟢 AÇÃO IMEDIATA (O QUE FAZER):
+• Garanta a segurança do local e da vítima;
+• Mantenha a vítima em posição confortável e a via aérea permeável;
+• Vigie a respiração e o estado de consciência continuamente.
+
+3. ⛔ PROIBIÇÕES CRÍTICAS (O QUE NUNCA FAZER):
+• Nunca abandone uma vítima com perda de sentidos;
+• Nunca dê comida ou líquidos na fase aguda;
+• Não faça movimentos bruscos na coluna se houver suspeita de trauma ou queda.
+
+4. 📞 CONDUTA 112:
+• Ligue 112 imediatamente caso a vítima apresente prostração, dor intensa ou perda de consciência.`;
+    }
+
+    let conduta112 = '• Ligue 112 se houver alteração do estado de consciência, desmaio, vómitos, dores intensas ou hemorragia ativa.';
+    let gravidadeLabel = '🟡 URGÊNCIA MODERADA';
+
+    if (matchedEntry.id === 'tce') {
+      gravidadeLabel = '🔴 EMERGÊNCIA CRÍTICA';
+      conduta112 = '🚨 **LIGAR 112 DE IMEDIATO!**\nO embate na cabeça com perda de consciência (desmaio, amnésia ou desorientação) constitui critério mandatório de emergência hospitalar segundo o manual de TAS/INEM. Informe o tempo estimado de desmaio ao operador do 112.';
+    } else if (matchedEntry.id === 'sbv' || matchedEntry.id === 'ova' || matchedEntry.id === 'avc' || matchedEntry.id === 'dor_toracica') {
+      gravidadeLabel = '🔴 EMERGÊNCIA CRÍTICA';
+      conduta112 = '🚨 **LIGAR 112 DE IMEDIATO!**\nSituação com risco iminente de paragem ou lesão neurológica/cardíaca grave. Ligue 112 em alta-voz enquanto inicia as manobras.';
+    }
+
+    return `1. 🩺 DIAGNÓSTICO E GRAVIDADE:
+[Fonte: ${matchedEntry.source}]
+Classificação: **${gravidadeLabel}** para **${matchedEntry.title}**.
+
+2. 🟢 AÇÃO IMEDIATA (DIRETRIZES DO MANUAL):
+• Posicione a vítima em repouso e posição de conforto neutra;
+• Avalie e mantenha a via aérea permeável e vigilância respiratória constante;
+• Em suspeita de traumatismo ou queda, estabilize a cabeça e coluna sem movimentos bruscos.
+
+3. ⛔ PROIBIÇÕES CRÍTICAS DO MANUAL:
+• Nunca administrar alimentos, água ou medicação oral na fase aguda;
+• Não permitir que a vítima adormeça sem vigilância nos primeiros minutos;
+• Não sacudir nem mexer na vítima se estiver inconsciente (proteger e vigiar respiração).
+
+4. 📞 CONDUTA 112:
+${conduta112}`;
+  }
+};

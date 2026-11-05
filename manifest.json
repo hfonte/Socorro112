@@ -1,0 +1,21 @@
+{
+  "name": "Socorro 112 - Suporte Básico de Vida & TAS",
+  "short_name": "Socorro 112",
+  "description": "Aplicação de Primeiros Socorros e Emergência Pré-Hospitalar (SIEM / INEM / ERC)",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./assets/images/estrela_da_vida.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "./assets/images/estrela_da_vida.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

@@ -1,0 +1,1438 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b1120">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Socorro 112 · Protocolos TAS &amp; Suporte Básico de Vida</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./css/styles.css">
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- CABEÇALHO SUPERIOR FIXO -->
+    <header class="top-header">
+      <div class="brand">
+        <img src="./assets/images/estrela_da_vida.jpg" alt="Estrela da Vida" class="brand-icon">
+        <span>SOCORRO 112 · TAS</span>
+      </div>
+      <a href="tel:112" class="btn-header-112">
+        <span>📞 LIGAR 112</span>
+      </a>
+    </header>
+
+    <!-- BANNER DE ISENÇÃO DE RESPONSABILIDADE MÉDICA (DISCLAIMER OBRIGATÓRIO) -->
+    <div id="app-legal-disclaimer" class="mx-3 my-2 p-2.5 bg-amber-950/80 border border-amber-500/70 rounded-xl text-xs text-amber-200 shadow-md">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-start gap-2">
+          <span class="text-base flex-shrink-0">⚠️</span>
+          <div>
+            <strong class="text-white text-xs block font-bold">AVISO DE EMERGÊNCIA &bull; ISENÇÃO DE RESPONSABILIDADE:</strong>
+            <p class="text-[11px] text-amber-200/90 leading-relaxed mt-0.5">
+              Esta aplicação tem fins de apoio pedagógico e orientação comunitária baseada em diretrizes de TAS e do INEM. <strong>NÃO substitui o contacto imediato com o 112 nem o aconselhamento médico qualificado.</strong> O recurso à aplicação nunca deve adiar a chamada de emergência.
+            </p>
+          </div>
+        </div>
+        <button type="button" id="btn-dismiss-disclaimer" class="text-amber-400 hover:text-white text-base font-bold leading-none px-1 py-0.5" title="Fechar aviso">&times;</button>
+      </div>
+    </div>
+
+    <!-- SELETOR DE MODO SUPERIOR (EMERGÊNCIA vs FORMAÇÃO) -->
+    <div class="mode-switch-bar">
+      <button type="button" id="tab-mode-emergency" class="mode-tab-btn active emergency-mode">
+        <span>🚨 MODO EMERGÊNCIA</span>
+      </button>
+      <button type="button" id="tab-mode-learning" class="mode-tab-btn">
+        <span>📘 MODO FORMAÇÃO</span>
+      </button>
+    </div>
+
+    <!-- CORPO DE CONTEÚDO PRINCIPAL (ECRÃS DINÂMICOS) -->
+    <main class="content-body">
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 1: PAINEL DE EMERGÊNCIA (HOME)                      -->
+      <!-- ======================================================== -->
+      <section id="screen-emergency" class="screen-view active">
+        
+        <!-- BANNER DE ALTA-VOZ OBRIGATÓRIO -->
+        <div class="speakerphone-alert">
+          <span class="text-2xl">📢</span>
+          <div>
+            <strong class="text-white text-sm block">AÇÃO INICIAL: LIGUE 112 EM ALTA-VOZ</strong>
+            <p class="text-xs text-slate-300">Coloque o telefone no chão ao lado da vítima e mantenha as mãos livres.</p>
+          </div>
+        </div>
+
+        <!-- QUADRO DE LOCALIZAÇÃO E PONTOS DE REFERÊNCIA -->
+        <div class="geo-panel">
+          <div class="flex items-center justify-between mb-1">
+            <span class="geo-label">📍 Diga a sua localização ao operador:</span>
+            <button type="button" onclick="triggerGeoDemo()" class="text-[11px] text-sky-400 underline font-semibold">Simular Demonstração</button>
+          </div>
+          <div class="geo-address-text geo-address-display">A detetar morada exata...</div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800 text-xs">
+            <div>
+              <span class="text-slate-400">GPS:</span>
+              <span class="geo-coords-badge geo-coords-display">--</span>
+            </div>
+            <div class="text-right">
+              <span class="text-slate-400">Referência:</span>
+              <strong class="text-white geo-landmark-display">A calcular...</strong>
+            </div>
+          </div>
+          <div class="mt-2.5 p-2 bg-slate-900/90 rounded border border-slate-800 text-[11px] text-slate-300">
+            <span class="text-amber-400 font-bold block mb-0.5">Cábula de Relato ao 112:</span>
+            <span class="geo-codu-script italic">«Estou em... A ocorrência é...»</span>
+          </div>
+        </div>
+
+        <!-- GATILHOS DE EMERGÊNCIA VITAL (BOTÕES GRANDES DE 1 TOQUE) -->
+        <button type="button" id="trigger-pcr-now" class="btn-emergency-action btn-pcr">
+          <span class="text-3xl">🫀</span>
+          <div>
+            <span class="text-lg block font-black">1. PARAGEM CARDÍACA (PCR)</span>
+            <span class="text-xs font-normal opacity-90 block">Vítima inconsciente e não respira ➔ Metrónomo 110 bpm e guia vocal imediato</span>
+          </div>
+        </button>
+
+        <button type="button" data-nav="screen-ova" class="btn-emergency-action btn-ova">
+          <span class="text-3xl">🗣️</span>
+          <div>
+            <span class="text-lg block font-black">2. ASFIXIA / ENGASGAMENTO (OVA)</span>
+            <span class="text-xs font-normal opacity-90 block">Não fala nem tosse ➔ Sequência 5 pancadas + 5 Heimlich</span>
+          </div>
+        </button>
+
+        <!-- NOVO BOTAO GIGANTE DE DISPNEIA / FALTA DE AR -->
+        <button type="button" data-nav="screen-dyspnea" class="btn-emergency-action btn-dyspnea">
+          <span class="text-3xl">🫁</span>
+          <div>
+            <span class="text-lg block font-black">3. DISPNEIA / FALTA DE AR AGUDA</span>
+            <span class="text-xs font-normal opacity-90 block">Dificuldade respiratória grave ➔ Posicionar sentado, arejar, O2 e sinais de alarme</span>
+          </div>
+        </button>
+
+        <!-- ATALHOS RÁPIDOS CLÍNICOS E TRAUMA (TAS) -->
+        <h3 class="card-title text-sm uppercase text-slate-400 tracking-wider mt-4 mb-2">Protocolos Rápidos de TAS:</h3>
+        
+        <div class="quick-grid">
+          <button type="button" data-nav="screen-stroke" class="grid-tile">
+            <span class="tile-icon">🧠</span>
+            <span class="tile-title">Suspeita de AVC</span>
+            <span class="tile-desc">Escala dos 3 Fs (Face, Força, Fala) &amp; Relógio Via Verde</span>
+          </button>
+
+          <button type="button" data-nav="screen-trauma" class="grid-tile">
+            <span class="tile-icon">🩹</span>
+            <span class="tile-title">Hemorragia Grave</span>
+            <span class="tile-desc">Compressão direta &amp; Garrote/Torniquete com hora</span>
+          </button>
+
+          <button type="button" data-nav="screen-burns" class="grid-tile">
+            <span class="tile-icon">🔥</span>
+            <span class="tile-title">Queimaduras</span>
+            <span class="tile-desc">Fotos 1º, 2º e 3º grau + Temporizador de água (15 min)</span>
+          </button>
+
+          <button type="button" data-nav="screen-seizure" class="grid-tile">
+            <span class="tile-icon">⚡</span>
+            <span class="tile-title">Convulsões</span>
+            <span class="tile-desc">Cronómetro de crise, proteção e Posição Lateral (PLS)</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-3 mb-1">
+          <button type="button" data-nav="screen-medical-id" class="p-3 bg-slate-900 border border-sky-500/50 rounded-xl flex items-center gap-2.5 text-left hover:bg-slate-800 transition-colors">
+            <span class="text-2xl">📋</span>
+            <div>
+              <strong class="text-sky-300 text-xs block font-bold">Ficha Médica ICE</strong>
+              <span class="text-[11px] text-slate-400 block" id="header-ice-status">Alergias &amp; Familiar</span>
+            </div>
+          </button>
+          <button type="button" data-nav="screen-ai" class="p-3 bg-slate-900 border border-yellow-400/40 rounded-xl flex items-center gap-2.5 text-left hover:bg-slate-800 transition-colors">
+            <span class="text-2xl">🤖</span>
+            <div>
+              <strong class="text-yellow-300 text-xs block font-bold">Assistente IA</strong>
+              <span class="text-[11px] text-slate-400 block">Triagem &amp; Foto</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 2: SBV & DAE (ADULTO & PEDIÁTRICO APRIMORADO)      -->
+      <!-- ======================================================== -->
+      <section id="screen-sbv" class="screen-view">
+        <div class="flex items-center justify-between mb-1">
+          <div class="flex items-center gap-2">
+            <span class="pulse-dot"></span>
+            <h2 class="text-xl font-black text-white">Suporte Básico de Vida</h2>
+          </div>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+        <div class="mb-3">
+          <span class="course-badge">⚡ Algoritmo SBV 2025 • Recomendações ERC / INEM</span>
+        </div>
+
+        <!-- SELETOR SEGMENTADO GIGANTE ADULTO vs PEDIÁTRICO -->
+        <div class="segmented-pedia-control">
+          <button type="button" id="pedia-select-adult" class="pedia-btn active">
+            <span class="text-lg">👤 ADULTO</span>
+            <span class="sub-text">Rácio 30:2 ou Contínuo (5-6 cm)</span>
+          </button>
+          <button type="button" id="pedia-select-child" class="pedia-btn">
+            <span class="text-lg">👶 PEDIÁTRICO</span>
+            <span class="sub-text">5 Insuflações Iniciais + 15:2</span>
+          </button>
+        </div>
+
+        <!-- BANNER DE AVISO PEDIÁTRICO (QUANDO ATIVO) -->
+        <div id="pedia-active-banner" class="hidden p-3 bg-emerald-950 border-2 border-emerald-500 rounded-xl mb-3 flex items-center gap-3">
+          <span class="text-2xl">👶</span>
+          <div>
+            <strong class="text-emerald-300 text-sm block">MODO PEDIÁTRICO ATIVADO</strong>
+            <p class="text-xs text-slate-200">Em crianças a causa primária é <strong>falta de oxigénio</strong>. Inicie obrigatoriamente com 5 insuflações!</p>
+          </div>
+        </div>
+
+        <!-- METRÓNOMO PROFISSIONAL -->
+        <div class="metro-display">
+          <span class="text-xs uppercase text-slate-400 font-bold block mb-1">Cadência de Compressões:</span>
+          <div class="metro-bpm" id="metro-bpm-val">110 <span class="text-sm font-sans text-slate-400">BPM</span></div>
+          
+          <div class="counter-grid">
+            <div class="counter-cell">
+              <span class="counter-lbl">Tempo</span>
+              <div class="counter-num" id="sbv-time-count">00:00</div>
+            </div>
+            <div class="counter-cell">
+              <span class="counter-lbl">Compressões</span>
+              <div class="counter-num text-yellow-400" id="sbv-beats-count">0</div>
+            </div>
+            <div class="counter-cell">
+              <span class="counter-lbl">Ciclos</span>
+              <div class="counter-num text-emerald-400" id="sbv-cycles-count">0</div>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-4">
+            <button type="button" id="btn-sbv-start" class="action bg-yellow-400 text-slate-950 font-black text-sm flex-1">
+              ▶ Iniciar Metrónomo
+            </button>
+            <button type="button" id="btn-sbv-pause" class="action bg-red-600 text-white font-black text-sm hidden flex-1">
+              ⏹ Pausar Ritmo
+            </button>
+            <button type="button" id="btn-sbv-reset" class="action bg-slate-800 text-slate-300 text-xs px-3">
+              Reiniciar
+            </button>
+          </div>
+
+          <!-- ALERTA DE FADIGA AOS 2 MINUTOS -->
+          <div id="sbv-rotation-alert" class="hidden rounded-xl p-3 mt-3 bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-between">
+            <span>⚠️ <strong>2 MINUTOS:</strong> Troque de reanimador sem parar as compressões (Prevenção da fadiga muscular).</span>
+            <button type="button" onclick="dismissRotationAlert()" class="bg-black text-white px-2 py-1 rounded text-xs">OK</button>
+          </div>
+        </div>
+
+        <!-- INSTRUÇÕES DINÂMICAS COM FONTE GRANDE -->
+        <div id="sbv-dynamic-instructions">
+          <div class="p-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 text-xs">
+            <span class="text-xs uppercase font-bold text-slate-400 block mb-1">PROTOCOLO ADULTO (ERC / INEM):</span>
+            <p class="large-instruction-text text-white mb-1">Compressões Torácicas Contínuas a 110 bpm</p>
+            <p class="text-slate-300">Profundidade de 5 a 6 cm no centro do esterno com descompressão torácica completa. Rácio de 30:2 ou compressões contínuas se leigo sem máscara.</p>
+          </div>
+        </div>
+
+        <!-- IMAGENS REAIS DE SBV DO MANUAL DE TAS (IMAGEM 4 CORRIGIDA) -->
+        <div class="card">
+          <h3 class="card-title text-sm">Sequência Oficial de Abordagem (Manual TAS):</h3>
+          
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/sbv_consciencia.png" alt="Avaliação de Consciência">
+                <div class="guide-caption">1. Abanar ombros e chamar com firmeza</div>
+              </div>
+            </div>
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/sbv_abertura_via_aerea.png" alt="Abertura da Via Aérea">
+                <div class="guide-caption">2. Extensão da cabeça e elevação do queixo</div>
+              </div>
+            </div>
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/sbv_vos.png" alt="Avaliação VOS">
+                <div class="guide-caption">3. Ver, Ouvir e Sentir (até 10 segundos)</div>
+              </div>
+            </div>
+            <div>
+              <div class="guide-image-box">
+                <!-- IMAGEM 4 CORRIGIDA: MOSTRA COMPRESSÕES REAIS DO MANUAL (image26.png) -->
+                <img id="sbv-step4-image" src="./assets/images/sbv_compressoes.png" alt="Compressões Torácicas">
+                <div id="sbv-step4-caption" class="guide-caption">4. Compressões no centro do peito: 5 a 6 cm</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs space-y-1">
+            <strong class="text-emerald-400 block font-bold">⚡ Desfibrilhador Automático Externo (DAE):</strong>
+            <p class="text-slate-300">Assim que o DAE estiver disponível, ligue-o e aplique as pás adesivas no tórax despido. Siga as instruções de voz do aparelho.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- NOVO ECRÃ: DISPNEIAS / DIFICULDADE RESPIRATÓRIA (TAS)   -->
+      <!-- ======================================================== -->
+      <section id="screen-dyspnea" class="screen-view">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-black text-white">Dispneia / Falta de Ar Aguda</h2>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <!-- CONDUTA IMEDIATA SEM MEDICAÇÃO SOS -->
+        <div class="card border-sky-500/50 bg-sky-950/20">
+          <span class="text-xs uppercase text-sky-400 font-bold block mb-2">Atuação Imediata pelo Cidadão / Socorrista:</span>
+          
+          <div class="space-y-3 text-sm">
+            <div class="flex items-start gap-3 bg-slate-900 p-3 rounded-xl border border-slate-800">
+              <span class="text-2xl">🪑</span>
+              <div>
+                <strong class="text-yellow-400 block text-base font-bold">1. Posicionamento de Fowler (Sentar com Apoio)</strong>
+                <p class="text-xs text-slate-200 mt-1">Coloque a vítima sentada ou com a cabeceira elevada a 45º-90º. <strong>NUNCA deite uma pessoa com falta de ar</strong> (aumenta o trabalho dos pulmões e agrava a asfixia!).</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-slate-900 p-3 rounded-xl border border-slate-800">
+              <span class="text-2xl">💨</span>
+              <div>
+                <strong class="text-yellow-400 block text-base font-bold">2. Arejar o Espaço e Desapertar Roupas</strong>
+                <p class="text-xs text-slate-200 mt-1">Abra portas e janelas. Afaste curiosos para o ar circular. Desaperte golas de camisa, gravatas, cintos ou soutiens.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-slate-900 p-3 rounded-xl border border-slate-800">
+              <span class="text-2xl">🧘</span>
+              <div>
+                <strong class="text-yellow-400 block text-base font-bold">3. Tranquilizar e Respiração com Lábios Semicerrados</strong>
+                <p class="text-xs text-slate-200 mt-1">O pânico duplica o consumo de oxigénio. Peça para inspirar pelo nariz e expirar devagar pela boca como se estivesse a soprar uma vela.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-slate-900 p-3 rounded-xl border border-slate-800">
+              <span class="text-2xl">🫧</span>
+              <div>
+                <strong class="text-yellow-400 block text-base font-bold">4. Oxigenoterapia (Se Disponível e Habilitado)</strong>
+                <p class="text-xs text-slate-200 mt-1">Se houver botija e máscara de oxigénio com operador de socorro/TAS, administre O2 a débito adequado.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAIXA DE SINAIS DE ALARME (RED FLAGS) -->
+        <div class="alarm-signals-box">
+          <div class="alarm-title">
+            <span>⚠️ SINAIS DE ALARME DE DISPNEIA (LIGAR 112 IMEDIATO):</span>
+          </div>
+          <ul class="alarm-list">
+            <li><strong>Cianose:</strong> Lábios, língua ou unhas azuladas/arroxeadas.</li>
+            <li><strong>Fala entrecortada:</strong> Incapacidade de dizer uma frase completa sem parar para respirar.</li>
+            <li><strong>Tiragem respiratória:</strong> Músculos do pescoço ou costelas a afundar com esforço extremo.</li>
+            <li><strong>Sons anormais:</strong> Pieira forte ("assobio no peito") ou silêncio respiratório repentino.</li>
+            <li><strong>Alteração do estado de consciência:</strong> Confusão, agitação extrema ou sonolência.</li>
+          </ul>
+
+          <a href="tel:112" class="action bg-red-600 text-white font-black text-xs w-full py-3 mt-3 block text-center">
+            📞 LIGAR 112 AGORA COM DISPNEIA GRAVE
+          </a>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 3: ASFIXIA / OVA (DESOBSTRUÇÃO)                    -->
+      <!-- ======================================================== -->
+      <section id="screen-ova" class="screen-view">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-xl font-black text-white">Obstrução da Via Aérea (OVA)</h2>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+        <div class="mb-3">
+          <span class="course-badge">⚡ Algoritmo OVA 2025 • Recomendações ERC / INEM</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="p-3 bg-emerald-950/70 border border-emerald-500 rounded-xl">
+            <strong class="text-emerald-300 text-sm block">🗣️ TOSSE EFICAZ</strong>
+            <p class="text-xs text-slate-300 mt-1">Consegue tossir e falar. <strong>Apenas encoraje a tossir.</strong> Proibido bater nas costas!</p>
+          </div>
+          <div class="p-3 bg-amber-950/70 border border-amber-500 rounded-xl">
+            <strong class="text-amber-300 text-sm block">🔇 TOSSE INEFICAZ</strong>
+            <p class="text-xs text-slate-300 mt-1">Não consegue falar nem respirar. <strong>Atue já com a sequência 5 + 5.</strong></p>
+          </div>
+        </div>
+
+        <!-- IMAGENS REAIS DE OVA DO MANUAL -->
+        <div class="card">
+          <h3 class="card-title text-sm">Sequência Oficial 5 + 5 (Manual TAS):</h3>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/ova_pancadas.png" alt="Pancadas Interescapulares">
+                <div class="guide-caption">Até 5 Pancadas Interescapulares</div>
+              </div>
+              <p class="text-[11px] text-slate-300">Incline a vítima bem para a frente com apoio no tórax e aplique pancadas secas entre as omoplatas.</p>
+            </div>
+
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/ova_heimlich.png" alt="Manobra de Heimlich">
+                <div class="guide-caption">Até 5 Compressões de Heimlich</div>
+              </div>
+              <p class="text-[11px] text-slate-300">Abrace por trás, punho fechado acima do umbigo, puxe com força para dentro e para cima.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-red-950/80 border-2 border-red-500 rounded-xl text-center">
+          <strong class="text-red-200 block text-sm mb-1">A VÍTIMA CAIU INCONSCIENTE?</strong>
+          <button type="button" data-nav="screen-sbv" class="action bg-red-600 text-white font-black text-sm w-full py-3">
+            Apoiar no chão e iniciar SBV com 30 compressões →
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 4: TRAUMA & HEMORRAGIAS (GARROTE/TORNIQUETE)        -->
+      <!-- ======================================================== -->
+      <section id="screen-trauma" class="screen-view">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-black text-white">Trauma &amp; Hemorragias Graves</h2>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <!-- RELÓGIO DO GARROTE / TORNIQUETE -->
+        <div class="card border-amber-500/50 bg-amber-950/20">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs uppercase text-amber-400 font-bold block">Aplicação de Garrote / Torniquete:</span>
+              <p id="tourniquet-time-applied" class="text-xs text-white">Hora de aplicação não registada</p>
+            </div>
+            <div class="timer-pill" id="tourniquet-timer-val">0 min</div>
+          </div>
+          <button type="button" id="btn-tourniquet-start" class="action bg-amber-600 text-white font-bold text-xs w-full py-2.5">
+            ⏱ Registar Aplicação de Garrote
+          </button>
+          <p class="text-[11px] text-amber-300/80 mt-2">
+            ⚠️ <strong>Regra de Ouro do TAS:</strong> Uma vez aplicado o garrote, <u>jamais deve ser aliviado</u> até à chegada dos meios diferenciados (risco de choque hipovolémico ou libertação de toxinas).
+          </p>
+        </div>
+
+        <!-- FOTOS REAIS DO MANUAL -->
+        <div class="card">
+          <h3 class="card-title text-sm">Protocolo de Controlo de Hemorragias (Manual TAS):</h3>
+          
+          <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/hemorragia_pressao_direta.jpg" alt="Pressão Direta">
+                <div class="guide-caption">1ª Linha: Pressão Direta Firme</div>
+              </div>
+            </div>
+            <div>
+              <div class="guide-image-box">
+                <img src="./assets/images/hemorragia_garrote.jpg" alt="Garrote / Torniquete">
+                <div class="guide-caption">Garrote: Amputação ou Exsanguinante</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="guide-image-box">
+            <img src="./assets/images/hemorragia_elevacao.jpg" alt="Elevação do Membro">
+            <div class="guide-caption">Métodos de apoio: Elevação do membro (apenas se sem suspeita de fratura)</div>
+          </div>
+        </div>
+
+        <!-- SINAIS DE ALARME DE HEMORRAGIA / CHOQUE -->
+        <div class="alarm-signals-box">
+          <div class="alarm-title">
+            <span>⚠️ SINAIS DE CHOQUE HIPOVOLÉMICO (LIGAR 112):</span>
+          </div>
+          <ul class="alarm-list">
+            <li>Palidez acentuada e pele fria ou suada.</li>
+            <li>Pulso muito rápido e fraco ("filiforme").</li>
+            <li>Sede intensa, tonturas ou desmaio iminente.</li>
+            <li>Confusão e agitação progressiva.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 5: QUEIMADURAS (CLASSIFICAÇÃO & CRONÓMETRO)         -->
+      <!-- ======================================================== -->
+      <section id="screen-burns" class="screen-view">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-black text-white">Protocolo de Queimaduras</h2>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <!-- TEMPORIZADOR DE ARREFECIMENTO TÉPIDO -->
+        <div class="card border-sky-500/50 bg-sky-950/20 text-center">
+          <span class="text-xs uppercase text-sky-400 font-bold block mb-1">Arrefecimento com Água Corrente Tépida:</span>
+          <div class="text-3xl font-mono font-black text-sky-300 mb-2" id="burn-timer-val">15:00</div>
+          <button type="button" id="btn-burn-timer" class="action bg-sky-600 text-white font-bold text-xs py-2 px-6">
+            ▶ Iniciar 15 Min de Água Corrente
+          </button>
+          <p class="text-[11px] text-slate-300 mt-2">Água corrente suave (entre 15°C a 20°C). Nunca use gelo direto nem água gelada.</p>
+        </div>
+
+        <!-- FOTOS REAIS DO MANUAL -->
+        <div class="card">
+          <h3 class="card-title text-sm">Classificação Visual de Queimaduras (Manual TAS):</h3>
+          
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center gap-3 bg-slate-900 p-2 rounded-xl border border-slate-800">
+              <img src="./assets/images/queimadura_1grau.jpg" class="w-20 h-20 rounded-lg object-cover" alt="1º Grau">
+              <div>
+                <strong class="text-yellow-400 block text-sm">1º Grau (Epiderme)</strong>
+                <p class="text-slate-300">Rubor (vermelhidão), calor e dor. Não há bolhas. Arrefecer e hidratar.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-slate-900 p-2 rounded-xl border border-slate-800">
+              <img src="./assets/images/queimadura_2grau.jpg" class="w-20 h-20 rounded-lg object-cover" alt="2º Grau">
+              <div>
+                <strong class="text-amber-400 block text-sm">2º Grau (Derme)</strong>
+                <p class="text-slate-300">Dor intensa e bolhas com líquido (<strong>flictenas</strong>). Proibido rebentar bolhas!</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-slate-900 p-2 rounded-xl border border-slate-800">
+              <img src="./assets/images/queimadura_3grau.jpg" class="w-20 h-20 rounded-lg object-cover" alt="3º Grau">
+              <div>
+                <strong class="text-red-400 block text-sm">3º Grau (Tecidos Profundos)</strong>
+                <p class="text-slate-300">Necrose esbranquiçada ou acastanhada. <strong>Não dói</strong> devido à destruição das terminações nervosas. Urgência hospitalar imediata.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 6: SUSPEITA DE AVC (ESCALA CINCINNATI / VIA VERDE)   -->
+      <!-- ======================================================== -->
+      <section id="screen-stroke" class="screen-view">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-black text-white">Suspeita de AVC (Via Verde)</h2>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <div class="card bg-purple-950/20 border-purple-500/50">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs uppercase text-purple-300 font-bold block">Registo para a Via Verde do AVC:</span>
+              <p id="stroke-onset-display" class="text-xs text-white">Hora dos primeiros sintomas não marcada</p>
+            </div>
+          </div>
+          <button type="button" id="btn-stroke-mark-time" class="action bg-purple-600 text-white font-bold text-xs w-full py-2.5">
+            ⏱ Registar Hora dos Primeiros Sintomas Agora
+          </button>
+          <p class="text-[11px] text-slate-400 mt-2">A janela de trombólise hospitalar é de apenas 4,5 horas. Cada minuto conta!</p>
+        </div>
+
+        <!-- ESCALA DOS 3 Fs -->
+        <div class="card">
+          <h3 class="card-title text-sm">Teste Rápido dos 3 «F»:</h3>
+          
+          <div class="space-y-2 text-xs">
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+              <strong class="text-yellow-400 text-sm block mb-1">1. FACE (Desvio da comissura labial)</strong>
+              <p class="text-slate-300">Peça para a pessoa sorrir. Um lado da boca fica descaído?</p>
+            </div>
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+              <strong class="text-yellow-400 text-sm block mb-1">2. FORÇA (Paresia dos membros)</strong>
+              <p class="text-slate-300">Peça para levantar ambos os braços por 10 segundos. Um braço cai?</p>
+            </div>
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+              <strong class="text-yellow-400 text-sm block mb-1">3. FALA (Disartria ou afasia)</strong>
+              <p class="text-slate-300">Peça para repetir uma frase simples. A fala sai enrolada ou incompreensível?</p>
+            </div>
+          </div>
+
+          <div class="alarm-signals-box mt-3">
+            <div class="alarm-title"><span>⚠️ CRITÉRIO VIA VERDE DO AVC:</span></div>
+            <p class="text-xs text-slate-200">Se <strong>pelo menos 1 destes 3 testes for positivo</strong>, ligue imediatamente 112 e transmita a hora de início dos sintomas.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 7: CONVULSÕES & PLS                                 -->
+      <!-- ======================================================== -->
+      <section id="screen-seizure" class="screen-view">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-black text-white">Crise Convulsiva &amp; PLS</h2>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <!-- CRONÓMETRO DE CRISE -->
+        <div class="card border-amber-500/50 bg-amber-950/20 text-center">
+          <span class="text-xs uppercase text-amber-400 font-bold block mb-1">Duração da Crise Convulsiva:</span>
+          <div class="text-3xl font-mono font-black text-yellow-300 mb-2" id="seizure-timer-val">00:00</div>
+          <button type="button" id="btn-seizure-timer" class="action bg-amber-600 text-white font-bold text-xs py-2 px-6">
+            ▶ Iniciar Contagem da Crise
+          </button>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title text-sm">O que fazer durante e após a crise:</h3>
+          
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-emerald-950/50 border border-emerald-500 rounded-lg">
+              <strong class="text-emerald-300 block mb-0.5">DURANTE:</strong>
+              <p class="text-slate-300">Proteja a cabeça. Afaste objetos perigosos. <strong>NUNCA meta nada na boca</strong> (não prenda a língua) e não segure os movimentos com força.</p>
+            </div>
+
+            <div class="p-2.5 bg-sky-950/50 border border-sky-500 rounded-lg">
+              <strong class="text-sky-300 block mb-0.5">APÓS A CRISE (Inconsciente mas respira):</strong>
+              <div class="guide-image-box my-2">
+                <img src="./assets/images/sbv_pls.png" alt="Posição Lateral de Segurança">
+                <div class="guide-caption">Colocar em Posição Lateral de Segurança (PLS)</div>
+              </div>
+              <p class="text-slate-300">Mantém a via aérea limpa e previne aspiração de vómito.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="alarm-signals-box">
+          <div class="alarm-title"><span>⚠️ SINAIS DE ALARME EM CONVULSÕES:</span></div>
+          <ul class="alarm-list">
+            <li>Crise com duração superior a 5 minutos (Estado de Mal Epiléptico).</li>
+            <li>Segunda crise consecutiva sem recuperar a consciência entre elas.</li>
+            <li>Traumatismo craniano sofrido durante a queda.</li>
+            <li>Vítima grávida ou sem antecedentes de epilepsia.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 8: ASSISTENTE IA (GEMINI MULTIMODAL)                -->
+      <!-- ======================================================== -->
+      <section id="screen-ai" class="screen-view">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🤖</span>
+            <h2 class="text-xl font-black text-white">Assistente IA de Socorro</h2>
+          </div>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <div class="mb-3 flex items-center justify-between bg-emerald-950/60 border border-emerald-500/70 p-2.5 rounded-xl text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">🟢 RAG Ativo:</span>
+            <span class="text-slate-200 font-mono text-[11px]">Gemini 3.8 Flash &bull; Base Oficial: Manual UFCD 9988 / TAS</span>
+          </div>
+          <span class="text-[10px] text-emerald-300 font-bold bg-emerald-900/80 px-2 py-0.5 rounded">Grounded</span>
+        </div>
+
+        <!-- NOTA DE RESPONSABILIDADE E TRÁFEGO DA IA -->
+        <div class="mb-3 p-3 bg-slate-900/90 border border-amber-500/50 rounded-xl text-xs text-slate-300 space-y-1.5 shadow-sm">
+          <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs">
+            <span>⚠️</span> <span>Condições de Uso &amp; Limitações da IA:</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-slate-300">
+            • <strong>Disponibilidade e Tráfego:</strong> Este assistente utiliza a API do Google Gemini (Modo Gratuito). O seu funcionamento está sujeito a critérios de rede, conectividade e momentos de congestionamento de tráfego global da Google, podendo não estar sempre disponível em tempo útil.
+          </p>
+          <p class="text-[11px] leading-relaxed text-slate-300">
+            • <strong>Nunca Atrasar o Socorro 112:</strong> A IA é uma ferramenta complementar e <u>não deve em caso algum atrasar o socorro</u>. Em paragens cardiorrespiratórias (PCR), asfixia grave, acidentes violentos ou qualquer suspeita de risco de vida, <strong>ligue 112 de imediato e não aguarde pela IA</strong>.
+          </p>
+          <p class="text-[11px] text-amber-300/90 font-medium italic">
+            «Em caso de dúvida ou se o sistema demorar, ligue 112 imediatamente.»
+          </p>
+        </div>
+
+        <!-- ESTADO DO ASSISTENTE CLÍNICO -->
+        <div class="card bg-slate-900/80 border-slate-700/60 py-2.5 px-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-semibold text-emerald-300">Assistente Clínico Pronto a Usar</span>
+          </div>
+          <span class="text-[10px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700 font-mono">Modo Comunitário</span>
+        </div>
+
+        <div class="card">
+          <label class="block text-xs font-bold text-slate-300 mb-2">1. Fotografia da Lesão ou Situação (Opcional):</label>
+          <input type="file" id="ai-file-input" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-yellow-300 cursor-pointer">
+          <img id="ai-img-preview" class="hidden w-full max-h-48 object-cover rounded-xl mt-3 border border-slate-700" alt="Pré-visualização">
+
+          <label class="block text-xs font-bold text-slate-300 mt-4 mb-2">2. Descreva o que está a acontecer:</label>
+          <textarea id="ai-text-prompt" rows="3" placeholder="Ex.: Queimadura com óleo quente no antebraço, tem bolha transparente com líquido... o que devo fazer?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-xs"></textarea>
+
+          <button type="button" id="btn-ask-ai" class="action bg-yellow-400 text-slate-950 font-black text-sm w-full mt-3 py-3">
+            🔍 Analisar com Diretrizes Médicas
+          </button>
+        </div>
+
+        <div id="ai-loading" class="hidden card text-center py-6 text-sm text-yellow-300 flex items-center justify-center gap-2">
+          <span class="animate-spin text-xl">⏳</span> A analisar segundo os manuais do INEM...
+        </div>
+
+        <div id="ai-response-box" class="card text-xs leading-relaxed text-slate-200">
+          <span class="text-slate-500 italic">A análise segura da IA e os passos imediatos serão apresentados aqui.</span>
+        </div>
+
+        <!-- CAIXA DE PARTILHA COM CONTACTO DE EMERGÊNCIA (ICE) -->
+        <div id="ai-share-box" class="hidden card bg-slate-900 border border-slate-700 mt-3 p-3">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-base">📲</span>
+              <strong class="text-xs text-white">Partilhar com Contacto de Confiança (ICE)</strong>
+            </div>
+            <span class="text-[10px] text-sky-400 font-mono font-bold" id="ai-share-contact-name">Contacto</span>
+          </div>
+          <p class="text-[11px] text-slate-300 mb-2.5 leading-relaxed">
+            Envie este ponto de situação com a localização atual ao seu contacto de emergência. Escolha o objetivo:
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btn-share-info" class="action bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/50 rounded-xl py-2 px-2 text-xs font-bold text-center flex items-center justify-center gap-1.5">
+              <span>ℹ️</span> Informar / Calmo
+            </button>
+            <button type="button" id="btn-share-urgent" class="action bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-600 rounded-xl py-2 px-2 text-xs font-bold text-center flex items-center justify-center gap-1.5">
+              <span>🚨</span> Alerta Urgente
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ: FICHA MÉDICA DE EMERGÊNCIA (ICE - PROTOCOLO SAMPLE) -->
+      <!-- ======================================================== -->
+      <section id="screen-medical-id" class="screen-view">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📋</span>
+            <h2 class="text-xl font-black text-white">Ficha Médica ICE</h2>
+          </div>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <div class="mb-3 p-2.5 bg-sky-950/50 border border-sky-500/60 rounded-xl text-xs text-slate-300">
+          <div class="flex items-center gap-1.5 text-sky-400 font-bold mb-1">
+            <span>🔒</span> <span>100% Privado &amp; Gravado Apenas no Telemóvel:</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Os seus dados nunca saem deste aparelho. Preencha uma vez e a app memoriza-os para sempre, adaptando a triagem da IA e permitindo alertar familiares em segundos.
+          </p>
+        </div>
+
+        <!-- CARTÃO RESUMO QUANDO JÁ ESTÁ GRAVADO -->
+        <div id="ice-summary-card" class="hidden card border-emerald-500/60 bg-emerald-950/20 mb-3">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>✅</span> Perfil Médico Ativo no Telemóvel
+            </span>
+            <span class="text-[11px] font-mono text-emerald-300 font-bold" id="ice-summary-blood">--</span>
+          </div>
+          <p class="text-xs text-white font-bold" id="ice-summary-name">Nome da Vítima</p>
+          <div class="text-[11px] text-slate-300 mt-1 space-y-0.5">
+            <p><strong>Alergias:</strong> <span id="ice-summary-allergies">Nenhuma</span></p>
+            <p><strong>Antecedentes:</strong> <span id="ice-summary-conditions">Nenhum</span></p>
+            <p><strong>Medicação:</strong> <span id="ice-summary-meds">Nenhuma</span></p>
+            <p class="pt-1 text-sky-300"><strong>Familiar (ICE):</strong> <span id="ice-summary-contact">Não definido</span></p>
+          </div>
+        </div>
+
+        <!-- FORMULÁRIO DE EDIÇÃO DA FICHA MÉDICA -->
+        <form id="form-medical-id" class="space-y-3">
+          <div class="card space-y-2">
+            <h3 class="text-xs font-bold uppercase text-slate-300 tracking-wider">1. Identificação Básica:</h3>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Nome Completo (ou Primeiro e Último):</label>
+              <input type="text" id="input-ice-name" placeholder="Ex: Hugo Fonte" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Idade / Ano Nasc.:</label>
+                <input type="text" id="input-ice-age" placeholder="Ex: 38 anos" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Grupo Sanguíneo:</label>
+                <select id="select-ice-blood" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+                  <option value="Desconhecido">Desconhecido</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card space-y-2">
+            <h3 class="text-xs font-bold uppercase text-slate-300 tracking-wider">2. História Clínica (Protocolo SAMPLE):</h3>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Alergias Críticas (Medicamentos / Alimentos / Picadas):</label>
+              <input type="text" id="input-ice-allergies" placeholder="Ex: Penicilina, picada de abelha, amendoim (ou Nenhuma)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Doenças Crónicas / Antecedentes:</label>
+              <input type="text" id="input-ice-conditions" placeholder="Ex: Diabético tipo 1, Asma, Hipertensão, Pacemaker, Epilepsia" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Medicação Habitual diária:</label>
+              <input type="text" id="input-ice-meds" placeholder="Ex: Insulina, Varfarina / Anticoagulante, Inalador SOS" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+            </div>
+          </div>
+
+          <div class="card space-y-2 border-sky-500/40">
+            <h3 class="text-xs font-bold uppercase text-sky-400 tracking-wider flex items-center gap-1.5">
+              <span>📞</span> 3. Contacto de Emergência (ICE - In Case of Emergency):
+            </h3>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Nome e Relação com o Contacto:</label>
+              <input type="text" id="input-ice-contact-name" placeholder="Ex: Maria Fonte (Esposa) ou António (Pai)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Número de Telemóvel para SMS / WhatsApp:</label>
+              <input type="tel" id="input-ice-contact-phone" placeholder="Ex: 912345678 ou +351912345678" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs font-mono">
+            </div>
+          </div>
+
+          <button type="submit" class="action bg-yellow-400 text-slate-950 font-black text-sm w-full py-3 rounded-xl shadow-lg">
+            💾 Guardar Ficha Médica no Telemóvel
+          </button>
+        </form>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ 9: MODO FORMAÇÃO & MANUAL COMPLETO (HUB PEDAGÓGICO) -->
+      <!-- ======================================================== -->
+      <section id="screen-learning-hub" class="screen-view">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📘</span>
+            <h2 class="text-xl font-black text-white">Manual de Formação &amp; Autoestudo</h2>
+          </div>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Ir para Emergência 🚨</button>
+        </div>
+
+        <div class="course-badge">
+          <span>🎓</span> UFCD-9988: Noções Básicas de Primeiros Socorros • Algoritmos Oficiais 2025
+        </div>
+
+        <p class="text-slate-300 text-xs mb-4">
+          Manual prático de autoestudo e consulta rápida em primeiros socorros, concebido para uso universal por cidadãos, socorristas e formandos. Conteúdos rigorosamente alinhados com as diretrizes e algoritmos mais recentes de <strong>SBV e OVA (Diretrizes 2025 ERC / INEM)</strong> e o Manual de Tripulante de Ambulância de Socorro (TAS). Toque nos capítulos para expandir os módulos e teste os seus conhecimentos no quiz interativo.
+        </p>
+
+        <!-- CAPÍTULO 1: O SIEM E O PROTOCOLO PAS -->
+        <div class="chapter-accordion open">
+          <button type="button" class="accordion-header">
+            <span>1. O SIEM e o Protocolo PAS</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <div class="guide-image-box mb-3">
+              <img src="./assets/images/estrela_da_vida.jpg" alt="Estrela da Vida SIEM">
+              <div class="guide-caption">A Estrela da Vida: As 6 Fases da Emergência Pré-Hospitalar</div>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-yellow-400">O que é o SIEM?</h4>
+            <p>O <strong>Sistema Integrado de Emergência Médica (SIEM)</strong> é o conjunto articulado de meios e ações extra-hospitalares, hospitalares e inter-hospitalares programados para atuar com rapidez e eficácia perante acidentes, catástrofes ou doenças súbitas, sob coordenação do INEM e dos seus <strong>Centros de Orientação de Doentes Urgentes (CODU)</strong>.</p>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-yellow-400">Meios de Resposta do SIEM em Portugal:</h4>
+            <ul class="list-disc pl-4 space-y-1 text-xs text-slate-300 mb-3">
+              <li><strong>Ambulâncias de Socorro (ABSC):</strong> Tripuladas por Bombeiros ou Cruz Vermelha Portuguesa (CVP), com Tripulantes de Ambulância de Socorro (TAS).</li>
+              <li><strong>Ambulâncias de Emergência Médica (AEM):</strong> Afetas diretamente ao INEM com Técnicos de Emergência Pré-Hospitalar (TEPH).</li>
+              <li><strong>Motociclos de Emergência Médica:</strong> Meio ágil com TEPH para triagem rápida e SBV em meio urbano de tráfego denso.</li>
+              <li><strong>Ambulâncias SIV (Suporte Imediato de Vida):</strong> Tripuladas por Enfermeiro e TAS, equipadas para medicação e via aérea avançada.</li>
+              <li><strong>VMER (Viatura Médica de Emergência e Reanimação):</strong> Equipa hospitalar diferenciada (Médico e Enfermeiro) para suporte avançado de vida no local.</li>
+              <li><strong>Helicópteros de Emergência Médica (SHEM):</strong> Resgate rápido e transporte inter-hospitalar de doentes críticos a longas distâncias.</li>
+            </ul>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-yellow-400">O Protocolo P.A.S. (Princípios Gerais do Socorrismo):</h4>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-sky-300 block mb-0.5">P - PREVENIR / PROTEGER:</strong>
+                <p class="text-slate-300">Antes de se aproximar, avalie criteriosamente a segurança do cenário (trânsito, eletricidade, fuga de gás, risco de incêndio ou desabamento). Use Equipamento de Proteção Individual (luvas descartáveis e máscara). <em>Regra de ouro: se o local não for seguro, não entre — um socorrista ferido torna-se uma segunda vítima!</em></p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-yellow-300 block mb-0.5">A - ALERTAR (Ligue 112):</strong>
+                <p class="text-slate-300">Ligue 112 e forneça dados objetivos ao operador: <strong>ONDE</strong> (morada exata, rua, número de polícia, sentido de trânsito e pontos de referência conspícuos); <strong>O QUÊ</strong> (tipo de evento: colisão, queda, doença súbita); <strong>QUEM</strong> (número aproximado de vítimas, sexo e idade aproximada); e <strong>ESTADO</strong> (inconsciente, com hemorragia, sem respirar). <em>Nunca desligue a chamada antes do operador autorizar!</em></p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-emerald-300 block mb-0.5">S - SOCORRER:</strong>
+                <p class="text-slate-300">Inicie as medidas básicas de preservação de vida (estancar hemorragias exsanguinantes, desobstrução da via aérea ou SBV) sem agravar lesões existentes até à chegada dos meios diferenciados.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 2: EXAME DA VÍTIMA (ABCDE, AVDS, CHAMU, TILIDAS) -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>2. Exame da Vítima: Avaliação Primária e Secundária</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-sky-400">Avaliação Primária: Sequência X-A-B-C-D-E</h4>
+            <p>Destina-se a identificar e corrigir de imediato as condições que ameaçam a vida a curto prazo:</p>
+
+            <div class="space-y-2 text-xs mb-3">
+              <div class="p-2.5 bg-red-950/40 border border-red-500/60 rounded-lg">
+                <strong class="text-red-300 block">X - Hemorragias Exsanguinantes:</strong>
+                <p class="text-slate-300">Controlo prioritário e imediato de hemorragias arteriais massivas externas antes da via aérea (pressão direta firme ou colocação de garrote/torniquete).</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-sky-300 block">A - Permeabilidade da Via Aérea (com Controlo Cervical):</strong>
+                <p class="text-slate-300">Verificar se a via aérea está desimpedida. Pesquisar corpos estranhos, secreções, vómito ou próteses dentárias soltas. Em vítimas de trauma, manter rigoroso alinhamento neutro e estabilização bimanual da coluna cervical.</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-sky-300 block">B - Ventilação e Respiração (Breathing):</strong>
+                <p class="text-slate-300">Avaliar frequência (FR normal adulto: 12 a 20 ciclos/min; bradipneia &lt; 10 cpm, taquipneia &gt; 20 cpm, taquipneia severa &gt; 35 cpm), amplitude torácica, simetria e ruídos respiratórios (pieira, estridor, gorgolejo). Pesquisar sinais de insuficiência respiratória (tiragem, respiração paradoxal, cianose).</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-sky-300 block">C - Circulação e Perfusão:</strong>
+                <p class="text-slate-300">Avaliar pulsos periférico e central (frequência cardíaca normal: 60-100 bpm; bradicardia &lt; 60 bpm, taquicardia &gt; 100 bpm). Avaliar Tempo de Preenchimento Capilar (normal &lt; 2 segundos). Avaliar pele: cor (pálida, cianótica), temperatura e humidade (suada/viscosa).</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-sky-300 block">D - Disfunção Neurológica: Escala AVDS e Pupilas:</strong>
+                <p class="text-slate-300 mb-2">Escala de resposta neurológica rápida:</p>
+                <ul class="list-disc pl-4 space-y-0.5 text-slate-300 text-[11px]">
+                  <li><strong>A (Alerta):</strong> Vítima lúcida, orientada no tempo e espaço.</li>
+                  <li><strong>V (Voz):</strong> Responde apenas a comandos verbais sonoros.</li>
+                  <li><strong>D (Dor):</strong> Reage apenas a estímulos dolorosos (pressão no trapézio).</li>
+                  <li><strong>S (Sem Resposta):</strong> Totalmente inconsciente e sem reação.</li>
+                </ul>
+                <p class="text-slate-300 mt-2 mb-1"><strong>Avaliação Pupilar:</strong></p>
+                <ul class="list-disc pl-4 space-y-0.5 text-slate-300 text-[11px]">
+                  <li><strong>Isocóricas:</strong> Ambas de tamanho normal e diâmetro simétrico (normal).</li>
+                  <li><strong>Anisocóricas:</strong> Diâmetros desiguais (suspeita grave de Traumatismo Crânio-Encefálico ou AVC hemorrágico com hipertensão intracraniana).</li>
+                  <li><strong>Miose:</strong> Ambas contraídas / puntiformes (intoxicações por opiáceos/organofosforados).</li>
+                  <li><strong>Midríase:</strong> Ambas amplamente dilatadas (hipóxia cerebral grave, PCR iminente/instalada).</li>
+                </ul>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg">
+                <strong class="text-sky-300 block">E - Exposição com Prevenção de Hipotermia:</strong>
+                <p class="text-slate-300">Expor áreas corporais estritamente necessárias para procurar fraturas ou feridas ocultas, salvaguardando a dignidade da vítima. Cobrir logo de seguida com manta térmica ou agasalho (a hipotermia despoleta a tríade mortal no trauma).</p>
+              </div>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-sky-400">Avaliação Secundária: Mnemónica C.H.A.M.U.</h4>
+            <p class="text-xs text-slate-300 mb-2">História clínica colhida junto da vítima consciente ou testemunhas presenciais:</p>
+            <div class="grid grid-cols-1 gap-1 text-xs">
+              <div class="p-2 bg-slate-900 rounded border border-slate-800"><strong>C - Circunstâncias:</strong> O que aconteceu? Como e quando iniciou?</div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800"><strong>H - História Pregressa:</strong> Doenças conhecidas (hipertensão, diabetes, asma, epilepsia, cirurgias)?</div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800"><strong>A - Alergias:</strong> Alergia a fármacos (penicilina, AAS), alimentos ou picadas de insetos?</div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800"><strong>M - Medicação Habitual:</strong> Que comprimidos toma diariamente (insulina, anticoagulantes, calmantes)?</div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800"><strong>U - Última Refeição:</strong> O que comeu ou bebeu e a que horas (crucial para eventual cirurgia sob anestesia geral)?</div>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-sky-400">Caracterização da Dor: Mnemónica T.I.L.I.D.A.S.</h4>
+            <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1">
+              <p><strong>T (Tipo de Dor):</strong> Aperto, pontada, facada, cólica, queimadura ou peso?</p>
+              <p><strong>I (Intensidade):</strong> Escala de dor de 0 (sem dor) a 10 (dor máxima insuportável).</p>
+              <p><strong>L (Localização):</strong> Onde dói exatamente (tórax, abdómen, coluna, cabeça)?</p>
+              <p><strong>I (Irradiação):</strong> A dor corre para algum sítio (braço esquerdo, costas, mandíbula)?</p>
+              <p><strong>D (Duração):</strong> Há quanto tempo começou a doer de forma contínua?</p>
+              <p><strong>A (Alívio / Agravamento):</strong> A dor melhora ou piora com repouso, respiração ou mudança de posição?</p>
+              <p><strong>S (Sintomas Associados):</strong> Náuseas, suores frios, vómitos, tonturas ou sensação de desmaio?</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 3: SUPORTE BÁSICO DE VIDA (SBV) & DAE -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>3. Suporte Básico de Vida (SBV Adulto e Pediátrico) &amp; DAE • Algoritmo 2025</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <div class="guide-image-box mb-3">
+              <img src="./assets/images/cadeia_sobrevivencia.png" alt="Cadeia de Sobrevivência ERC">
+              <div class="guide-caption">Cadeia de Sobrevivência 2025: 1. Alerta Precoce | 2. SBV Precoce | 3. DAE Precoce | 4. SAV Precoce</div>
+            </div>
+
+            <!-- DESTAQUE ALGORITMO SBV 2025 -->
+            <div class="p-3 bg-emerald-950/60 border border-emerald-500 rounded-xl mb-3 text-xs">
+              <strong class="text-emerald-300 block mb-1 font-bold text-sm">⭐ Algoritmo SBV 2025 (Diretrizes Europeias ERC / INEM):</strong>
+              <ul class="list-disc pl-4 space-y-1 text-slate-200">
+                <li><strong>Alerta 112 com Alta-Voz Imediato:</strong> Se estiver sozinho com smartphone, ligue 112 e ative o <em>alta-voz</em> no primeiro segundo. Inicie as compressões torácicas sem demora enquanto fala com o operador do CODU, indicando a morada exata e pontos de referência conspícuos.</li>
+                <li><strong>Reconhecimento de Gasping:</strong> Respiração lenta, ruidosa, agónica ou com pausas prolongadas <u>não é respiração normal</u>! É sinal de PCR e exige início imediato de 30 compressões torácicas.</li>
+                <li><strong>Compressões Torácicas de Alta Qualidade:</strong> Metade inferior do esterno, 5 a 6 cm de profundidade no adulto, cadência constante de 100 a 120 bpm e retorno elástico total do tórax após cada compressão.</li>
+                <li><strong>Troca aos 2 Minutos (5 Ciclos):</strong> Rotação obrigatória de reanimadores a cada 2 minutos para prevenir a fadiga muscular e a perda inconsciente de eficácia e profundidade das compressões.</li>
+                <li><strong>DAE Precoce:</strong> Ligar logo que chegue à vítima, aplicar pás no tórax despido e afastar todos durante análise e choque. Retomar compressões imediatamente após o choque.</li>
+                <li><strong>SBV Pediátrico:</strong> Paragem primariamente hipóxica/respiratória. <strong>5 insuflações iniciais</strong> obrigatórias antes das compressões, rácio 15:2 e compressão de 1/3 do diâmetro torácico (~4 cm no lactente com 2 dedos e cabeça neutra; ~5 cm na criança com 1 ou 2 mãos).</li>
+              </ul>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-yellow-400">Algoritmo de SBV no Adulto (Passo a Passo com Fotos Reais):</h4>
+
+            <div class="space-y-3 text-xs mb-3">
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/sbv_consciencia.png" alt="Avaliação de Consciência">
+                  <div class="guide-caption">1. Avaliar Consciência</div>
+                </div>
+                <p class="text-slate-300">Abanar suavemente os ombros e perguntar em voz alta e clara: <em>«Está a ouvir-me? Sente-se bem?»</em></p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/sbv_abertura_via_aerea.png" alt="Abertura da Via Aérea">
+                  <div class="guide-caption">2. Abertura da Via Aérea</div>
+                </div>
+                <p class="text-slate-300">Se não responde, colocar uma mão na testa e a ponta dos dedos da outra mão sob o queixo (mento), estendendo a cabeça para afastar a língua da parte de trás da garganta.</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/sbv_vos.png" alt="Ver, Ouvir e Sentir">
+                  <div class="guide-caption">3. Ver, Ouvir e Sentir (VOS até 10 segundos)</div>
+                </div>
+                <p class="text-slate-300">Aproximar o rosto da boca da vítima, olhando para o peito: <strong>VER</strong> se o tórax sobe e desce, <strong>OUVIR</strong> os sons respiratórios, <strong>SENTIR</strong> o ar expirado na face durante no máximo 10 segundos.<br>
+                ⚠️ <strong>Atenção Vital:</strong> Ruídos ruidosos, gaspejo ou respiração agónica lenta (<em>gasping</em>) <u>não são respiração normal</u>! Indicar paragem cardiorrespiratória (PCR).</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/sbv_compressoes.png" alt="Compressões Torácicas">
+                  <div class="guide-caption">4. 30 Compressões Torácicas de Alta Qualidade</div>
+                </div>
+                <p class="text-slate-300">Colocar a base da mão no centro do peito (metade inferior do esterno), entrelaçar a outra mão por cima com dedos elevados. Braços completamente verticais e cotovelos esticados.<br>
+                • <strong>Profundidade:</strong> 5 a 6 cm no adulto.<br>
+                • <strong>Ritmo:</strong> 100 a 120 compressões por minuto (use o metrónomo acústico da app).<br>
+                • Permitir o retorno elástico total do tórax após cada compressão sem tirar as mãos do peito.</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/sbv_insuflacoes.png" alt="Insuflações de Resgate">
+                  <div class="guide-caption">5. 2 Insuflações de Resgate (Rácio 30:2)</div>
+                </div>
+                <p class="text-slate-300">Manter a via aérea aberta, pinçar o nariz com o polegar e indicador, selar completamente a boca em redor da boca da vítima e insuflar durante 1 segundo até verificar elevação suave do peito.<br>
+                • Se o socorrista leigo não tiver máscara de bolso ou não se sentir apto/seguro a insuflar, <strong>mantenha compressões torácicas contínuas sem qualquer interrupção!</strong></p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/sbv_pls.png" alt="Posição Lateral de Segurança">
+                  <div class="guide-caption">6. Posição Lateral de Segurança (PLS)</div>
+                </div>
+                <p class="text-slate-300">Se a vítima estiver <strong>inconsciente mas a respirar com normalidade</strong> e sem suspeita de traumatismo na coluna, coloque-a em PLS para garantir a drenagem de vómito/secreções e manter a via aérea aberta. Vigiar a respiração a cada minuto.</p>
+              </div>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-yellow-400">Particularidades Críticas no SBV Pediátrico:</h4>
+            <div class="p-3 bg-amber-950/40 border border-amber-500/70 rounded-lg text-xs space-y-2">
+              <p>Na criança e lactente, a PCR tem origem quase sempre em <strong>hipóxia (asfixia respiratória)</strong> e não em fibrilhação primária de causa cardíaca:</p>
+              <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                <li><strong>5 Insuflações Iniciais Obrigatórias:</strong> Antes das compressões, forneça 5 insuflações lentas para oxigenar o sangue.</li>
+                <li><strong>Rácio 15:2:</strong> Em socorristas treinados, aplicar 15 compressões para 2 ventilações.</li>
+                <li><strong>Profundidade:</strong> 1/3 do diâmetro torácico (~4 cm no lactente &lt; 1 ano; ~5 cm na criança &gt; 1 ano).</li>
+                <li><strong>Técnica no Lactente (&lt; 1 ano):</strong> Compressão com 2 dedos ou 2 polegares no terço inferior do esterno; cabeça em posição neutra (sem hiperextensão).</li>
+                <li><strong>Técnica na Criança (1 ano até puberdade):</strong> Com 1 ou 2 mãos consoante a compleição da criança.</li>
+                <li><strong>Socorrista Solitário:</strong> Efetuar <strong>1 minuto de SBV (cerca de 5 ciclos)</strong> antes de se afastar para ligar 112 se não tiver telefone consigo.</li>
+              </ul>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-yellow-400">Desfibrilhador Automático Externo (DAE):</h4>
+            <p class="text-xs text-slate-300">Ligue o aparelho de imediato logo que chegue. Cole os elétrodos no tórax despido e seco (um sob a clavícula direita e outro no flanco esquerdo). Siga escrupulosamente as ordens de voz. <strong>Gere silêncio e garanta que ninguém toca na vítima durante a análise do ritmo e o choque!</strong> Retome as compressões torácicas sem demora imediatamente após o choque.</p>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 4: OBSTRUÇÃO DA VIA AÉREA (OVA) -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>4. Obstrução da Via Aérea (Asfixia / Engasgamento) • Algoritmo 2025</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <!-- DESTAQUE ALGORITMO OVA 2025 -->
+            <div class="p-3 bg-amber-950/60 border border-amber-500 rounded-xl mb-3 text-xs">
+              <strong class="text-amber-300 block mb-1 font-bold text-sm">⭐ Algoritmo Oficial OVA 2025 (Diretrizes ERC / INEM):</strong>
+              <ul class="list-disc pl-4 space-y-1 text-slate-200">
+                <li><strong>Tosse Eficaz:</strong> A vítima tosse ativamente, fala ou chora. <strong>Conduta exclusiva: apenas encorajar a tossir.</strong> <u>PROIBIDO</u> bater nas costas ou fazer compressões abdominais (pode desalojar o objeto e causar obstrução total!).</li>
+                <li><strong>Tosse Ineficaz Consciente:</strong> Não consegue falar, tossir ou respirar; mãos ao pescoço (sinal universal de asfixia); ruídos agudos ou silêncio total. Aplicar a sequência <strong>5 pancadas interescapulares</strong> (tronco bem inclinado para a frente) alternadas com <strong>5 compressões de Heimlich</strong> (puxão para dentro e para cima em "J").</li>
+                <li><strong>Casos Especiais 2025:</strong> Em <strong>lactentes (&lt; 1 ano)</strong>, grávidas e obesos mórbidos, a manobra de Heimlich é <u>contraindicada</u> (risco de rotura de órgãos internos) e é substituída por <strong>compressões torácicas</strong>. No lactente: 5 pancadas nas costas (bebé deitado de bruços no antebraço, cabeça mais baixa) + 5 compressões torácicas no esterno com 2 dedos.</li>
+                <li><strong>Vítima que Perde a Consciência:</strong> Amparar suavemente ao solo, ligar 112 imediatamente e <strong>iniciar logo 30 compressões de SBV</strong> (a compressão mecânica cria pressão positiva intratorácica que mobiliza o corpo estranho para a boca).</li>
+                <li><strong>Regra do Varrimento:</strong> Ao ventilar, inspecione a cavidade oral e retire o corpo estranho <u>apenas se visível e acessível</u>. <strong>Nunca faça varrimento cego às cegas com os dedos</strong>.</li>
+              </ul>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-amber-400">Avaliação da Eficácia da Tosse:</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+              <div class="p-2.5 bg-emerald-950/50 border border-emerald-500 rounded-lg">
+                <strong class="text-emerald-300 block mb-1">🗣️ TOSSE EFICAZ (Obstrução Ligeira)</strong>
+                <p class="text-slate-300">A vítima tosse fortemente, fala, chora e respira.<br>
+                <strong>Atuação:</strong> Apenas encorajar a tossir. <u>Proibido bater nas costas</u> ou comprimir o abdómen, pois isso pode desalojar o objeto e encravá-lo totalmente!</p>
+              </div>
+              <div class="p-2.5 bg-red-950/50 border border-red-500 rounded-lg">
+                <strong class="text-red-300 block mb-1">🔇 TOSSE INEFICAZ (Obstrução Grave)</strong>
+                <p class="text-slate-300">A vítima não consegue falar nem tossir, emite ruídos agudos, agarra o pescoço com ambas as mãos (sinal universal de asfixia) e desenvolve cianose.<br>
+                <strong>Atuação:</strong> Iniciar imediatamente a sequência 5 + 5!</p>
+              </div>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-amber-400">Sequência 5 + 5 no Adulto e Criança (&gt; 1 ano):</h4>
+            
+            <div class="space-y-3 text-xs mb-3">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/ova_pancadas.png" alt="Pancadas Interescapulares">
+                  <div class="guide-caption">Até 5 Pancadas Interescapulares</div>
+                </div>
+                <p class="text-slate-300">Coloque-se ao lado da vítima, apoie o peito com uma mão e <strong>incline o tronco bem para a frente</strong> para que o objeto saia pela boca pela ação da gravidade. Aplique até 5 pancadas secas com a base da mão entre as omoplatas. Verifique se o objeto se soltou a cada pancada.</p>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <div class="guide-image-box mb-2">
+                  <img src="./assets/images/ova_heimlich.png" alt="Manobra de Heimlich">
+                  <div class="guide-caption">Até 5 Compressões Abdominais (Manobra de Heimlich)</div>
+                </div>
+                <p class="text-slate-300">Se as pancadas falharem, posicione-se atrás da vítima e envolva a cintura com ambos os braços. Feche o punho de uma mão e posicione-o entre o umbigo e o apêndice xifoide. Agarre o punho com a outra mão e puxe com força para dentro e para cima (em "J"). Aplique até 5 compressões.<br>
+                • <em>Alterne 5 pancadas e 5 compressões abdominais sucessivamente.</em></p>
+              </div>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mt-3 mb-1 text-amber-400">Casos Especiais: Lactentes, Grávidas e Vítima Inconsciente:</h4>
+            <div class="space-y-2 text-xs">
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <strong class="text-yellow-400 block">Lactentes (&lt; 1 ano):</strong>
+                <p class="text-slate-300">Deitar de bruços no antebraço do socorrista com a cabeça mais baixa que o corpo. Aplicar 5 pancadas nas costas. Voltar de costas e aplicar 5 compressões torácicas no esterno com 2 dedos. <u>Nunca fazer compressões abdominais de Heimlich em bebés</u> (risco de rotura de órgãos internos)!</p>
+              </div>
+
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <strong class="text-yellow-400 block">Grávidas e Obesos:</strong>
+                <p class="text-slate-300">Substituir as compressões abdominais por <strong>compressões torácicas</strong> no esterno (mesmo ponto do SBV, empurrando o esterno vigorosamente para trás).</p>
+              </div>
+
+              <div class="p-2 bg-red-950/40 rounded border border-red-500">
+                <strong class="text-red-300 block">Se a Vítima Perder a Consciência:</strong>
+                <p class="text-slate-300">Amparar suavemente até ao chão, ligar 112 e <strong>iniciar imediatamente 30 compressões torácicas</strong>. Antes de ventilar, espreitar a boca: retirar o objeto apenas se estiver visível e solto; nunca fazer varrimento cego às cegas com os dedos!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 5: EMERGÊNCIAS MÉDICAS & SINAIS DE ALARME -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>5. Emergências Médicas &amp; Sinais de Alarme</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <!-- 1. DISPNEIA -->
+            <div class="mb-4">
+              <h4 class="text-white font-bold text-xs uppercase mb-1 text-sky-400">1. Dispneia e Crises Respiratórias (Asma / DPOC):</h4>
+              <p class="text-xs text-slate-300 mb-2">Dificuldade em respirar, sensação de sufoco, pieira ("assobios"), aumento acentuado do ritmo respiratório e uso dos músculos do pescoço.</p>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1">
+                <p><strong>Posicionamento de Fowler Obrigatório:</strong> Sentar ou semi-sentar a vítima (tronco elevado a 45°-90°). <u>Jamais deitar na horizontal uma pessoa com falta de ar</u> (o retorno venoso aumenta a congestão pulmonar e provoca asfixia postural).</p>
+                <p><strong>Arejamento:</strong> Abrir janelas, afastar aglomerações e desapertar golas, gravatas e cintos.</p>
+                <p><strong>Oxigenoterapia:</strong> Se disponível e se o operador for socorrista/TAS credenciado, administrar O2 a débito adequado para manter saturação estável.</p>
+                <p><strong>Regra de Segurança:</strong> Não administrar medicação de SOS por iniciativa do socorrista leigo. Ajudar apenas o próprio doente a manusear o seu inalador pessoal prescrito se ele assim o solicitar.</p>
+              </div>
+            </div>
+
+            <!-- 2. DOR TORÁCICA / ENFARTE -->
+            <div class="mb-4">
+              <h4 class="text-white font-bold text-xs uppercase mb-1 text-red-400">2. Dor Torácica &amp; Enfarte Agudo do Miocárdio (EAM):</h4>
+              <p class="text-xs text-slate-300 mb-2">Ocorre pela oclusão aguda de uma artéria coronária com morte de células do músculo cardíaco (isquemia e necrose).</p>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1">
+                <p><strong>Sintomas Típicos:</strong> Dor retrosternal em aperto profundo, peso ou constrição no peito que dura mais de 10-15 minutos e não alivia com a posição; irradiação para o braço esquerdo, mandíbula, pescoço ou costas; acompanhada de suores frios profusos, palidez acentuada, náuseas e sensação iminente de morte.</p>
+                <p><strong>Atuação Imediata:</strong> <u>Repouso absoluto e imediato</u> (a vítima não pode andar nem fazer o mínimo esforço físico). Colocar em posição semi-sentada confortável, manter ambiente calmo, ligar 112 comunicando suspeita de EAM (Via Verde Coronária) e manter o DAE acessível.</p>
+              </div>
+            </div>
+
+            <!-- 3. AVC -->
+            <div class="mb-4">
+              <h4 class="text-white font-bold text-xs uppercase mb-1 text-purple-400">3. Acidente Vascular Cerebral (AVC &amp; Via Verde):</h4>
+              <div class="grid grid-cols-2 gap-2 my-2">
+                <div class="guide-image-box">
+                  <img src="./assets/images/avc_isquemico.png" alt="AVC Isquémico">
+                  <div class="guide-caption">Isquémico (85%): Vaso ocluído</div>
+                </div>
+                <div class="guide-image-box">
+                  <img src="./assets/images/avc_hemorragico.png" alt="AVC Hemorrágico">
+                  <div class="guide-caption">Hemorrágico (15%): Rotura vascular</div>
+                </div>
+              </div>
+              <div class="p-2.5 bg-purple-950/30 border border-purple-500/60 rounded-lg text-xs space-y-1">
+                <p><strong>O Teste dos 3 «F» (Escala de Cincinnati):</strong></p>
+                <ul class="list-disc pl-4 space-y-0.5 text-slate-300">
+                  <li><strong>F - Face:</strong> Peça para a pessoa sorrir. Um dos cantos da boca fica descaído ("boca ao lado")?</li>
+                  <li><strong>F - Força:</strong> Peça para levantar ambos os braços esticados durante 10 segundos. Um braço descai por fraqueza muscular?</li>
+                  <li><strong>F - Fala:</strong> Peça para repetir uma frase simples. A fala sai enrolada, incompreensível ou com incapacidade total de articular?</li>
+                </ul>
+                <p class="text-purple-200 mt-2"><strong>Critério Via Verde:</strong> Se 1 dos 3 testes for positivo, ligue 112 imediatamente. <u>Registe a hora exata</u> em que a pessoa foi vista sem sintomas (a trombólise hospitalar tem uma janela restrita de 4,5 horas). <strong>Nunca dar alimentos, água ou medicamentos</strong> (o reflexo de engolir fica paralisado, causando asfixia fatal).</p>
+              </div>
+            </div>
+
+            <!-- 4. CONVULSÕES -->
+            <div class="mb-4">
+              <h4 class="text-white font-bold text-xs uppercase mb-1 text-amber-400">4. Crises Convulsivas &amp; Epilepsia:</h4>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-2">
+                <p><strong>DURANTE A CRISE (Fase Tónico-Clónica):</strong> Perda súbita de consciência com abalos musculares descontrolados e rigidez. Cronometre a duração. Afaste mesas, cadeiras e objetos perfurantes. Apoie a cabeça da vítima com um casaco dobrado para amortecer o embate no chão. Desaperte roupas apertadas ao pescoço.</p>
+                <div class="p-2 bg-red-950/60 border border-red-500 rounded text-red-200">
+                  ⚠️ <strong>MITOS PERIGOSOS A PROIBIR:</strong><br>
+                  • NUNCA coloque colheres, panos ou os dedos dentro da boca (a língua não se engole e pode sofrer mordeduras ou amputação de dedos).<br>
+                  • NUNCA tente segurar os braços ou conter os movimentos com força (risco de fraturas ósseas).
+                </div>
+                <p><strong>APÓS A CRISE (Fase Pós-Crítica):</strong> Os abalos cessam, a vítima fica sonolenta e inconsciente. Se respira normalmente, coloque imediatamente em <strong>Posição Lateral de Segurança (PLS)</strong> para drenar saliva e manter via aérea limpa.<br>
+                • <em>Ligue 112 se:</em> A crise durar mais de 5 minutos, se ocorrer uma 2ª crise consecutiva sem recuperar consciência, se a vítima estiver grávida ou se houver traumatismo craniano associado.</p>
+              </div>
+            </div>
+
+            <!-- 5. GLICÉMIA -->
+            <div class="mb-4">
+              <h4 class="text-white font-bold text-xs uppercase mb-1 text-yellow-400">5. Alterações de Glicémia (Diabetes):</h4>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1">
+                <p><strong>Hipoglicemia (&lt; 60 mg/dL):</strong> Instalação súbita e fulminante. Sinais: palidez extrema, sudação fria e viscosa, tremores, sensação de fome intensa, fraqueza, irritabilidade/confusão e risco de coma.</p>
+                <p>• <strong>Vítima Consciente:</strong> Administrar água com 2 a 3 pacotes de açúcar bem dissolvidos ou sumo açucarado em pequenos goles.</p>
+                <p>• <strong>Vítima Inconsciente:</strong> <u>JAMAIS dar líquidos</u> (risco fatal de broncoaspiração). Colocar em PLS e ligar 112 com urgência.</p>
+                <p><strong>Hiperglicemia (&gt; 200 mg/dL):</strong> Instalação lenta e progressiva ao longo de horas/dias. Sinais: sede constante (polidipsia), urina excessiva, fadiga e hálito cetónico (odor a fruta fermentada).</p>
+              </div>
+            </div>
+
+            <!-- 6. INTOXICAÇÕES -->
+            <div>
+              <h4 class="text-white font-bold text-xs uppercase mb-1 text-emerald-400">6. Intoxicações e Envenenamentos:</h4>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1">
+                <p><strong>Contacto Imediato:</strong> Ligue para o <strong>CIAV - Centro de Informação Antivenenos (800 250 250)</strong> ou 112.</p>
+                <p><strong>Inalação de Gases:</strong> Retirar a vítima imediatamente para local arejado, salvaguardando a própria segurança do socorrista.</p>
+                <p><strong>Contacto Cutâneo/Ocular:</strong> Lavar com água corrente abundante durante pelo menos 15 minutos.</p>
+                <div class="p-2 bg-red-950/60 border border-red-500 rounded text-red-200 mt-2">
+                  🚫 <strong>REGRAS DE OURO EM INTOXICAÇÕES POR INGESTÃO:</strong><br>
+                  1. NUNCA provocar o vómito (o cáustico volta a queimar o esófago e pode entrar nos pulmões).<br>
+                  2. NUNCA dar leite nem azeite (o leite acelera a absorção de químicos lipossolúveis).<br>
+                  3. Guardar embalagens, rótulos e restos do produto para apresentar aos médicos.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 6: TRAUMATOLOGIA, HEMORRAGIAS, QUEIMADURAS E FRATURAS -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>6. Traumatologia: Hemorragias, Queimaduras e Fraturas</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <!-- HEMORRAGIAS -->
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-red-400">Controlo de Hemorragias Externas:</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+              <div class="guide-image-box">
+                <img src="./assets/images/hemorragia_pressao_direta.jpg" alt="Pressão Direta">
+                <div class="guide-caption">1ª Linha: Pressão Direta Firme</div>
+              </div>
+              <div class="guide-image-box">
+                <img src="./assets/images/hemorragia_garrote.jpg" alt="Garrote / Torniquete">
+                <div class="guide-caption">Garrote: Amputação ou Exsanguinante</div>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs mb-4">
+              <p><strong>Tipos de Hemorragia:</strong><br>
+              • <strong>Arterial:</strong> Sangue vermelho-vivo que jorra sob pressão pulsátil ao ritmo do coração (perda rápida de volume sanguíneo).<br>
+              • <strong>Venosa:</strong> Sangue vermelho-escuro que flui de forma contínua e sem pulsação.<br>
+              • <strong>Capilar:</strong> Pequeno sangramento em toalha superficial (escoriações).</p>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-300 block mb-0.5">Técnica de Hemostase:</strong>
+                <p class="text-slate-300">1. Aplicar compressas esterilizadas sobre o ferimento e comprimir firmemente com a mão durante 10 minutos. Se o penso ensopar, <u>nunca o retire</u> — coloque novas compressas por cima e continue a compressão.</p>
+                <div class="guide-image-box my-2">
+                  <img src="./assets/images/hemorragia_elevacao.jpg" alt="Elevação do Membro">
+                  <div class="guide-caption">2. Elevação do Membro (apenas se não houver suspeita de fratura associada)</div>
+                </div>
+                <p class="text-slate-300">3. <strong>Aplicação de Garrote / Torniquete:</strong> Exclusivo para amputações ou sangramentos arteriais maciços nos membros que não cedem à pressão direta. Colocar 5 a 7 cm acima da lesão, apertar o fuso até o sangramento parar, registar a hora e <u>NUNCA aliviar o garrote</u> até aos cuidados hospitalares definitivos!</p>
+              </div>
+            </div>
+
+            <!-- QUEIMADURAS -->
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-amber-400">Protocolo de Queimaduras:</h4>
+            <div class="space-y-2 text-xs mb-4">
+              <div class="grid grid-cols-3 gap-2">
+                <div class="guide-image-box">
+                  <img src="./assets/images/queimadura_1grau.jpg" alt="1º Grau">
+                  <div class="guide-caption">1º Grau: Eritema e Dor</div>
+                </div>
+                <div class="guide-image-box">
+                  <img src="./assets/images/queimadura_2grau.jpg" alt="2º Grau">
+                  <div class="guide-caption">2º Grau: Flictenas / Bolhas</div>
+                </div>
+                <div class="guide-image-box">
+                  <img src="./assets/images/queimadura_3grau.jpg" alt="3º Grau">
+                  <div class="guide-caption">3º Grau: Necrose Indolor</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-sky-950/30 border border-sky-500/50 rounded-lg">
+                <strong class="text-sky-300 block mb-1">Regra de Ouro do Arrefecimento:</strong>
+                <p class="text-slate-300">Colocar imediatamente a queimadura sob <strong>água corrente tépida (entre 15°C a 20°C) durante 15 a 20 minutos seguidos</strong> para interromper a progressão térmica nos tecidos profundos.</p>
+                <p class="text-slate-300 mt-1">Retirar com cuidado pulseiras, relógios e anéis antes do aparecimento do edema.</p>
+                <p class="text-slate-300 mt-1">Cobrir a área com compressas esterilizadas humedecidas em soro e aplicar ligadura suave sem compressão.</p>
+                <div class="p-2 bg-red-950/60 border border-red-500 rounded text-red-200 mt-2">
+                  🚫 <strong>PROIBIDO EM QUEIMADURAS:</strong><br>
+                  • Nunca aplicar gelo direto (agrava a necrose tecidular por congelação).<br>
+                  • Nunca rebentar bolhas (flictenas).<br>
+                  • Nunca aplicar pasta de dentes, gorduras, azeite, álcool ou pomadas caseiras.<br>
+                  • Nunca arrancar roupas que estejam coladas à pele queimada.
+                </div>
+              </div>
+            </div>
+
+            <!-- FRATURAS -->
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-yellow-400">Fraturas &amp; Traumatismos Ósseos:</h4>
+            <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1">
+              <p><strong>Sinais Indicativos:</strong> Dor aguda localizada, deformidade anatómica evidente, inchaço (edema), hematoma, mobilidade anormal ou crepitação ao toque e incapacidade funcional total de movimentar o membro.</p>
+              <p><strong>Fratura Aberta vs Fechada:</strong> Na fratura aberta há rotura da pele com exposição dos topos ósseos ou ferida profunda comunicante (risco severo de infeção e hemorragia).</p>
+              <p><strong>Atuação de Primeiros Socorros:</strong><br>
+              • <u>Nunca tentar alinhar, puxar ou forçar o membro fraturado</u> no socorrismo básico.<br>
+              • Imobilizar o membro na posição exata em que se encontra, abrangendo obrigatoriamente a articulação imediatamente acima e a articulação abaixo da fratura.<br>
+              • Aplicar frio indireto (saco com gelo envolvido em pano) durante 15 minutos para diminuir a dor e o inchaço.<br>
+              • Em fraturas abertas, cobrir com compressas esterilizadas húmidas sem comprimir o osso e vigiar a circulação periférica na ponta dos dedos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 7: VÍDEOS DE DEMONSTRAÇÃO PRÁTICA EM PORTUGUÊS -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>7. Demonstrações Audiovisuais em Língua Portuguesa</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <div class="mb-4">
+              <strong class="text-xs text-white block mb-1">Vídeo 1: Sequência de Suporte Básico de Vida no Adulto (ERC / INEM)</strong>
+              <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-700">
+                <iframe class="w-full h-full" src="https://www.youtube.com/embed/HeZ0jfqodK0" title="Demonstração SBV em Português" allowfullscreen></iframe>
+              </div>
+              <div class="badge-critical text-[11px] mt-2">
+                <strong>💡 Análise Crítica:</strong> Observe a cadência rítmica e a verticalidade dos braços para garantir 5 a 6 cm de compressão torácica sem flexionar os cotovelos.
+              </div>
+            </div>
+
+            <div>
+              <strong class="text-xs text-white block mb-1">Vídeo 2: Desobstrução da Via Aérea (Pancadas &amp; Heimlich)</strong>
+              <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-700">
+                <iframe class="w-full h-full" src="https://www.youtube.com/embed/LCxkSiuMah8" title="Demonstração OVA em Português" allowfullscreen></iframe>
+              </div>
+              <div class="badge-critical text-[11px] mt-2">
+                <strong>💡 Análise Crítica:</strong> Repare no posicionamento do punho em "J" acima do umbigo e na inclinação para a frente nas pancadas interescapulares.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 8: QUIZ DINÂMICO DE AUTOAVALIAÇÃO -->
+        <div class="chapter-accordion open">
+          <button type="button" class="accordion-header">
+            <span>8. Quiz Dinâmico de Autoavaliação</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <div class="flex items-center justify-between mb-3 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+              <div>
+                <span class="text-xs text-slate-300 font-bold block">Sessão Aleatória de Autoavaliação</span>
+                <span id="quiz-score-badge" class="text-[11px] text-sky-400 font-semibold">Responda às 5 perguntas sorteadas:</span>
+              </div>
+              <button type="button" id="btn-reload-quiz" class="action bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs py-1.5 px-3 border border-slate-700 rounded-lg flex items-center gap-1.5">
+                <span>🔄</span> Novas Perguntas
+              </button>
+            </div>
+
+            <!-- CONTAINER ONDE AS PERGUNTAS SÃO GERADAS DINAMICAMENTE -->
+            <div id="quiz-dynamic-container" class="space-y-3">
+              <!-- Renderizado dinamicamente via app.js -->
+            </div>
+
+            <!-- SUMÁRIO DE PONTUAÇÃO FINAL -->
+            <div id="quiz-summary-box" class="hidden mt-4 p-4 rounded-xl text-center border bg-slate-900 border-slate-700">
+              <div id="quiz-summary-score" class="text-lg font-bold text-white mb-1"></div>
+              <p id="quiz-summary-msg" class="text-xs text-slate-300 mb-3"></p>
+              <button type="button" id="btn-summary-restart" class="action bg-yellow-400 text-slate-950 font-bold text-xs py-2 px-4 rounded-xl">
+                🔄 Tentar Novo Quiz com Novas Perguntas
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RODAPÉ DE CRÉDITOS: THINKED BY HUGO FONTE (ÚNICA REFERÊNCIA) -->
+        <footer class="mt-10 mb-6 pt-5 border-t border-slate-800/80 text-center text-xs text-slate-500">
+          <p class="font-semibold tracking-wide text-slate-400 text-sm">Thinked by Hugo Fonte</p>
+          <p class="text-[11px] text-slate-600 mt-1">Socorro 112 &bull; Suporte Pré-Hospitalar &amp; Primeiros Socorros</p>
+          <button type="button" id="btn-show-disclaimer" class="text-[11px] text-amber-400/80 hover:text-amber-300 underline mt-2 block mx-auto">
+            ⚖️ Aviso Legal &amp; Isenção de Responsabilidade Médica
+          </button>
+        </footer>
+      </section>
+
+    </main>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APP NATIVA -->
+    <nav class="bottom-nav">
+      <button type="button" class="nav-item active" data-target="screen-emergency">
+        <span class="nav-icon">🚨</span>
+        <span>Socorro</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-sbv">
+        <span class="nav-icon">🫀</span>
+        <span>SBV/DAE</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-dyspnea">
+        <span class="nav-icon">🫁</span>
+        <span>Dispneia</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-ova">
+        <span class="nav-icon">🗣️</span>
+        <span>Asfixia</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-trauma">
+        <span class="nav-icon">🩹</span>
+        <span>Trauma</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-ai">
+        <span class="nav-icon">🤖</span>
+        <span>IA Triagem</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-learning-hub">
+        <span class="nav-icon">📘</span>
+        <span>Manual</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
+  <script src="./js/audio.js?v=15"></script>
+  <script src="./js/geo.js?v=15"></script>
+  <script src="./js/knowledge_base.js?v=15"></script>
+  <script src="./js/rag.js?v=15"></script>
+  <script src="./js/ai.js?v=15"></script>
+  <script src="./js/app.js?v=15"></script>
+</body>
+</html>
