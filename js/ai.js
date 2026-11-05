@@ -20,6 +20,31 @@ const AIManager = {
     // Modo automático integrado
   },
 
+  // ENCAMINHAMENTO INTELIGENTE DE MODELOS (SMART MODEL ROUTING):
+  // - Perguntas abertas, descrições complexas e fotografias -> Gemini 3.8 Flash (Raciocínio Clínico Profundo)
+  // - Respostas a botões de afunilamento (Sim/Não) ou perguntas diretas -> Gemini Flash Lite (Ultrarrápido, poupa cota)
+  determineRoutingStrategy(textPrompt = '', imageBase64 = null) {
+    const isImage = !!imageBase64;
+    const isFollowUp = textPrompt.includes('[Despiste de Triagem:');
+    const isShortDirect = textPrompt.trim().length < 50;
+
+    if (isFollowUp || (isShortDirect && !isImage)) {
+      // Rota Rápida e Direta (preserva a cota diária do modelo 3.8)
+      return [
+        { model: 'gemini-flash-lite-latest', tier: 'rápido' },
+        { model: 'gemini-3.1-flash-lite', tier: 'suplente' },
+        { model: 'gemini-3.8-flash', tier: 'reforço' }
+      ];
+    }
+
+    // Rota de Raciocínio Profundo para diagnóstico inicial e análise de imagem
+    return [
+      { model: 'gemini-3.8-flash', tier: 'raciocínio_profundo' },
+      { model: 'gemini-flash-lite-latest', tier: 'suplente_rápido' },
+      { model: 'gemini-3.1-flash-lite', tier: 'suplente' }
+    ];
+  },
+
   async analyzeSymptomOrImage({ textPrompt, imageBase64, mimeType = 'image/jpeg' }) {
     const key = this.getApiKey();
     if (!key) {
@@ -105,33 +130,15 @@ REGRA: Considera estes antecedentes médicos reais para personalizar o diagnóst
       ]
     };
 
-    // Configurações em cascata para garantir fiabilidade e evitar limites de quota:
-    // 1. gemini-flash-lite-latest (ultrarrápido, cota ampla no plano gratuito e suporte multimodal)
-    // 2. gemini-3.1-flash-lite (alternativa estável)
-    // 3. gemini-3.8-flash (modelo completo quando quota disponível)
-    const configsToTry = [
-      {
-        model: 'gemini-flash-lite-latest',
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1200
-        }
-      },
-      {
-        model: 'gemini-3.1-flash-lite',
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1200
-        }
-      },
-      {
-        model: 'gemini-3.8-flash',
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1200
-        }
+    // Sequência calculada dinamicamente pelo Encaminhamento Inteligente
+    const modelSequence = this.determineRoutingStrategy(textPrompt, imageBase64);
+    const configsToTry = modelSequence.map(item => ({
+      model: item.model,
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 1200
       }
-    ];
+    }));
 
     let lastError = null;
 
