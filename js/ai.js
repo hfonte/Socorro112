@@ -105,13 +105,20 @@ REGRA: Considera estes antecedentes médicos reais para personalizar o diagnóst
       ]
     };
 
-    // Configurações em cascata para garantir fiabilidade máxima:
-    // 1. gemini-3.8-flash (modelo de referência atual) com limite de 1200 tokens (rápido e completo)
-    // 2. gemini-3.8-flash com thinking desligado (se suportado pelo endpoint)
-    // 3. gemini-2.5-flash como alternativa
+    // Configurações em cascata para garantir fiabilidade e evitar limites de quota:
+    // 1. gemini-flash-lite-latest (ultrarrápido, cota ampla no plano gratuito e suporte multimodal)
+    // 2. gemini-3.1-flash-lite (alternativa estável)
+    // 3. gemini-3.8-flash (modelo completo quando quota disponível)
     const configsToTry = [
       {
-        model: 'gemini-3.8-flash',
+        model: 'gemini-flash-lite-latest',
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 1200
+        }
+      },
+      {
+        model: 'gemini-3.1-flash-lite',
         generationConfig: {
           temperature: 0.2,
           maxOutputTokens: 1200
@@ -119,14 +126,6 @@ REGRA: Considera estes antecedentes médicos reais para personalizar o diagnóst
       },
       {
         model: 'gemini-3.8-flash',
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1200,
-          thinkingConfig: { thinkingBudget: 0 }
-        }
-      },
-      {
-        model: 'gemini-2.5-flash',
         generationConfig: {
           temperature: 0.2,
           maxOutputTokens: 1200
