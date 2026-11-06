@@ -1,6 +1,6 @@
 # Cuidar em Emergência · Guia Prático de Primeiros Socorros (PWA)
 
-Aplicação web progressiva (PWA) inclusiva, comunitária e universal para suporte prático a situações de emergência e formação em primeiros socorros. Desenhada para ser acessível a qualquer cidadão, família, cuidadores em ERPI (Estruturas Residenciais para Pessoas Idosas), escolas e formandos, mantendo o mais rigoroso alinhamento com as diretrizes do **Conselho Europeu de Ressuscitação (ERC 2025)** e do **INEM**.
+Aplicação web progressiva (PWA) inclusiva, comunitária e universal para suporte prático a situações de emergência e formação em primeiros socorros. Desenhada para ser acessível a qualquer cidadão, família, cuidadores em ERPI (Estruturas Residenciais para Pessoas Idosas), escolas e formandos, mantendo o mais rigoroso alinhamento com as diretrizes do **Conselho Europeu de Ressuscitação (ERC 2026 / 2025)** e do **INEM**.
 
 ---
 
@@ -15,31 +15,25 @@ Aplicação web progressiva (PWA) inclusiva, comunitária e universal para supor
 - **Triângulo de Avaliação Pediátrica (TAP):** Avaliação de 30-60s da Aparência (TICOS), Trabalho Respiratório e Circulação Cutânea com matriz de decisão clínica.
 - **Sinais Vitais Normais por Faixa Etária:** Seletor interativo para Lactente (<1 ano), Criança Pequena (1-5 anos), Escolar (6-12 anos) e Adolescente (>12 anos) com FC, FR, PAS e notas anatómicas.
 - **Patologias Pediátricas Frequentes:** Crupe / Laringite Estridulosa, Bronquiolite Aguda (VSR), Convulsão Febril, Desidratação Aguda no Bebé, Petéquias / Púrpura (Meningite/Sépsis com Teste da Vitropressão do Copo de Vidro).
-- **Asfixia & SBV Pediátrico ERC 2025:** 5 pancadas + 5 compressões no lactente (Heimlich estritamente proibido), e 5 insuflações iniciais de resgate.
+- **Asfixia & SBV Pediátrico ERC 2026 (PBLS):** 5 pancadas + 5 compressões no lactente (Heimlich estritamente proibido), e 5 insuflações iniciais de resgate.
 
-### 3. Suporte Básico de Vida (SBV) & DAE
-- **Metrónomo Acústico & Visual (110 bpm):** Ritmo rigoroso segundo as normas ERC 2025 para compressões torácicas eficazes (5 a 6 cm).
+### 3. Suporte Básico de Vida (SBV) & DAE • Framework 3-C (ERC 2026)
+- **Framework Oficial 3-C:** Check (Segurança e Consciência/VOS) ➔ Call 112 (Alta-Voz e T-CPR) ➔ Compressions & AED (100-120 bpm e DAE precoce).
+- **Metrónomo Acústico & Visual (110 bpm):** Ritmo sintetizado via Web Audio API para compressões torácicas eficazes (5 a 6 cm).
 - **SBV Adulto (Rácio 30:2):** Temporizador de ciclo e alerta vocal de rotação de reanimadores aos 2 minutos por fadiga muscular, mantendo compressões contínuas sem interrupções.
 - **SBV Pediátrico Especializado:** 5 insuflações iniciais obrigatórias, rácio 15:2 e adaptação da profundidade e técnica (lactente vs criança).
 - **Desfibrilhação Automática Externa (DAE):** Passos guiados para colocação de elétrodos e segurança no choque.
 
-### 4. Obstrução da Via Aérea (OVA / Asfixia)
+### 4. Obstrução da Via Aérea (OVA / Asfixia ERC 2026)
 - **Despiste Tosse Eficaz vs Ineficaz:** Proteção contra manobras intempestivas.
 - **Sequência 5 Pancadas Interescapulares + 5 Compressões de Heimlich.**
-- **Casos Especiais 2025:** Contraindicação formal de Heimlich em lactentes (< 1 ano) e grávidas, substituindo por compressões torácicas.
+- **Casos Especiais 2026:** Contraindicação formal de Heimlich em lactentes (< 1 ano) e grávidas, substituindo por compressões torácicas.
 - **Algoritmo de Perda de Consciência:** Transição imediata para 30 compressões de SBV.
 
-### 4. Protocolos Clínicos de TAS
-- **Dispneia & Falta de Ar:** Posicionamento de Fowler (semi-sentado a 45º), arejamento e sinais de alarme.
-- **Suspeita de AVC:** Escala dos 3 Fs (Face, Força, Fala) e relógio de início de sintomas para ativação da Via Verde AVC.
-- **Trauma & Hemorragia Grave:** Compressão direta, penso compressivo e protocolo de garrote/torniquete comercial (5-7 cm acima da lesão com hora).
-- **Queimaduras:** Cronómetro de arrefecimento com água tépida/fria (15 min), classificação visual (1º, 2º e 3º grau) e proibições clínicas.
-- **Crise Convulsiva & PLS:** Cronómetro de duração de crise, proteção craniana sem prender a língua e Posição Lateral de Segurança pós-crise.
-
-### 5. Motor de IA Multimodal com RAG (Retrieval-Augmented Generation)
-- **Base de Conhecimento Clínica Local:** Indexação direta de 12 módulos oficiais dos Manuais UFCD 9988 / TAS.
-- **Triagem em 4 Blocos Rigorosos:** Diagnóstico, 3 Ações Prioritárias, Proibições Críticas e Conduta 112.
-- **Afunilamento de Triagem com 1 Toque:** Botões interativos de resposta rápida para despiste de gravidade.
+### 5. Motor de IA Multimodal com RAG & Follow-up com Reavaliação Clínica
+- **Base de Conhecimento Clínica Local:** Indexação direta de 21 módulos oficiais dos Manuais UFCD 9988 / TAS / INEM e ERC 2026.
+- **Triagem em 4 Blocos Rigorosos:** Diagnóstico, 3 Ações Prioritárias, Proibições Críticas e Conduta 112 / Linha SNS 24.
+- **Temporizador de Monitorização & Reavaliação Clínica:** Se o algoritmo indicar repouso ou observação, ativa um temporizador configurável (5, 10, 15, 20 min) com aviso sonoro (chime) e questionário interativo de evolução clínica (🟢 Melhorou / 🟡 Mantém-se igual com SNS 24 / 🔴 Piorou com alarme sonoro e escalada 112).
 - **Modo de Contingência:** Se os servidores da Google estiverem offline ou em pico de tráfego, o motor RAG debita as diretrizes diretamente do manual local sem falhar.
 
 ### 6. Ficha Médica ICE (In Case of Emergency) & Partilha Familiar

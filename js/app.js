@@ -1,4 +1,4 @@
-// LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
+// LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2026)
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
       explanation: "A segurança do socorrista e do cenário (P) antecede sempre o alerta (A) e as manobras de socorro direto (S)."
     },
     {
-      question: "Perante um lactente (< 1 ano) com asfixia grave (tosse ineficaz), qual é a conduta correta de desobstrução (ERC 2025)?",
+      question: "Perante um lactente (< 1 ano) com asfixia grave (tosse ineficaz), qual é a conduta correta de desobstrução (ERC 2026)?",
       options: [
         { text: "5 pancadas interescapulares em plano declive alternadas com 5 compressões torácicas; a manobra de Heimlich está estritamente proibida.", isCorrect: true },
         { text: "Manobra de Heimlich imediata com compressões abdominais violentas.", isCorrect: false },
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       explanation: "O TAP é uma ferramenta de impressão geral rápida (30-60 seg) baseada na Aparência (SNC), Trabalho Respiratório e Circulação Cutânea."
     },
     {
-      question: "No Suporte Básico de Vida (SBV) Pediátrico segundo as diretrizes ERC 2025, qual é o primeiro passo obrigatório após confirmar a ausência de respiração?",
+      question: "No Suporte Básico de Vida (SBV) Pediátrico segundo as diretrizes ERC 2026, qual é o primeiro passo obrigatório após confirmar a ausência de respiração?",
       options: [
         { text: "Realizar obrigatoriamente 5 insuflações iniciais de resgate antes das compressões torácicas.", isCorrect: true },
         { text: "Iniciar imediatamente 30 compressões torácicas sem ventilações.", isCorrect: false },
@@ -879,6 +879,87 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
+    // ACOMPANHAMENTO CLÍNICO & FOLLOW-UP (TEMPORIZADOR + REAVALIAÇÃO DE SINTOMAS)
+    const suggestsWaiting = /(aguard|esper|repous|vigia|monitoriz|repouso|minutos|min\b)/i.test(rawText) || isModerateOrMild;
+
+    if (suggestsWaiting && !isCritical) {
+      let defaultMins = 10;
+      if (/15\s*(minutos|min)/i.test(rawText)) defaultMins = 15;
+      else if (/20\s*(minutos|min)/i.test(rawText)) defaultMins = 20;
+      else if (/5\s*(minutos|min)/i.test(rawText)) defaultMins = 5;
+
+      formattedHtml += `
+        <div class="mt-4 p-3.5 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/50 rounded-2xl shadow-lg" id="triage-followup-card">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">⏱️</span>
+              <div>
+                <strong class="text-xs text-white block font-bold">Acompanhamento &amp; Reavaliação Clínica</strong>
+                <p class="text-[11px] text-indigo-200">Recomendado aguardar e vigiar a evolução dos sintomas.</p>
+              </div>
+            </div>
+            <span class="text-[10px] text-indigo-300 font-bold bg-indigo-950 px-2 py-0.5 rounded border border-indigo-700/60" id="followup-badge">Em Espera</span>
+          </div>
+
+          <!-- CONTROLOS DO TEMPORIZADOR -->
+          <div id="followup-timer-section" class="my-2.5 p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-center">
+            <div class="text-[11px] text-slate-400 mb-1">Tempo de Observação &amp; Repouso:</div>
+            <div class="text-3xl font-black font-mono text-yellow-400 mb-2 tracking-wider" id="followup-timer-display" data-seconds="${defaultMins * 60}">
+              ${String(defaultMins).padStart(2, '0')}:00
+            </div>
+            
+            <div class="flex items-center justify-center gap-2">
+              <button type="button" id="btn-start-followup-timer" class="py-1.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow cursor-pointer transition">
+                <span>▶️</span> <span id="label-start-timer">Iniciar Temporizador</span>
+              </button>
+              <button type="button" id="btn-skip-to-reassess" class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg border border-slate-700 cursor-pointer transition">
+                <span>⏩</span> Reavaliar Já
+              </button>
+            </div>
+
+            <!-- PRESETS DE TEMPO -->
+            <div class="flex items-center justify-center gap-2 mt-2 pt-2 border-t border-slate-800 text-[10px] text-slate-400">
+              <span>Duração:</span>
+              <button type="button" class="btn-time-preset px-2 py-0.5 rounded ${defaultMins === 5 ? 'bg-sky-950 text-sky-200 border border-sky-600' : 'bg-slate-900 text-sky-300 border border-slate-700'}" data-mins="5">5 min</button>
+              <button type="button" class="btn-time-preset px-2 py-0.5 rounded ${defaultMins === 10 ? 'bg-sky-950 text-sky-200 border border-sky-600' : 'bg-slate-900 text-sky-300 border border-slate-700'}" data-mins="10">10 min</button>
+              <button type="button" class="btn-time-preset px-2 py-0.5 rounded ${defaultMins === 15 ? 'bg-sky-950 text-sky-200 border border-sky-600' : 'bg-slate-900 text-sky-300 border border-slate-700'}" data-mins="15">15 min</button>
+              <button type="button" class="btn-time-preset px-2 py-0.5 rounded ${defaultMins === 20 ? 'bg-sky-950 text-sky-200 border border-sky-600' : 'bg-slate-900 text-sky-300 border border-slate-700'}" data-mins="20">20 min</button>
+            </div>
+          </div>
+
+          <!-- QUESTIONÁRIO DE REAVALIAÇÃO CLÍNICA -->
+          <div id="followup-questionnaire" class="hidden my-2 p-3 bg-slate-950 border border-indigo-500/70 rounded-xl space-y-2">
+            <div class="flex items-center gap-1.5 text-amber-300 font-bold text-xs">
+              <span>🔔</span> <span>Reavaliação dos Sintomas: Como se encontra a vítima?</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              Decorrido o período de observação e repouso, indique a evolução dos sintomas:
+            </p>
+
+            <div class="space-y-1.5">
+              <button type="button" class="btn-followup-option w-full py-2 px-2.5 bg-emerald-950/70 hover:bg-emerald-900 text-emerald-200 border border-emerald-600/60 rounded-xl text-left text-xs font-semibold flex items-center justify-between cursor-pointer transition" data-outcome="improved">
+                <span>🟢 Melhorou visivelmente (sintomas aliviaram / respiração calma)</span>
+                <span class="text-xs">➔</span>
+              </button>
+              
+              <button type="button" class="btn-followup-option w-full py-2 px-2.5 bg-yellow-950/60 hover:bg-yellow-900 text-yellow-200 border border-yellow-600/60 rounded-xl text-left text-xs font-semibold flex items-center justify-between cursor-pointer transition" data-outcome="unchanged">
+                <span>🟡 Mantém-se igual (sintomas persistem sem qualquer alívio)</span>
+                <span class="text-xs">➔</span>
+              </button>
+
+              <button type="button" class="btn-followup-option w-full py-2 px-2.5 bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-600 rounded-xl text-left text-xs font-bold flex items-center justify-between cursor-pointer transition" data-outcome="worsened">
+                <span>🔴 Piorou / Novos sinais (prostração, dor forte, falta de ar, desmaio)</span>
+                <span class="text-xs">➔</span>
+              </button>
+            </div>
+
+            <!-- RESPOSTA E CONDUTA DO FOLLOW-UP -->
+            <div id="followup-outcome-display" class="hidden mt-3"></div>
+          </div>
+        </div>
+      `;
+    }
+
     return formattedHtml;
   }
 
@@ -923,6 +1004,9 @@ document.addEventListener('DOMContentLoaded', () => {
               btnAskAI.click();
             });
           });
+
+          // Inicializar temporizador e questionário de follow-up
+          initFollowupTimerListeners();
         }
       } catch (err) {
         if (aiResponseBox) {
@@ -936,6 +1020,206 @@ document.addEventListener('DOMContentLoaded', () => {
           btnAskAI.textContent = '🔍 Analisar com Diretrizes Médicas';
         }
       }
+    });
+  }
+
+  // ========================================================
+  // LÓGICA DE FOLLOW-UP COM TEMPORIZADOR E REAVALIAÇÃO
+  // ========================================================
+  let followupTimerInterval = null;
+  let followupRemainingSeconds = 600;
+  let followupTimerRunning = false;
+
+  function initFollowupTimerListeners() {
+    const card = document.getElementById('triage-followup-card');
+    if (!card) return;
+
+    const display = document.getElementById('followup-timer-display');
+    const btnStart = document.getElementById('btn-start-followup-timer');
+    const btnSkip = document.getElementById('btn-skip-to-reassess');
+    const badge = document.getElementById('followup-badge');
+    const questionnaire = document.getElementById('followup-questionnaire');
+    const outcomeDisplay = document.getElementById('followup-outcome-display');
+    const presetBtns = card.querySelectorAll('.btn-time-preset');
+    const outcomeBtns = card.querySelectorAll('.btn-followup-option');
+
+    if (display) {
+      followupRemainingSeconds = parseInt(display.dataset.seconds, 10) || 600;
+    }
+    followupTimerRunning = false;
+    if (followupTimerInterval) {
+      clearInterval(followupTimerInterval);
+      followupTimerInterval = null;
+    }
+
+    function updateDisplay() {
+      if (!display) return;
+      const mins = Math.floor(followupRemainingSeconds / 60);
+      const secs = followupRemainingSeconds % 60;
+      display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function finishTimer() {
+      if (followupTimerInterval) {
+        clearInterval(followupTimerInterval);
+        followupTimerInterval = null;
+      }
+      followupTimerRunning = false;
+      if (display) display.textContent = '00:00';
+      if (btnStart) {
+        btnStart.innerHTML = '<span>✅</span> Concluído';
+        btnStart.classList.replace('bg-emerald-600', 'bg-slate-700');
+        btnStart.disabled = true;
+      }
+      if (badge) {
+        badge.textContent = '🔔 Reavaliar';
+        badge.className = 'text-[10px] text-amber-300 font-bold bg-amber-950 px-2 py-0.5 rounded border border-amber-600 animate-pulse';
+      }
+      if (questionnaire) {
+        questionnaire.classList.remove('hidden');
+        questionnaire.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      if (typeof AudioManager !== 'undefined' && AudioManager.playChime) {
+        AudioManager.playChime();
+        AudioManager.speak('Tempo de observação concluído. Por favor reavalie os sintomas da vítima.');
+      }
+    }
+
+    presetBtns.forEach(pBtn => {
+      pBtn.addEventListener('click', () => {
+        if (followupTimerRunning) return;
+        presetBtns.forEach(b => {
+          b.classList.remove('bg-sky-950', 'text-sky-200', 'border-sky-600');
+          b.classList.add('bg-slate-900', 'text-sky-300', 'border-slate-700');
+        });
+        pBtn.classList.remove('bg-slate-900', 'text-sky-300', 'border-slate-700');
+        pBtn.classList.add('bg-sky-950', 'text-sky-200', 'border-sky-600');
+
+        const m = parseInt(pBtn.dataset.mins, 10) || 10;
+        followupRemainingSeconds = m * 60;
+        updateDisplay();
+      });
+    });
+
+    if (btnStart) {
+      btnStart.addEventListener('click', () => {
+        if (!followupTimerRunning) {
+          followupTimerRunning = true;
+          btnStart.innerHTML = '<span>⏸️</span> Pausar';
+          btnStart.classList.replace('bg-emerald-600', 'bg-amber-600');
+          if (badge) {
+            badge.textContent = '⏱️ Em Contagem';
+            badge.className = 'text-[10px] text-sky-300 font-bold bg-sky-950 px-2 py-0.5 rounded border border-sky-600';
+          }
+          followupTimerInterval = setInterval(() => {
+            if (followupRemainingSeconds > 0) {
+              followupRemainingSeconds--;
+              updateDisplay();
+            } else {
+              finishTimer();
+            }
+          }, 1000);
+        } else {
+          followupTimerRunning = false;
+          if (followupTimerInterval) clearInterval(followupTimerInterval);
+          btnStart.innerHTML = '<span>▶️</span> Retomar';
+          btnStart.classList.replace('bg-amber-600', 'bg-emerald-600');
+          if (badge) badge.textContent = 'Pausa';
+        }
+      });
+    }
+
+    if (btnSkip) {
+      btnSkip.addEventListener('click', () => {
+        finishTimer();
+      });
+    }
+
+    outcomeBtns.forEach(oBtn => {
+      oBtn.addEventListener('click', () => {
+        const outcome = oBtn.dataset.outcome;
+        outcomeBtns.forEach(b => b.classList.remove('ring-2', 'ring-white'));
+        oBtn.classList.add('ring-2', 'ring-white');
+
+        if (!outcomeDisplay) return;
+        outcomeDisplay.classList.remove('hidden');
+
+        if (outcome === 'worsened') {
+          if (typeof AudioManager !== 'undefined' && AudioManager.playAlarmTone) {
+            AudioManager.playAlarmTone();
+          }
+          outcomeDisplay.innerHTML = `
+            <div class="p-3 bg-red-950 border border-red-500 rounded-xl text-red-200 space-y-2">
+              <strong class="text-white text-sm block font-black flex items-center gap-1.5">
+                <span>🚨</span> AGRAVAMENTO CLÍNICO: LIGAR 112 DE IMEDIATO!
+              </strong>
+              <p class="text-[11px] leading-relaxed">
+                A ausência de resposta ao repouso e o surgimento de novos sintomas indicam que a situação <strong>já não é segura para manter em casa</strong>.
+              </p>
+              <div class="p-2 bg-slate-950 border border-red-600/70 rounded-lg text-[11px] text-yellow-300">
+                <strong>Cábula ao 112:</strong> «Vítima em agravamento clínico progressivo após observação inicial de sintomas, apresentando piora acentuada / novos sinais de alarme.»
+              </div>
+              <a href="tel:112" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-red-900/60 flex items-center justify-center gap-2 mt-2 animate-pulse">
+                <span>🚨</span> LIGAR 112 AGORA (Emergência INEM)
+              </a>
+              <button type="button" class="btn-ask-ai-followup w-full mt-2 py-2 bg-slate-900 hover:bg-slate-800 text-yellow-300 text-[11px] rounded-lg border border-yellow-600/50 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span>🤖</span> Reavaliar Sintomas Pormenorizados com a IA
+              </button>
+            </div>
+          `;
+        } else if (outcome === 'unchanged') {
+          outcomeDisplay.innerHTML = `
+            <div class="p-3 bg-amber-950/80 border border-amber-600/70 rounded-xl text-amber-200 space-y-2">
+              <strong class="text-yellow-300 text-sm block font-bold flex items-center gap-1.5">
+                <span>📞</span> Sintomas Persistentes: Contactar Linha SNS 24 (808 24 24 24)
+              </strong>
+              <p class="text-[11px] leading-relaxed">
+                Os sintomas mantêm-se inalterados após o período de repouso. É necessária <strong>triagem telefónica profissional por um enfermeiro do SNS 24</strong> para encaminhamento adequado para Centro de Saúde ou consulta.
+              </p>
+              <a href="tel:808242424" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-emerald-900/60 flex items-center justify-center gap-2 mt-2">
+                <span>📞</span> LIGAR LINHA SNS 24 (808 24 24 24)
+              </a>
+              <button type="button" class="btn-ask-ai-followup w-full mt-2 py-2 bg-slate-900 hover:bg-slate-800 text-yellow-300 text-[11px] rounded-lg border border-yellow-600/50 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span>🤖</span> Reavaliar Sintomas com a IA
+              </button>
+            </div>
+          `;
+        } else if (outcome === 'improved') {
+          outcomeDisplay.innerHTML = `
+            <div class="p-3 bg-emerald-950/80 border border-emerald-600/70 rounded-xl text-emerald-200 space-y-2">
+              <strong class="text-emerald-300 text-sm block font-bold flex items-center gap-1.5">
+                <span>🟢</span> Evolução Favorável Registada
+              </strong>
+              <p class="text-[11px] leading-relaxed">
+                A redução ou alívio dos sintomas é um indicador clínico positivo. Mantenha a vítima em repouso confortável, com hidratação oral fracionada se tolerada.
+              </p>
+              <p class="text-[10px] text-slate-300 italic">
+                Nota de segurança: Se os sintomas reaparecerem nas próximas horas ou se surgir nova fraqueza, contacte a Linha SNS 24 (808 24 24 24).
+              </p>
+              <button type="button" class="btn-ask-ai-followup w-full mt-2 py-2 bg-slate-900 hover:bg-slate-800 text-emerald-300 text-[11px] rounded-lg border border-emerald-600/50 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span>🤖</span> Atualizar a Triagem com a IA
+              </button>
+            </div>
+          `;
+        }
+
+        const btnFollowupAI = outcomeDisplay.querySelector('.btn-ask-ai-followup');
+        if (btnFollowupAI) {
+          btnFollowupAI.addEventListener('click', () => {
+            const outcomeLabels = {
+              improved: 'Vítima melhorou visivelmente dos sintomas após repouso',
+              unchanged: 'Sintomas mantêm-se iguais sem melhorias após período de espera',
+              worsened: 'Vítima piorou e surgiram novos sinais de alarme após o período de espera'
+            };
+            if (aiTextPrompt) {
+              aiTextPrompt.value += `\n[Follow-up de Triagem: ${outcomeLabels[outcome]}]`;
+              if (btnAskAI) btnAskAI.click();
+            }
+          });
+        }
+
+        outcomeDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
     });
   }
 

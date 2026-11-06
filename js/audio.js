@@ -99,6 +99,51 @@ const AudioManager = {
     utterance.lang = 'pt-PT';
     utterance.rate = 1.05;
     window.speechSynthesis.speak(utterance);
+  },
+
+  playChime() {
+    this.initContext();
+    if (!this.audioCtx) return;
+    const now = this.audioCtx.currentTime;
+    [523.25, 659.25, 783.99].forEach((freq, idx) => {
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+      gain.gain.setValueAtTime(0.001, now + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.3, now + idx * 0.12 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      osc.start(now + idx * 0.12);
+      osc.stop(now + idx * 0.12 + 0.4);
+    });
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([100, 50, 100]); } catch (_) {}
+    }
+  },
+
+  playAlarmTone() {
+    this.initContext();
+    if (!this.audioCtx) return;
+    const now = this.audioCtx.currentTime;
+    for (let i = 0; i < 3; i++) {
+      const t = now + i * 0.22;
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(880, t);
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.exponentialRampToValueAtTime(0.4, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.18);
+    }
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([200, 100, 200]); } catch (_) {}
+    }
   }
 };
 
