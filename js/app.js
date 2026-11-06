@@ -32,6 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.geo-coords-display').forEach(el => el.textContent = `${loc.lat || '--'}, ${loc.lon || '--'}`);
     document.querySelectorAll('.geo-landmark-display').forEach(el => el.textContent = loc.landmark);
     document.querySelectorAll('.geo-codu-script').forEach(el => el.textContent = GeoManager.getCoduSpeechScript('Emergência Médica / Traumatismo'));
+
+    // Atualizar links para Google Maps centrado nas coordenadas
+    if (loc.lat && loc.lon) {
+      const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=empresas+ou+lojas&center=${loc.lat},${loc.lon}`;
+      const btnGmaps = document.getElementById('btn-open-gmaps');
+      const modalGmaps = document.getElementById('modal-gmaps-link');
+      if (btnGmaps) btnGmaps.href = gmapsUrl;
+      if (modalGmaps) modalGmaps.href = gmapsUrl;
+    }
   }
 
   // NAVEGAÇÃO DE ECRÃS
@@ -1064,14 +1073,15 @@ document.addEventListener('DOMContentLoaded', () => {
       : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || '') : '');
 
     let locLine = '';
+    const refClean = loc.landmark && !loc.landmark.includes('A calcular') ? ` (Ref: ${loc.landmark})` : '';
     if (lat && lon) {
       const latShort = Number(lat).toFixed(4);
       const lonShort = Number(lon).toFixed(4);
       const mapPinUrl = `https://maps.google.com/?q=${latShort},${lonShort}`;
-      const addressShort = address ? `\n📍 Local: ${address}` : '';
+      const addressShort = address ? `\n📍 Local: ${address}${refClean}` : '';
       locLine = `${addressShort}\n🗺️ Ver no Mapa: ${mapPinUrl}`;
     } else if (address) {
-      locLine = `\n📍 Local: ${address}`;
+      locLine = `\n📍 Local: ${address}${refClean}`;
     }
 
     const patientName = ice.name || 'Eu';
@@ -1367,6 +1377,93 @@ document.addEventListener('DOMContentLoaded', () => {
   if (modalPocketGuide) {
     modalPocketGuide.addEventListener('click', (e) => {
       if (e.target === modalPocketGuide) closePocketGuide();
+    });
+  }
+
+  // ========================================================
+  // GESTÃO & EDIÇÃO DE PONTO DE REFERÊNCIA / EMPRESAS PRÓXIMAS
+  // ========================================================
+  const modalEditLandmark = document.getElementById('modal-edit-landmark');
+  const btnEditLandmark = document.getElementById('btn-edit-landmark');
+  const btnQuickEditRef = document.getElementById('btn-quick-edit-ref');
+  const geoLandmarkLabel = document.getElementById('geo-landmark-label');
+  const btnCloseEditLandmark = document.getElementById('btn-close-edit-landmark');
+  const btnCancelLandmark = document.getElementById('btn-cancel-landmark');
+  const btnSaveLandmark = document.getElementById('btn-save-landmark');
+  const inputCustomLandmark = document.getElementById('input-custom-landmark');
+  const boxNearbyPois = document.getElementById('box-nearby-pois');
+  const listNearbyPois = document.getElementById('list-nearby-pois');
+
+  function openEditLandmarkModal() {
+    if (!modalEditLandmark) return;
+    const currentRef = GeoManager.currentLocation.landmark;
+    if (inputCustomLandmark) {
+      inputCustomLandmark.value = (currentRef && !currentRef.includes('A calcular')) ? currentRef : '';
+    }
+
+    // Renderizar POIs / Empresas detetadas nas redondezas
+    const pois = GeoManager.currentLocation.nearbyPOIs || [];
+    if (boxNearbyPois && listNearbyPois) {
+      if (pois.length > 0) {
+        boxNearbyPois.classList.remove('hidden');
+        listNearbyPois.innerHTML = pois.map(p => `
+          <button type="button" class="w-full text-left py-1 px-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded text-[11px] text-sky-300 flex items-center justify-between cursor-pointer btn-pick-poi" data-name="${p.name}">
+            <span>🏢 ${p.name}</span>
+            <span class="text-[9px] text-slate-500">Escolher</span>
+          </button>
+        `).join('');
+
+        listNearbyPois.querySelectorAll('.btn-pick-poi').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (inputCustomLandmark) {
+              inputCustomLandmark.value = `Junto a ${btn.dataset.name}`;
+            }
+          });
+        });
+      } else {
+        boxNearbyPois.classList.add('hidden');
+      }
+    }
+
+    modalEditLandmark.classList.remove('hidden');
+    if (inputCustomLandmark) inputCustomLandmark.focus();
+  }
+
+  function closeEditLandmarkModal() {
+    if (modalEditLandmark) modalEditLandmark.classList.add('hidden');
+  }
+
+  if (btnEditLandmark) btnEditLandmark.addEventListener('click', openEditLandmarkModal);
+  if (btnQuickEditRef) btnQuickEditRef.addEventListener('click', openEditLandmarkModal);
+  if (geoLandmarkLabel) geoLandmarkLabel.addEventListener('click', openEditLandmarkModal);
+  if (btnCloseEditLandmark) btnCloseEditLandmark.addEventListener('click', closeEditLandmarkModal);
+  if (btnCancelLandmark) btnCancelLandmark.addEventListener('click', closeEditLandmarkModal);
+
+  // Chips com prefixos rápidos
+  document.querySelectorAll('.btn-ref-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const prefix = chip.dataset.prefix || '';
+      if (inputCustomLandmark) {
+        inputCustomLandmark.value = prefix;
+        inputCustomLandmark.focus();
+      }
+    });
+  });
+
+  if (btnSaveLandmark) {
+    btnSaveLandmark.addEventListener('click', () => {
+      const val = inputCustomLandmark ? inputCustomLandmark.value.trim() : '';
+      if (val) {
+        GeoManager.setCustomLandmark(val);
+        updateGeoUI(GeoManager.currentLocation);
+      }
+      closeEditLandmarkModal();
+    });
+  }
+
+  if (modalEditLandmark) {
+    modalEditLandmark.addEventListener('click', (e) => {
+      if (e.target === modalEditLandmark) closeEditLandmarkModal();
     });
   }
 
