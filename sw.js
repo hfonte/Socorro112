@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuidar-emergencia-v26';
+const CACHE_NAME = 'cuidar-emergencia-v27';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS_TO_CACHE = [
   './js/knowledge_base.js',
   './js/rag.js',
   './js/ai.js',
+  'https://cdn.tailwindcss.com/3.4.17',
   './assets/images/estrela_da_vida.jpg',
   './assets/images/cadeia_sobrevivencia.png',
   './assets/images/sbv_consciencia.png',
@@ -66,14 +67,14 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request, { ignoreSearch: true }).then((cached) => cached || caches.match('./index.html')))
     );
     return;
   }
 
   // Para imagens e restantes ficheiros estáticos: Cache-First
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       return cachedResponse || fetch(event.request).catch(() => {
         return caches.match('./index.html');
       });
