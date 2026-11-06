@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#0b1120">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Socorro 112 · Protocolos TAS &amp; Suporte Básico de Vida</title>
+  <title>Protocolo TAS · Guia Clínico Pré-Hospitalar &amp; Emergência</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/styles.css?v=25">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
 </head>
 <body>
@@ -19,7 +19,7 @@
     <header class="top-header">
       <div class="brand">
         <img src="./assets/images/estrela_da_vida.jpg" alt="Estrela da Vida" class="brand-icon">
-        <span>SOCORRO 112 · TAS</span>
+        <span>PROTOCOLO TAS</span>
       </div>
       <a href="tel:112" class="btn-header-112">
         <span>📞 LIGAR 112</span>
@@ -109,12 +109,21 @@
           </div>
         </button>
 
-        <!-- NOVO BOTAO GIGANTE DE DISPNEIA / FALTA DE AR -->
+        <!-- BOTAO DE DISPNEIA / FALTA DE AR -->
         <button type="button" data-nav="screen-dyspnea" class="btn-emergency-action btn-dyspnea">
           <span class="text-3xl">🫁</span>
           <div>
             <span class="text-lg block font-black">3. DISPNEIA / FALTA DE AR AGUDA</span>
             <span class="text-xs font-normal opacity-90 block">Dificuldade respiratória grave ➔ Posicionar sentado, arejar, O2 e sinais de alarme</span>
+          </div>
+        </button>
+
+        <!-- NOVO BOTAO GIGANTE DE PEDIATRIA E LACTENTES -->
+        <button type="button" data-nav="screen-pediatria" class="btn-emergency-action btn-pediatria">
+          <span class="text-3xl">👶</span>
+          <div>
+            <span class="text-lg block font-black">4. PEDIATRIA &amp; LACTENTES</span>
+            <span class="text-xs font-normal opacity-90 block">Triângulo Pediátrico (TAP), Sinais Vitais Normais &amp; Patologias Agudas</span>
           </div>
         </button>
 
@@ -353,6 +362,307 @@
 
           <a href="tel:112" class="action bg-red-600 text-white font-black text-xs w-full py-3 mt-3 block text-center">
             📞 LIGAR 112 AGORA COM DISPNEIA GRAVE
+          </a>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- ECRÃ: PEDIATRIA & LACTENTES (INEM & ERC 2025)            -->
+      <!-- ======================================================== -->
+      <section id="screen-pediatria" class="screen-view">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">👶</span>
+            <div>
+              <h2 class="text-xl font-black text-white">Pediatria &amp; Lactentes</h2>
+              <span class="text-[10px] text-sky-400 font-bold block uppercase tracking-wider">Protocolo TAS • INEM &amp; ERC 2025</span>
+            </div>
+          </div>
+          <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-700">Voltar</button>
+        </div>
+
+        <!-- PRINCÍPIO FUNDAMENTAL: CRIANÇA NÃO É ADULTO PEQUENO -->
+        <div class="p-3 bg-gradient-to-r from-sky-950/80 to-blue-950/80 border border-sky-500/60 rounded-xl mb-3 shadow-md">
+          <div class="flex items-start gap-2.5">
+            <span class="text-xl flex-shrink-0">⚠️</span>
+            <div class="text-xs">
+              <strong class="text-sky-300 font-bold block text-[13px] mb-0.5">Regra de Ouro Pediátrica:</strong>
+              <p class="text-slate-200 leading-relaxed text-[11px]">
+                A criança não é um adulto pequeno. <strong>Cerca de 90% das paragens cardiorrespiratórias em pediatria têm causa respiratória / hipóxica</strong> (e não cardíaca). A identificação precoce do esforço respiratório e da má perfusão salva vidas antes de ocorrer a PCR!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. TRIÂNGULO DE AVALIAÇÃO PEDIÁTRICA (TAP) -->
+        <div class="card border-sky-500/50 bg-slate-900/90 mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="card-title text-sm text-sky-400 flex items-center gap-1.5">
+              <span>📐</span> 1. Triângulo de Avaliação Pediátrica (TAP)
+            </h3>
+            <span class="text-[10px] bg-sky-950 border border-sky-600 text-sky-300 px-2 py-0.5 rounded-full font-mono font-bold">30 a 60 seg • Sem Tocar</span>
+          </div>
+          <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+            Avaliação visual e auditiva rápida, idealmente ao colo do cuidador para não agitar a criança:
+          </p>
+
+          <div class="space-y-2.5">
+            <!-- LADO 1: APARÊNCIA -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1.5">
+                <strong class="text-yellow-400 text-xs uppercase flex items-center gap-1">
+                  <span>🧠</span> Lado 1: APARÊNCIA (Mnemónica TICOS)
+                </strong>
+                <span class="text-[10px] text-slate-400 font-semibold">Reflete o SNC e Oxigenação Cerebral</span>
+              </div>
+              <ul class="text-[11px] text-slate-300 space-y-1 pl-1">
+                <li>• <strong>T (Tónus):</strong> Movimenta braços/pernas com vigor ou está hipotónico/flácido ("boneco de trapos")?</li>
+                <li>• <strong>I (Interatividade):</strong> Alerta, fixa o cuidador, procura brinquedos ou está apático/alheio?</li>
+                <li>• <strong>C (Consolabilidade):</strong> Acalma no colo dos pais ou chora de forma inconsolável/sem parar?</li>
+                <li>• <strong>O (Olhar):</strong> Fixa as pessoas ou tem olhar perdido, vago e vidrado?</li>
+                <li>• <strong>S (Sons / Fala / Choro):</strong> Choro forte e claro ou fraco, rouco, queixoso ou ausente?</li>
+              </ul>
+            </div>
+
+            <!-- LADO 2: TRABALHO RESPIRATÓRIO -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1.5">
+                <strong class="text-sky-300 text-xs uppercase flex items-center gap-1">
+                  <span>🫁</span> Lado 2: TRABALHO RESPIRATÓRIO
+                </strong>
+                <span class="text-[10px] text-slate-400 font-semibold">Reflete o Esforço Ventilatório</span>
+              </div>
+              <ul class="text-[11px] text-slate-300 space-y-1 pl-1">
+                <li>• <strong>Tiragem:</strong> Músculos intercostais, subcostais ou na base do pescoço afundados com esforço.</li>
+                <li>• <strong>Batimento das Asas do Nariz:</strong> Narinas a abrir amplamente a cada inspiração.</li>
+                <li>• <strong>Balanceio da Cabeça (Head Bobbing):</strong> No lactente, a cabeça oscila para a frente ao inspirar.</li>
+                <li>• <strong>Ruídos Anormais:</strong> Estridor inspiratório ("garganta apertada"), pieira ("assobio") ou gemido expiratório.</li>
+                <li>• <strong class="text-red-400">⚠️ ALERTA EXTREMO:</strong> Bradipneia (respiração lenta e irregular) com exaustão indica <u>paragem respiratória iminente</u>!</li>
+              </ul>
+            </div>
+
+            <!-- LADO 3: CIRCULAÇÃO CUTÂNEA -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1.5">
+                <strong class="text-red-400 text-xs uppercase flex items-center gap-1">
+                  <span>❤️</span> Lado 3: CIRCULAÇÃO CUTÂNEA
+                </strong>
+                <span class="text-[10px] text-slate-400 font-semibold">Reflete o Débito Cardíaco e Perfusão</span>
+              </div>
+              <ul class="text-[11px] text-slate-300 space-y-1 pl-1">
+                <li>• <strong>Palidez:</strong> Perda da cor rosada nas bochechas, lábios e mucosas.</li>
+                <li>• <strong>Pele Mosqueada / Marmoreada:</strong> Aspeto rendilhado ou arroxeado (livedo reticular).</li>
+                <li>• <strong>Cianose:</strong> Pele ou lábios azulados (sinal tardio de choque hipóxico grave).</li>
+                <li>• <strong>Tempo de Preenchimento Capilar (TPC):</strong> Pressionar o esterno durante 5 segundos e soltar: se demorar <strong>mais de 2 segundos</strong> a voltar à cor rosada, há má perfusão periférica.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- MATRIZ DE DECISÃO CLÍNICA DO TAP -->
+          <div class="mt-3 p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="text-[11px] text-yellow-300 font-bold block mb-1.5">🚦 Interpretação e Decisão Clínica do TAP:</span>
+            <div class="space-y-1.5 text-[11px]">
+              <div class="flex items-center justify-between p-1.5 bg-emerald-950/50 border border-emerald-600/40 rounded-lg text-emerald-200">
+                <span><strong>Estável:</strong> 3 lados normais</span>
+                <span class="text-[10px] bg-emerald-900/80 px-2 py-0.5 rounded font-semibold">Triagem e vigilância</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-yellow-950/50 border border-yellow-600/40 rounded-lg text-yellow-200">
+                <span><strong>Dificuldade Respiratória:</strong> A normal | B alterado | C normal</span>
+                <span class="text-[10px] bg-yellow-900/80 px-2 py-0.5 rounded font-semibold">Conforto + Oxigénio</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-red-950/60 border border-red-600/50 rounded-lg text-red-200">
+                <span><strong>Falência Respiratória:</strong> A alterado + B alterado</span>
+                <span class="text-[10px] bg-red-900 px-2 py-0.5 rounded font-bold animate-pulse">🚨 112 + Ventilar</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-amber-950/50 border border-amber-600/40 rounded-lg text-amber-200">
+                <span><strong>Choque Compensado:</strong> A normal | B normal | C alterado</span>
+                <span class="text-[10px] bg-amber-900 px-2 py-0.5 rounded font-semibold">Aquecer + 112</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-red-950/70 border border-red-500 rounded-lg text-red-100">
+                <span><strong>Choque Descompensado:</strong> A alterado + C alterado</span>
+                <span class="text-[10px] bg-red-700 px-2 py-0.5 rounded font-black animate-pulse">🚨 112 IMEDIATO</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-purple-950/50 border border-purple-600/40 rounded-lg text-purple-200">
+                <span><strong>Disfunção do SNC:</strong> A alterado | B normal | C normal</span>
+                <span class="text-[10px] bg-purple-900 px-2 py-0.5 rounded font-semibold">Glicose / Tóxicos</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-rose-950 border border-rose-500 rounded-lg text-rose-100">
+                <span><strong>Falência Cardiorrespiratória:</strong> TODOS os 3 lados alterados</span>
+                <span class="text-[10px] bg-rose-600 px-2 py-0.5 rounded font-black">112 + SBV (5 insufl.)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. SELETOR INTERATIVO DE SINAIS VITAIS NORMAIS PEDIÁTRICOS -->
+        <div class="card border-slate-700 bg-slate-900/90 mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="card-title text-sm text-sky-400 flex items-center gap-1.5">
+              <span>📊</span> 2. Sinais Vitais Normais por Idade (INEM)
+            </h3>
+            <span class="text-[10px] text-slate-400">Toque na faixa etária:</span>
+          </div>
+
+          <!-- BOTOES DE FAIXA ETARIA -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-3">
+            <button type="button" class="pediatric-chip active" data-age="lactente">👶 Lactente (&lt;1 ano)</button>
+            <button type="button" class="pediatric-chip" data-age="pequena">🧒 1 a 5 anos</button>
+            <button type="button" class="pediatric-chip" data-age="escolar">🎒 6 a 12 anos</button>
+            <button type="button" class="pediatric-chip" data-age="adolescente">🧑 &gt;12 anos</button>
+          </div>
+
+          <!-- PAINEL DINÂMICO DE VALORES DE REFERÊNCIA -->
+          <div id="pediatric-vitals-display" class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-slate-400">Frequência Cardíaca (FC em repouso):</span>
+              <strong id="ped-vitals-fc" class="text-emerald-400 font-mono text-sm">100 - 150 bpm</strong>
+            </div>
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-slate-400">Frequência Respiratória (FR):</span>
+              <strong id="ped-vitals-fr" class="text-sky-400 font-mono text-sm">30 - 50 cpm</strong>
+            </div>
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-slate-400">Tensão Arterial Sistólica Mínima:</span>
+              <strong id="ped-vitals-pas" class="text-yellow-400 font-mono text-sm">&gt; 70 mmHg (PAS)</strong>
+            </div>
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-slate-400">Tempo de Preenchimento Capilar (TPC):</span>
+              <strong class="text-white font-mono text-xs">&lt; 2 segundos</strong>
+            </div>
+            <div class="pt-1 text-[11px] text-slate-300" id="ped-vitals-notes">
+              • <strong>Particularidades do Lactente:</strong> Cabeça occipital volumosa (colocar toalha dobrada sob o tronco para manter eixo neutro); via aérea afunilada em funil; respiração quase exclusivamente diafragmática.
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. PATOLOGIAS PEDIÁTRICAS MAIS COMUNS (SINAIS E CONDUTA) -->
+        <div class="card border-slate-700 bg-slate-900/90 mb-3">
+          <h3 class="card-title text-sm text-yellow-400 flex items-center gap-1.5 mb-2.5">
+            <span>🩺</span> 3. Patologias Pediátricas Frequentes &amp; Atuação Imediata
+          </h3>
+
+          <div class="space-y-3 text-xs">
+            <!-- CRUPE / LARINGITE -->
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-sky-300 text-xs flex items-center gap-1.5">
+                  <span>🐕</span> Laringite Estridulosa (Crupe / Falso Crupe)
+                </strong>
+                <span class="text-[10px] text-amber-300 font-semibold bg-amber-950/60 px-2 py-0.5 rounded">6 meses a 3 anos</span>
+              </div>
+              <p class="text-[11px] text-slate-300 mb-1.5">
+                • <strong>Sinais Patognomónicos:</strong> Tosse ladrante (típica "tosse de cão" ou de foca), rouquidão, estridor inspiratório agudo ao chorar ou em repouso. Piora habitual a meio da noite.
+              </p>
+              <div class="text-[11px] text-emerald-300 bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/40">
+                ➔ <strong>Conduta do Socorrista / TAS:</strong> Manter a criança calminha no colo do cuidador (o pânico e o choro aumentam o inchaço laríngeo!). Expor ao ar fresco e húmido da janela/rua ou vapor de água morna. <u>PROIBIÇÃO ABSOLUTA:</u> NUNCA examinar a orofaringe nem colocar espátulas/colher na boca (risco de espasmo reflexo com fecho total da glote!). Ligar 112 se houver estridor em repouso ou tiragem grave.
+              </div>
+            </div>
+
+            <!-- BRONQUIOLITE AGUDA -->
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-sky-300 text-xs flex items-center gap-1.5">
+                  <span>🍼</span> Bronquiolite Aguda (Lactentes &lt; 2 anos)
+                </strong>
+                <span class="text-[10px] text-sky-300 font-semibold bg-sky-950/60 px-2 py-0.5 rounded">Vírus VSR</span>
+              </div>
+              <p class="text-[11px] text-slate-300 mb-1.5">
+                • <strong>Sinais Patognomónicos:</strong> Começa com corrimento nasal (ranho) e febre baixa, evoluindo para tosse persistente, pieira audível ("assobios"), respiração acelerada, tiragem e <strong>dificuldade na alimentação</strong> (o bebé larga a mama/biberão por não conseguir respirar ao mesmo tempo).
+              </p>
+              <div class="text-[11px] text-emerald-300 bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/40">
+                ➔ <strong>Conduta do Socorrista / TAS:</strong> Desobstruir e lavar o nariz com soro fisiológico antes de cada mamada; manter cabeceira elevada a 30º; fracionar as tomas em pequenas quantidades mais frequentes. Ligar 112 se surgirem pausas respiratórias (apneias), gemido ou cianose.
+              </div>
+            </div>
+
+            <!-- CONVULSÃO FEBRIL -->
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-yellow-300 text-xs flex items-center gap-1.5">
+                  <span>⚡</span> Convulsão Febril
+                </strong>
+                <span class="text-[10px] text-yellow-300 font-semibold bg-yellow-950/60 px-2 py-0.5 rounded">6 meses a 5 anos</span>
+              </div>
+              <p class="text-[11px] text-slate-300 mb-1.5">
+                • <strong>Sinais:</strong> Subida abrupta e rápida da temperatura corporal, perda de sentidos súbita, olhos virados para cima e abalos musculares nos 4 membros (crise tónico-clónica).
+              </p>
+              <div class="text-[11px] text-amber-300 bg-amber-950/40 p-2 rounded-lg border border-amber-800/40">
+                ➔ <strong>Conduta do Socorrista / TAS:</strong> Afastar objetos e proteger a cabeça contra traumatismos; cronometrar a duração da crise. <u>NUNCA segurar a criança à força e NUNCA meter objetos/dedos na boca</u>. Não dar banhos de água gelada (provoca choque térmico!). Despir roupas para arrefecimento passivo. Colocar em PLS assim que a crise parar. Ligar 112 se for a 1ª crise na vida, se durar mais de 5 minutos ou se não recuperar a consciência.
+              </div>
+            </div>
+
+            <!-- DESIDRATAÇÃO GRAVE NO BEBÉ -->
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-amber-300 text-xs flex items-center gap-1.5">
+                  <span>💧</span> Desidratação Grave do Lactente
+                </strong>
+                <span class="text-[10px] text-amber-300 font-semibold bg-amber-950/60 px-2 py-0.5 rounded">Gastroenterite</span>
+              </div>
+              <p class="text-[11px] text-slate-300 mb-1.5">
+                • <strong>Sinais de Alarme Extremo:</strong> <strong>Moleirinha / Fontanela afundada (deprimida)</strong>, boca seca sem saliva, choro sem lágrimas, olhos encovados, ausência de urina (fralda seca há mais de 6 a 8 horas) e prostração/sonolência.
+              </p>
+              <div class="text-[11px] text-emerald-300 bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/40">
+                ➔ <strong>Conduta:</strong> Se consciente, iniciar pequenos goles de soro de reidratação oral (com colher de café a cada 2-3 minutos). Não dar sumos doces ou leite de vaca puro na crise. Contactar SNS 24 (808 24 24 24) ou 112 se o bebé estiver apático e incapaz de engolir.
+              </div>
+            </div>
+
+            <!-- MANCHAS ROXAS / PETÉQUIAS (TESTE DO COPO) -->
+            <div class="p-3 bg-red-950/40 border border-red-600/70 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-red-400 text-xs flex items-center gap-1.5">
+                  <span>🟣</span> Petéquias / Púrpura (Suspeita de Meningite ou Sépsis)
+                </strong>
+                <span class="text-[10px] text-red-200 font-black bg-red-600 px-2 py-0.5 rounded animate-pulse">EMERGÊNCIA 112</span>
+              </div>
+              <p class="text-[11px] text-slate-200 mb-1.5">
+                • <strong>Sinais:</strong> Criança febril com pequenas manchas avermelhadas ou arroxeadas pontiformes na pele (petéquias), rigidez da nuca, gemido fraco ou moleirinha saliente (fontanela abaulada e tensa).
+              </p>
+              <div class="p-2 bg-slate-900 border border-red-500/60 rounded-lg text-[11px] text-yellow-300 mb-1.5 font-semibold">
+                🍷 <strong>O Teste do Copo de Vidro (Vitropressão):</strong> Pressione firmemente o fundo ou lado de um copo de vidro transparente contra a mancha roxa. Se a mancha <u>NÃO desaparecer nem branquear através do vidro</u>, trata-se de hemorragia sob a pele provocada por infeção fulminante!
+              </div>
+              <p class="text-[11px] text-red-300 font-bold">
+                ➔ <strong>Ação:</strong> LIGAR 112 DE IMEDIATO indicando "Criança febril com petéquias não branqueáveis e suspeita de sépsis / doença meningocócica".
+              </p>
+            </div>
+
+            <!-- OVA PEDIÁTRICA ERC 2025 -->
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-emerald-400 text-xs flex items-center gap-1.5">
+                  <span>🗣️</span> Obstrução da Via Aérea (Asfixia Pediátrica ERC 2025)
+                </strong>
+                <span class="text-[10px] text-emerald-300 font-semibold bg-emerald-950 px-2 py-0.5 rounded">Seq. 5 + 5</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-1.5 text-[11px]">
+                <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
+                  <strong class="text-sky-300 block mb-1">👶 No Lactente (&lt; 1 ano):</strong>
+                  <p class="text-slate-300 leading-relaxed">• Colocar de barriga para baixo sobre o antebraço do socorrista com a cabeça mais baixa que o tronco;<br>• Aplicar <strong>5 pancadas interescapulares</strong> secas;<br>• Rodar para o outro braço de barriga para cima e aplicar <strong>5 compressões torácicas</strong> com 2 dedos no centro do peito;<br><u class="text-red-400 font-bold">NUNCA FAZER HEIMLICH NO BEBÉ!</u></p>
+                </div>
+                <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
+                  <strong class="text-yellow-300 block mb-1">🧒 Na Criança (&gt; 1 ano):</strong>
+                  <p class="text-slate-300 leading-relaxed">• Inclinar a criança para a frente e aplicar <strong>5 pancadas interescapulares</strong> secas;<br>• Se não resolver, aplicar <strong>5 compressões abdominais (Heimlich)</strong> adaptando a altura (ajoelhado atrás da criança);<br>• Alternar 5 pancadas e 5 compressões até desobstruir ou até perda de sentidos.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- SBV PEDIÁTRICO ERC 2025 -->
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <strong class="text-red-400 text-xs flex items-center gap-1.5 mb-1">
+                <span>🫀</span> Suporte Básico de Vida Pediátrico (ERC 2025)
+              </strong>
+              <p class="text-[11px] text-slate-300 mb-1.5">
+                Em criança ou lactente inconsciente e que não respira normalmente, a causa é quase sempre <strong>hipóxia</strong>.
+              </p>
+              <div class="p-2 bg-red-950/60 border border-red-600/50 rounded-lg text-[11px] text-red-200">
+                ➔ <strong>INICIAR OBRIGATORIAMENTE COM 5 INSUFLAÇÕES DE RESGATE</strong> (observando a subida do tórax).<br>
+                ➔ Prosseguir com <strong>1 minuto de compressões e insuflações</strong> (proporção 15:2 com 2 socorristas ou 30:2 com 1 socorrista) antes de ir procurar ajuda se estiver sozinho.<br>
+                ➔ No lactente comprimir com 2 polegares abraçando o tórax ou 2 dedos; na criança com 1 ou 2 mãos conforme a compleição física.
+              </div>
+            </div>
+          </div>
+
+          <a href="tel:112" class="action bg-red-600 hover:bg-red-500 text-white font-black text-xs w-full py-3 mt-3 block text-center rounded-xl shadow-lg shadow-red-900/60">
+            📞 LIGAR 112 EM EMERGÊNCIA PEDIÁTRICA
           </a>
         </div>
       </section>
@@ -656,7 +966,7 @@
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="text-xl">🤖</span>
-            <h2 class="text-xl font-black text-white">Assistente IA de Socorro</h2>
+            <h2 class="text-xl font-black text-white">Triagem Clínica com IA</h2>
           </div>
           <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
         </div>
@@ -678,7 +988,7 @@
             • <strong>Disponibilidade e Tráfego:</strong> Este assistente utiliza a API do Google Gemini (Modo Gratuito). O seu funcionamento está sujeito a critérios de rede, conectividade e momentos de congestionamento de tráfego global da Google, podendo não estar sempre disponível em tempo útil.
           </p>
           <p class="text-[11px] leading-relaxed text-slate-300">
-            • <strong>Nunca Atrasar o Socorro 112:</strong> A IA é uma ferramenta complementar e <u>não deve em caso algum atrasar o socorro</u>. Em paragens cardiorrespiratórias (PCR), asfixia grave, acidentes violentos ou qualquer suspeita de risco de vida, <strong>ligue 112 de imediato e não aguarde pela IA</strong>.
+            • <strong>Nunca Atrasar o Acionamento do 112:</strong> A IA é uma ferramenta complementar e <u>não deve em caso algum atrasar o socorro</u>. Em paragens cardiorrespiratórias (PCR), asfixia grave, acidentes violentos ou qualquer suspeita de risco de vida, <strong>ligue 112 de imediato e não aguarde pela IA</strong>.
           </p>
           <p class="text-[11px] text-amber-300/90 font-medium italic">
             «Em caso de dúvida ou se o sistema demorar, ligue 112 imediatamente.»
@@ -1452,10 +1762,65 @@
           </div>
         </div>
 
-        <!-- CAPÍTULO 9: VÍDEOS DE DEMONSTRAÇÃO PRÁTICA EM PORTUGUÊS -->
+        <!-- CAPÍTULO 9: ABORDAGEM PEDIÁTRICA E DO LACTENTE (INEM & ERC 2025) -->
         <div class="chapter-accordion">
           <button type="button" class="accordion-header">
-            <span>9. Demonstrações Audiovisuais em Língua Portuguesa</span>
+            <span>9. Abordagem Pediátrica e do Lactente (INEM &amp; ERC 2025)</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-sky-400">1. Particularidades Anatómicas e Fisiológicas:</h4>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1 text-xs text-slate-200 mb-3">
+              <p>• <strong>Criança Não é um Adulto Pequeno:</strong> Cerca de 90% das paragens em pediatria têm causa <strong>respiratória / hipóxica</strong> secundária a fadiga ventilatória ou asfixia (ao contrário dos adultos, onde a causa primária é cardíaca arrítmica);</p>
+              <p>• <strong>Via Aérea Estreita:</strong> A via aérea infantil é cónica/afunilada e de pequeno calibre. Um edema de apenas 1 mm reduz o lúmen aéreo em mais de 50%, aumentando a resistência ao fluxo 16 vezes;</p>
+              <p>• <strong>Cabeça e Língua Volumosas:</strong> O occiput saliente flete o pescoço da criança quando deitada de costas. É necessário colocar uma toalha dobrada sob os ombros/dorso do lactente para manter o eixo neutro;</p>
+              <p>• <strong>Consumo Elevado de O2:</strong> O consumo metabólico de oxigénio na criança é o dobro do adulto (6 a 8 mL/kg/min vs 3 a 4 mL/kg/min), desenvolvendo hipóxia grave e cianose com grande rapidez.</p>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-yellow-400">2. O Triângulo de Avaliação Pediátrica (TAP):</h4>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1.5 text-xs text-slate-200 mb-3">
+              <p>Avaliação rápida de 30 a 60 segundos realizada à distância, sem tocar e sem instrumentos:</p>
+              <p>• <strong>Aparência (Mnemónica TICOS):</strong> Avalia o Tónus (flácido vs ativo), Interatividade (alerta vs apático), Consolabilidade (acalma ao colo vs choro inconsolável), Olhar (fixa vs olhar vago) e Sons da fala/choro (choro forte vs gemido fraco). Reflete a integridade do Sistema Nervoso Central e perfusão cerebral;</p>
+              <p>• <strong>Trabalho Respiratório:</strong> Pesquisa de esforço ventilatório compensatório: tiragem intercostal/subcostal, batimento das asas do nariz, balanceio da cabeça (*head bobbing*), pieira e estridor inspiratório. A presença de bradipneia com exaustão indica paragem iminente;</p>
+              <p>• <strong>Circulação Cutânea:</strong> Palidez precoce, pele mosqueada/marmoreada (*livedo reticular*), cianose periférica/central e Tempo de Preenchimento Capilar (TPC &gt; 2 segundos). Avalia o débito cardíaco e perfusão periférica;</p>
+              <p class="text-sky-300 font-semibold">• <strong>Decisão Clínica:</strong> Falência Respiratória (A alterado + B alterado) ou Choque Descompensado (A alterado + C alterado) exigem acionamento do 112 de imediato!</p>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-emerald-400">3. Sinais Vitais Normais por Escalão Etário:</h4>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 mb-3 overflow-x-auto">
+              <table class="w-full text-left border-collapse text-[11px]">
+                <thead>
+                  <tr class="border-b border-slate-700 text-sky-400">
+                    <th class="py-1">Faixa Etária</th>
+                    <th class="py-1">FC (bpm)</th>
+                    <th class="py-1">FR (cpm)</th>
+                    <th class="py-1">PAS Mínima</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 font-mono">
+                  <tr><td class="py-1 text-slate-300">Lactente (&lt;1 ano)</td><td>100 - 150</td><td>30 - 50</td><td>&gt; 70 mmHg</td></tr>
+                  <tr><td class="py-1 text-slate-300">1 a 5 anos</td><td>90 - 130</td><td>24 - 40</td><td>70 + (2x idade)</td></tr>
+                  <tr><td class="py-1 text-slate-300">6 a 12 anos</td><td>70 - 110</td><td>18 - 30</td><td>&gt; 80 - 90 mmHg</td></tr>
+                  <tr><td class="py-1 text-slate-300">&gt; 12 anos</td><td>60 - 100</td><td>12 - 20</td><td>&gt; 90 mmHg</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 class="text-white font-bold text-xs uppercase mb-1 text-rose-400">4. Patologias Frequentes e Condutas Críticas:</h4>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1.5 text-xs text-slate-200">
+              <p>• <strong>Laringite / Crupe:</strong> Tosse ladrante ("de cão"), estridor inspiratório. Acalmar no colo dos pais, ar fresco/húmido, posição sentada. NUNCA colocar espátulas na boca (risco de espasmo glótico total!). 112 se estridor em repouso;</p>
+              <p>• <strong>Bronquiolite:</strong> Pieira e tiragem com recusa de alimentação em bebés &lt; 2 anos. Desobstruir nariz com soro antes de mamar, cabeceira a 30º, mamadas fracionadas;</p>
+              <p>• <strong>Convulsão Febril:</strong> Crise tónico-clónica por subida abrupta de temperatura (6m a 5a). Proteger de quedas, cronometrar, nada na boca, arrefecimento passivo, PLS. 112 se durar &gt; 5 min ou 1ª crise;</p>
+              <p>• <strong>Petéquias / Púrpura (Meningite/Sépsis):</strong> Febre com pequenas manchas roxas que <strong>NÃO somem ao pressionar um copo transparente</strong> (teste da vitropressão) ➔ 112 IMEDIATO;</p>
+              <p>• <strong>Asfixia (OVA Pediátrica ERC 2025):</strong> No lactente (&lt;1a): 5 pancadas nas costas em declive + 5 compressões torácicas com 2 dedos (NUNCA Heimlich!). Na criança (&gt;1a): 5 pancadas + 5 compressões abdominais de Heimlich.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 10: VÍDEOS DE DEMONSTRAÇÃO PRÁTICA EM PORTUGUÊS -->
+        <div class="chapter-accordion">
+          <button type="button" class="accordion-header">
+            <span>10. Demonstrações Audiovisuais em Língua Portuguesa</span>
             <span class="accordion-chevron">▼</span>
           </button>
           <div class="accordion-body">
@@ -1481,10 +1846,10 @@
           </div>
         </div>
 
-        <!-- CAPÍTULO 10: QUIZ DINÂMICO DE AUTOAVALIAÇÃO -->
+        <!-- CAPÍTULO 11: QUIZ DINÂMICO DE AUTOAVALIAÇÃO -->
         <div class="chapter-accordion open">
           <button type="button" class="accordion-header">
-            <span>10. Quiz Dinâmico de Autoavaliação</span>
+            <span>11. Quiz Dinâmico de Autoavaliação</span>
             <span class="accordion-chevron">▼</span>
           </button>
           <div class="accordion-body">
@@ -1517,7 +1882,7 @@
         <!-- RODAPÉ DE CRÉDITOS: THINKED BY HUGO FONTE (ÚNICA REFERÊNCIA) -->
         <footer class="mt-10 mb-6 pt-5 border-t border-slate-800/80 text-center text-xs text-slate-500">
           <p class="font-semibold tracking-wide text-slate-400 text-sm">Thinked by Hugo Fonte</p>
-          <p class="text-[11px] text-slate-600 mt-1">Socorro 112 &bull; Suporte Pré-Hospitalar &amp; Primeiros Socorros</p>
+          <p class="text-[11px] text-slate-500 mt-1">Protocolo TAS &bull; Suporte Clínico Pré-Hospitalar &amp; Primeiros Socorros</p>
           <button type="button" id="btn-show-disclaimer" class="text-[11px] text-amber-400/80 hover:text-amber-300 underline mt-2 block mx-auto">
             ⚖️ Aviso Legal &amp; Isenção de Responsabilidade Médica
           </button>
@@ -1530,12 +1895,17 @@
     <nav class="bottom-nav">
       <button type="button" class="nav-item active" data-target="screen-emergency">
         <span class="nav-icon">🚨</span>
-        <span>Socorro</span>
+        <span>Emergência</span>
       </button>
 
       <button type="button" class="nav-item" data-target="screen-sbv">
         <span class="nav-icon">🫀</span>
         <span>SBV/DAE</span>
+      </button>
+
+      <button type="button" class="nav-item" data-target="screen-pediatria">
+        <span class="nav-icon">👶</span>
+        <span>Pediatria</span>
       </button>
 
       <button type="button" class="nav-item" data-target="screen-dyspnea">
@@ -1567,11 +1937,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=24"></script>
-  <script src="./js/geo.js?v=24"></script>
-  <script src="./js/knowledge_base.js?v=24"></script>
-  <script src="./js/rag.js?v=24"></script>
-  <script src="./js/ai.js?v=24"></script>
-  <script src="./js/app.js?v=24"></script>
+  <script src="./js/audio.js?v=25"></script>
+  <script src="./js/geo.js?v=25"></script>
+  <script src="./js/knowledge_base.js?v=25"></script>
+  <script src="./js/rag.js?v=25"></script>
+  <script src="./js/ai.js?v=25"></script>
+  <script src="./js/app.js?v=25"></script>
 </body>
 </html>

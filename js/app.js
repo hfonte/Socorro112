@@ -1,4 +1,4 @@
-// LÓGICA PRINCIPAL DA APLICAÇÃO SOCORRO 112 & PROTOCOLOS TAS / INEM
+// LÓGICA PRINCIPAL DA APLICAÇÃO PROTOCOLO TAS & SUPORTE CLÍNICO PRÉ-HOSPITALAR (INEM / ERC 2025)
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -298,6 +298,33 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: "Alertar 112, Socorrer a correr e só depois verificar perigos no local.", isCorrect: false }
       ],
       explanation: "A segurança do socorrista e do cenário (P) antecede sempre o alerta (A) e as manobras de socorro direto (S)."
+    },
+    {
+      question: "Perante um lactente (< 1 ano) com asfixia grave (tosse ineficaz), qual é a conduta correta de desobstrução (ERC 2025)?",
+      options: [
+        { text: "5 pancadas interescapulares em plano declive alternadas com 5 compressões torácicas; a manobra de Heimlich está estritamente proibida.", isCorrect: true },
+        { text: "Manobra de Heimlich imediata com compressões abdominais violentas.", isCorrect: false },
+        { text: "Colocar o dedo em gancho às cegas na garganta para tentar puxar o objeto.", isCorrect: false }
+      ],
+      explanation: "No lactente, compressões abdominais de Heimlich causam rotura hepática e visceral grave. A sequência oficial é 5 pancadas nas costas + 5 compressões torácicas com 2 dedos."
+    },
+    {
+      question: "No Triângulo de Avaliação Pediátrica (TAP), quais são os 3 lados avaliados em 30 a 60 segundos sem tocar na criança?",
+      options: [
+        { text: "Aparência (Mnemónica TICOS), Trabalho Respiratório e Circulação Cutânea.", isCorrect: true },
+        { text: "Alimentação, Peso e Altura.", isCorrect: false },
+        { text: "Temperatura, Reflexos e Pressão Arterial.", isCorrect: false }
+      ],
+      explanation: "O TAP é uma ferramenta de impressão geral rápida (30-60 seg) baseada na Aparência (SNC), Trabalho Respiratório e Circulação Cutânea."
+    },
+    {
+      question: "No Suporte Básico de Vida (SBV) Pediátrico segundo as diretrizes ERC 2025, qual é o primeiro passo obrigatório após confirmar a ausência de respiração?",
+      options: [
+        { text: "Realizar obrigatoriamente 5 insuflações iniciais de resgate antes das compressões torácicas.", isCorrect: true },
+        { text: "Iniciar imediatamente 30 compressões torácicas sem ventilações.", isCorrect: false },
+        { text: "Aplicar imediatamente um choque com o DAE antes de qualquer manobra.", isCorrect: false }
+      ],
+      explanation: "Nas crianças e lactentes, a paragem é primordialmente hipóxica (respiratória); 5 insuflações de resgate fornecem oxigenação crítica imediata."
     }
   ];
 
@@ -1052,9 +1079,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let messageBody = '';
 
     if (mode === 'urgent') {
-      messageBody = `🚨 ALERTA SOCORRO 112: Situação urgente (${patientName}).\n- Situação: ${diagSummary}${locLine}\n- 112 solicitado/em curso. Por favor vem ter comigo.`;
+      messageBody = `🚨 ALERTA DE EMERGÊNCIA (Protocolo TAS): Situação urgente (${patientName}).\n- Situação: ${diagSummary}${locLine}\n- 112 solicitado/em curso. Por favor vem ter comigo.`;
     } else {
-      messageBody = `Olá ${contactName}, ponto de situação via Socorro 112:\n- Avaliação clínica: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
+      messageBody = `Olá ${contactName}, ponto de situação clínica via Protocolo TAS:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
     }
 
     const rawPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
@@ -1128,6 +1155,56 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnShareUrgent) {
     btnShareUrgent.addEventListener('click', () => shareClinicalUpdateWithICE('urgent'));
   }
+
+  // SELETOR INTERATIVO DE IDADES PEDIÁTRICAS
+  const pedChips = document.querySelectorAll('.pediatric-chip');
+  const pedVitalsData = {
+    lactente: {
+      fc: '100 - 150 bpm',
+      fr: '30 - 50 cpm',
+      pas: '> 70 mmHg (PAS)',
+      notes: '• <strong>Particularidades do Lactente (&lt;1 ano):</strong> Cabeça occipital volumosa (colocar toalha dobrada sob os ombros para manter eixo neutro da cabeça sem fletir o pescoço); via aérea afunilada em funil (região subglótica é o ponto mais estreito); respiração quase exclusivamente diafragmática.'
+    },
+    pequena: {
+      fc: '90 - 130 bpm',
+      fr: '24 - 40 cpm',
+      pas: '[70 + (2 × idade)] mmHg',
+      notes: '• <strong>Particularidades de 1 a 5 anos:</strong> Tórax muito complacente e elástico (fraturas de costela raras, mas contusões pulmonares internas frequentes sem sinais externos); estômago com esvaziamento mais lento; suscetibilidade a convulsões febris.'
+    },
+    escolar: {
+      fc: '70 - 110 bpm',
+      fr: '18 - 30 cpm',
+      pas: '> 80 - 90 mmHg (PAS)',
+      notes: '• <strong>Particularidades de 6 a 12 anos:</strong> Via aérea com anatomia similar à do adulto; capacidade de cooperação na escala de dor e no exame físico; vigilância de traumatismos desportivos e crises de asma aguda.'
+    },
+    adolescente: {
+      fc: '60 - 100 bpm',
+      fr: '12 - 20 cpm',
+      pas: '> 90 mmHg (PAS)',
+      notes: '• <strong>Particularidades de &gt;12 anos:</strong> Parâmetros fisiológicos idênticos aos do adulto; atuar segundo o protocolo de suporte de vida do adulto; despistar acidentes de viação/mota, consumo de substâncias ou traumatismos de alta energia.'
+    }
+  };
+
+  pedChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      pedChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+
+      const ageKey = chip.dataset.age;
+      const data = pedVitalsData[ageKey];
+      if (data) {
+        const elFc = document.getElementById('ped-vitals-fc');
+        const elFr = document.getElementById('ped-vitals-fr');
+        const elPas = document.getElementById('ped-vitals-pas');
+        const elNotes = document.getElementById('ped-vitals-notes');
+
+        if (elFc) elFc.textContent = data.fc;
+        if (elFr) elFr.textContent = data.fr;
+        if (elPas) elPas.textContent = data.pas;
+        if (elNotes) elNotes.innerHTML = data.notes;
+      }
+    });
+  });
 
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));

@@ -113,7 +113,7 @@ Classificação: **🟡 URGÊNCIA MODERADA** para avaliação presencial das fun
     let encaminhamento = `• Situação clínica estável (sem critérios de emergência vital imediata). Contacte a **Linha SNS 24 (808 24 24 24)** para aconselhamento clínico e encaminhamento para o Centro de Saúde.\n• Ligar **112** de emergência APENAS se surgirem sinais de alarme: perda de consciência, dificuldade respiratória grave, dor opressiva no peito ou hemorragia ativa.`;
     let gravidadeLabel = '🟡 URGÊNCIA MODERADA';
 
-    const criticalIds = ['sbv', 'ova', 'avc', 'dor_toracica', 'tce', 'anafilaxia', 'tvm', 'trauma_toracico_abdominal', 'amputacao_esmagamento', 'eap_insuficiencia_cardiaca', 'parto_iminente'];
+    const criticalIds = ['sbv', 'ova', 'avc', 'dor_toracica', 'tce', 'anafilaxia', 'tvm', 'trauma_toracico_abdominal', 'amputacao_esmagamento', 'eap_insuficiencia_cardiaca', 'parto_iminente', 'pediatria_lactente'];
     if (criticalIds.includes(matchedEntry.id)) {
       gravidadeLabel = '🔴 EMERGÊNCIA CRÍTICA';
       encaminhamento = `🚨 **LIGAR 112 DE IMEDIATO (INEM)!**\nSituação clínica ou traumática com risco vital eminente segundo o manual de TAS / INEM. Ligue 112 em alta-voz enquanto presta os primeiros socorros.`;

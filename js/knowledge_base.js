@@ -486,6 +486,50 @@ const CLINICAL_KNOWLEDGE_BASE = [
       "prioridade de socorro"
     ],
     "excerpt": "Metodologia de Avaliação TAS / INEM (Abordagem Sistemática):\n1. Avaliação Primária Sistematizada (X-A-B-C-D-E):\n- X (eXsanguinating Hemorrhage): Identificação e controlo imediato de hemorragia massiva externa através de garrote/torniquete ou compressão direta antes de qualquer outra ação;\n- A (Airway with C-spine protection): Permeabilidade da via aérea e alinhamento da coluna cervical se houver suspeita de trauma;\n- B (Breathing): Avaliação de movimentos torácicos, frequência ventilatória, esforço respiratório e simetria;\n- C (Circulation): Avaliação da circulação, pulsos periféricos/centrais, cor/temperatura da pele e tempo de preenchimento capilar (< 2 segundos);\n- D (Disability): Avaliação neurológica rápida através da Escala AVDS (A: Alerta, V: Resposta a estímulos Verbais, D: Resposta a estímulos Dolorosos, S: Sem resposta/Inconsciente) e reatividade pupilar;\n- E (Exposure): Exposição de lesões ocultas e proteção rigorosa contra a hipotermia com manta isotérmica.\n2. Recolha de Antecedentes (Mnemónica SAMPLE / CHAMU):\n- S (Signs/Symptoms / Sinais e Sintomas): Queixas principais e achados objetivos;\n- A (Allergies / Alergias): Alergias medicamentosas, alimentares ou ambientais;\n- M (Medications / Medicamentos): Fármacos habituais e doses recentes;\n- P (Past medical history / Passado médico): Doenças crónicas, cirurgias, enfartes prévios, diabetes, hipertensão;\n- L (Last meal / Última refeição): Hora e natureza da última ingestão sólida ou líquida;\n- E (Events / Eventos): Circunstâncias que precipitaram o início da ocorrência ou do trauma.\n3. Caracterização da Dor (Mnemónica OPQRST):\n- O (Onset): Início súbito ou progressivo;\n- P (Provocation/Palliation): O que agrava ou alivia a dor;\n- Q (Quality): Qualidade da dor (aperto, queimadura, pontada, peso);\n- R (Radiation): Irradiação para ombros, mandíbula, dorso ou membros;\n- S (Severity): Intensidade numa escala numérica de 0 (sem dor) a 10 (dor máxima intolerável);\n- T (Time): Duração e tempo de evolução."
+  },
+  {
+    "id": "pediatria_lactente",
+    "title": "Emergências Pediátricas, Lactentes e Triângulo de Avaliação Pediátrica (TAP)",
+    "source": "Manual de TAS / INEM • Cap. Abordagem ao Doente Pediátrico & Diretrizes ERC 2025",
+    "keywords": [
+      "criança",
+      "crianças",
+      "bebé",
+      "bebe",
+      "bebés",
+      "bebes",
+      "lactente",
+      "lactentes",
+      "recém-nascido",
+      "pediatria",
+      "pediátrico",
+      "pediatrico",
+      "moleirinha",
+      "fontanela",
+      "crupe",
+      "crup",
+      "laringite",
+      "estridor",
+      "tosse de cão",
+      "tosse metálica",
+      "bronquiolite",
+      "pieira no bebé",
+      "convulsão febril",
+      "convulsões febris",
+      "febre na criança",
+      "petéquias",
+      "manchas roxas",
+      "triângulo pediátrico",
+      "triangulo pediatrico",
+      "tap",
+      "ticos",
+      "tiragem",
+      "respiração rápida bebé",
+      "desidratação bebé",
+      "fralda seca",
+      "moleirinha afundada"
+    ],
+    "excerpt": "Emergências Pediátricas e do Lactente (INEM & ERC 2025):\nPrincípio Fundamental: A criança não é um adulto pequeno. Cerca de 90% das paragens cardiorrespiratórias em pediatria têm génese respiratória/hipóxica e não cardíaca primária.\n\n1. O Triângulo de Avaliação Pediátrica (TAP) - Avaliação Inicial Visual (30-60 seg sem tocar):\n- Lado 1: APARÊNCIA (A) - Mnemónica TICOS:\n  * T (Tónus): Movimentação ativa vs hipotónico/flácido;\n  * I (Interatividade): Alerta, contacta com o olhar vs apático;\n  * C (Consolabilidade): Acalma ao colo do cuidador vs choro inconsolável contínuo;\n  * O (Olhar): Fixa o rosto vs olhar vago, vítreo;\n  * S (Sons/Choro): Choro forte normal vs choro fraco, rouco ou gemido.\n  * Significado: Avalia a oxigenação cerebral e estado do Sistema Nervoso Central (SNC).\n- Lado 2: TRABALHO RESPIRATÓRIO (B):\n  * Tiragem intercostal, subcostal ou supraesternal (músculos a afundar);\n  * Batimento das asas do nariz;\n  * Balanceio da cabeça (head bobbing) no lactente;\n  * Sons respiratórios audíveis: pieira (assobio), estridor inspiratório ou gemido expiratório;\n  * ATENÇÃO: Bradipneia (respiração muito lenta) com exaustão indica paragem respiratória iminente!\n- Lado 3: CIRCULAÇÃO CUTÂNEA (C):\n  * Palidez precoce;\n  * Pele marmoreada / mosqueada (livedo reticular);\n  * Cianose perioral ou central;\n  * Tempo de Preenchimento Capilar (TPC) > 2 segundos.\nDecisão Clínica pelo TAP:\n- Estável: 3 lados normais;\n- Dificuldade Respiratória: A normal, B alterado, C normal;\n- Falência Respiratória (CRÍTICO 112): A alterado + B alterado;\n- Choque Compensado: A normal, B normal, C alterado;\n- Choque Descompensado (CRÍTICO 112): A alterado + C alterado;\n- Disfunção do SNC: A alterado, B normal, C normal;\n- Falência Cardiorrespiratória (EMERGÊNCIA MÁXIMA 112): TODOS os 3 lados alterados (Iniciar insuflações/SBV).\n\n2. Sinais Vitais Normais por Faixa Etária (INEM):\n- Lactente (<1 ano): FC 100-150 bpm | FR 30-50 cpm | PAS mínima > 70 mmHg | TPC < 2 seg;\n- Criança Pequena (1-5 anos): FC 90-130 bpm | FR 24-40 cpm | PAS mínima [70 + (2x idade)] mmHg;\n- Criança Escolar (6-12 anos): FC 70-110 bpm | FR 18-30 cpm | PAS mínima > 80-90 mmHg;\n- Adolescente (>12 anos): FC 60-100 bpm | FR 12-20 cpm | PAS > 90 mmHg.\n\n3. Patologias Pediátricas Frequentes e Atuação:\n- Laringite Estridulosa / Crupe: Tosse ladrante (de cão), rouquidão, estridor inspiratório. Atuação: Manter calma no colo dos pais (o choro agrava o edema!), ar fresco da noite ou ambiente húmido, posição sentada. Se estridor em repouso ➔ 112;\n- Bronquiolite Aguda (Lactente): Pieira, respiração rápida, tiragem, dificuldade/cansaço na amamentação. Atuação: Desobstruir fossas nasais com soro fisiológico antes das mamadas, cabeceira elevada a 30º, tomas fracionadas. 112 se apneias, cianose ou gemido;\n- Convulsão Febril: Subida súbita de temperatura dos 6 meses aos 5 anos. Atuação: Proteger de quedas, cronometrar a crise, NUNCA colocar nada na boca, arrefecimento passivo (despir roupa, sem água fria!), PLS após a crise. Ligar 112 se durar > 5 minutos ou se for a 1ª crise;\n- Desidratação Grave: Moleirinha/Fontanela afundada, boca seca, choro sem lágrimas, fralda seca há > 6 horas. Reidratação oral fracionada com soro de reidratação oral (pequenos goles);\n- Manchas Roxas / Petéquias (Suspeita de Meningite/Sépsis): Febre + manchas que NÃO desaparecem ao pressionar um copo de vidro transparente (teste da vitropressão), rigidez de nuca ou abaulamento da fontanela ➔ LIGAR 112 IMEDIATAMENTE (Emergência Máxima);\n- Asfixia e Desobstrução (OVA Pediátrica ERC 2025): No lactente (<1 ano): 5 pancadas interescapulares em declive + 5 compressões torácicas com 2 dedos (NUNCA Heimlich!). Na criança (>1 ano): 5 pancadas interescapulares + 5 compressões abdominais (Heimlich);\n- SBV Pediátrico ERC 2025: Iniciar OBRIGATORIAMENTE com 5 insuflações de resgate antes de compressões (15:2 ou 30:2) durante 1 minuto antes de pedir ajuda se sozinho."
   }
 ];
 

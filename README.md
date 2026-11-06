@@ -1,6 +1,6 @@
-# Socorro 112 · TAS & Suporte Básico de Vida (PWA)
+# Protocolo TAS · Guia Clínico Pré-Hospitalar & Emergência (PWA)
 
-Aplicação web progressiva (PWA) de utilidade pública e suporte comunitário a situações de emergência pré-hospitalar e autoestudo clínico, desenvolvida de acordo com as diretrizes do **Conselho Europeu de Ressuscitação (ERC 2025)**, do **INEM** e os manuais de **Tripulante de Ambulância de Socorro (TAS / UFCD 9988)**.
+Aplicação web progressiva (PWA) de utilidade médica, clínica e comunitária para suporte a situações de emergência pré-hospitalar e formação em primeiros socorros, desenvolvida de acordo com as diretrizes do **Conselho Europeu de Ressuscitação (ERC 2025)**, do **INEM** e os manuais de **Tripulante de Ambulância de Socorro (TAS / UFCD 9988)**.
 
 ---
 
@@ -11,13 +11,19 @@ Aplicação web progressiva (PWA) de utilidade pública e suporte comunitário a
 - **Geolocalização & Cábula CODU:** Apresenta a morada exata, coordenadas GPS e pontos de referência imediatos para transmissão sem pânico ao operador do 112.
 - **Protocolo de Alta-Voz:** Alerta visual proeminente para colocação do telemóvel em alta-voz no chão junto à vítima, mantendo as mãos livres.
 
-### 2. Suporte Básico de Vida (SBV) & DAE
+### 2. Pediatria & Lactentes (Módulo Dedicado)
+- **Triângulo de Avaliação Pediátrica (TAP):** Avaliação de 30-60s da Aparência (TICOS), Trabalho Respiratório e Circulação Cutânea com matriz de decisão clínica.
+- **Sinais Vitais Normais por Faixa Etária:** Seletor interativo para Lactente (<1 ano), Criança Pequena (1-5 anos), Escolar (6-12 anos) e Adolescente (>12 anos) com FC, FR, PAS e notas anatómicas.
+- **Patologias Pediátricas Frequentes:** Crupe / Laringite Estridulosa, Bronquiolite Aguda (VSR), Convulsão Febril, Desidratação Aguda no Bebé, Petéquias / Púrpura (Meningite/Sépsis com Teste da Vitropressão do Copo de Vidro).
+- **Asfixia & SBV Pediátrico ERC 2025:** 5 pancadas + 5 compressões no lactente (Heimlich estritamente proibido), e 5 insuflações iniciais de resgate.
+
+### 3. Suporte Básico de Vida (SBV) & DAE
 - **Metrónomo Acústico & Visual (110 bpm):** Ritmo rigoroso segundo as normas ERC 2025 para compressões torácicas eficazes (5 a 6 cm).
 - **SBV Adulto (Rácio 30:2):** Temporizador de ciclo e alerta vocal de rotação de reanimadores aos 2 minutos por fadiga muscular, mantendo compressões contínuas sem interrupções.
 - **SBV Pediátrico Especializado:** 5 insuflações iniciais obrigatórias, rácio 15:2 e adaptação da profundidade e técnica (lactente vs criança).
 - **Desfibrilhação Automática Externa (DAE):** Passos guiados para colocação de elétrodos e segurança no choque.
 
-### 3. Obstrução da Via Aérea (OVA / Asfixia)
+### 4. Obstrução da Via Aérea (OVA / Asfixia)
 - **Despiste Tosse Eficaz vs Ineficaz:** Proteção contra manobras intempestivas.
 - **Sequência 5 Pancadas Interescapulares + 5 Compressões de Heimlich.**
 - **Casos Especiais 2025:** Contraindicação formal de Heimlich em lactentes (< 1 ano) e grávidas, substituindo por compressões torácicas.
@@ -43,8 +49,8 @@ Aplicação web progressiva (PWA) de utilidade pública e suporte comunitário a
 - **Partilha Direta por SMS:** Envio com 1 toque de relatórios clínicos e localização GPS ao contacto de emergência, sem alarmismos desnecessários.
 
 ### 7. Hub de Formação & Autoestudo
-- 8 capítulos interativos expandíveis em acordeão com esquemas e ilustrações.
-- **Quiz Clínico Dinâmico:** Sorteio aleatório de 5 questões a partir de um banco de 22 perguntas de avaliação, com baralhamento de alternativas.
+- 11 capítulos interativos expandíveis em acordeão com esquemas clínicos, ilustrações e capítulo pediátrico dedicado.
+- **Quiz Clínico Dinâmico:** Sorteio aleatório de 5 questões a partir de um banco de 25 perguntas de avaliação técnica, com baralhamento de alternativas.
 
 ---
 
@@ -57,4 +63,4 @@ Aplicação web progressiva (PWA) de utilidade pública e suporte comunitário a
 
 ## 👨‍🏫 Autoria e Créditos
 **Thinked by Hugo Fonte**  
-*Socorro 112 · Suporte Pré-Hospitalar & Primeiros Socorros*
+*Protocolo TAS · Suporte Clínico Pré-Hospitalar & Primeiros Socorros*

@@ -1,7 +1,7 @@
 {
-  "name": "Socorro 112 - Suporte Básico de Vida & TAS",
-  "short_name": "Socorro 112",
-  "description": "Aplicação de Primeiros Socorros e Emergência Pré-Hospitalar (SIEM / INEM / ERC)",
+  "name": "Protocolo TAS - Suporte Clínico Pré-Hospitalar & Emergência",
+  "short_name": "Protocolo TAS",
+  "description": "Guia Clínico e Protocolos Pré-Hospitalares de TAS, Suporte Básico de Vida (ERC 2025) e Pediatria.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b1120",
