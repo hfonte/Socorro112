@@ -1,4 +1,4 @@
-const CACHE_NAME = 'protocolo-tas-v25';
+const CACHE_NAME = 'cuidar-emergencia-v26';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

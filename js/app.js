@@ -1,4 +1,4 @@
-// LÓGICA PRINCIPAL DA APLICAÇÃO PROTOCOLO TAS & SUPORTE CLÍNICO PRÉ-HOSPITALAR (INEM / ERC 2025)
+// LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -1079,9 +1079,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let messageBody = '';
 
     if (mode === 'urgent') {
-      messageBody = `🚨 ALERTA DE EMERGÊNCIA (Protocolo TAS): Situação urgente (${patientName}).\n- Situação: ${diagSummary}${locLine}\n- 112 solicitado/em curso. Por favor vem ter comigo.`;
+      messageBody = `🚨 ALERTA DE EMERGÊNCIA (Cuidar em Emergência): Situação urgente (${patientName}).\n- Situação: ${diagSummary}${locLine}\n- 112 solicitado/em curso. Por favor vem ter comigo.`;
     } else {
-      messageBody = `Olá ${contactName}, ponto de situação clínica via Protocolo TAS:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
+      messageBody = `Olá ${contactName}, ponto de situação via Cuidar em Emergência:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
     }
 
     const rawPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');

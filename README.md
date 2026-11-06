@@ -1,6 +1,6 @@
-# Protocolo TAS · Guia Clínico Pré-Hospitalar & Emergência (PWA)
+# Cuidar em Emergência · Guia Prático de Primeiros Socorros (PWA)
 
-Aplicação web progressiva (PWA) de utilidade médica, clínica e comunitária para suporte a situações de emergência pré-hospitalar e formação em primeiros socorros, desenvolvida de acordo com as diretrizes do **Conselho Europeu de Ressuscitação (ERC 2025)**, do **INEM** e os manuais de **Tripulante de Ambulância de Socorro (TAS / UFCD 9988)**.
+Aplicação web progressiva (PWA) inclusiva, comunitária e universal para suporte prático a situações de emergência e formação em primeiros socorros. Desenhada para ser acessível a qualquer cidadão, família, cuidadores em ERPI (Estruturas Residenciais para Pessoas Idosas), escolas e formandos, mantendo o mais rigoroso alinhamento com as diretrizes do **Conselho Europeu de Ressuscitação (ERC 2025)** e do **INEM**.
 
 ---
 
@@ -63,4 +63,4 @@ Aplicação web progressiva (PWA) de utilidade médica, clínica e comunitária 
 
 ## 👨‍🏫 Autoria e Créditos
 **Thinked by Hugo Fonte**  
-*Protocolo TAS · Suporte Clínico Pré-Hospitalar & Primeiros Socorros*
+*Cuidar em Emergência · Guia Prático de Primeiros Socorros & Apoio Comunitário*

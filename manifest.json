@@ -1,7 +1,7 @@
 {
-  "name": "Protocolo TAS - Suporte Clínico Pré-Hospitalar & Emergência",
-  "short_name": "Protocolo TAS",
-  "description": "Guia Clínico e Protocolos Pré-Hospitalares de TAS, Suporte Básico de Vida (ERC 2025) e Pediatria.",
+  "name": "Cuidar em Emergência - Guia Prático de Primeiros Socorros",
+  "short_name": "Cuidar em Emergência",
+  "description": "Guia prático e inclusivo de primeiros socorros, suporte básico de vida (ERC 2025), pediatria e apoio comunitário à decisão.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b1120",
