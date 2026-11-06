@@ -1,4 +1,4 @@
-// LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2026)
+// LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
       explanation: "A segurança do socorrista e do cenário (P) antecede sempre o alerta (A) e as manobras de socorro direto (S)."
     },
     {
-      question: "Perante um lactente (< 1 ano) com asfixia grave (tosse ineficaz), qual é a conduta correta de desobstrução (ERC 2026)?",
+      question: "Perante um lactente (< 1 ano) com asfixia grave (tosse ineficaz), qual é a conduta correta de desobstrução (Diretrizes ERC 2025)?",
       options: [
         { text: "5 pancadas interescapulares em plano declive alternadas com 5 compressões torácicas; a manobra de Heimlich está estritamente proibida.", isCorrect: true },
         { text: "Manobra de Heimlich imediata com compressões abdominais violentas.", isCorrect: false },
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       explanation: "O TAP é uma ferramenta de impressão geral rápida (30-60 seg) baseada na Aparência (SNC), Trabalho Respiratório e Circulação Cutânea."
     },
     {
-      question: "No Suporte Básico de Vida (SBV) Pediátrico segundo as diretrizes ERC 2026, qual é o primeiro passo obrigatório após confirmar a ausência de respiração?",
+      question: "No Suporte Básico de Vida (SBV) Pediátrico segundo as diretrizes oficiais ERC 2025, qual é o primeiro passo obrigatório após confirmar a ausência de respiração?",
       options: [
         { text: "Realizar obrigatoriamente 5 insuflações iniciais de resgate antes das compressões torácicas.", isCorrect: true },
         { text: "Iniciar imediatamente 30 compressões torácicas sem ventilações.", isCorrect: false },
