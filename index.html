@@ -172,6 +172,41 @@
             </div>
           </button>
         </div>
+
+        <!-- PAINEL DE ACESSO OFFLINE & GUIA DE BOLSO -->
+        <div class="mt-4 p-3 bg-slate-900/90 border border-slate-700/80 rounded-2xl shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💾</span>
+              <div>
+                <strong class="text-xs text-white block font-bold">Segurança Offline &amp; Zonas Sem Rede</strong>
+                <span class="text-[10px] text-slate-400 block" id="offline-cache-status">A verificar armazenamento local...</span>
+              </div>
+            </div>
+            <span id="badge-offline-ready" class="text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="badge-offline-text">Pronto</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <button type="button" id="btn-force-cache" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-600 rounded-xl text-left flex items-center gap-2 transition cursor-pointer">
+              <span class="text-lg">📥</span>
+              <div class="min-w-0">
+                <strong class="text-white text-xs block font-bold truncate">Descarregar Info</strong>
+                <span class="text-[10px] text-sky-300 block truncate">Garantir 100% Offline</span>
+              </div>
+            </button>
+
+            <button type="button" id="btn-pocket-guide" class="py-2.5 px-3 bg-sky-950/70 hover:bg-sky-900/80 active:bg-sky-950 border border-sky-600/70 rounded-xl text-left flex items-center gap-2 transition cursor-pointer">
+              <span class="text-lg">📄</span>
+              <div class="min-w-0">
+                <strong class="text-sky-200 text-xs block font-bold truncate">Guia de Bolso</strong>
+                <span class="text-[10px] text-sky-400 block truncate">Resumo A4 / Imprimir</span>
+              </div>
+            </button>
+          </div>
+        </div>
       </section>
 
       <!-- ======================================================== -->
@@ -1198,9 +1233,23 @@
           <span>🎓</span> UFCD-9988: Noções Básicas de Primeiros Socorros • Algoritmos Oficiais 2025
         </div>
 
-        <p class="text-slate-300 text-xs mb-4">
+        <p class="text-slate-300 text-xs mb-3">
           Manual prático de autoestudo e consulta rápida em primeiros socorros, concebido para uso universal por cidadãos, socorristas e formandos. Conteúdos rigorosamente alinhados com as diretrizes e algoritmos mais recentes de <strong>SBV e OVA (Diretrizes 2025 ERC / INEM)</strong> e o Manual de Tripulante de Ambulância de Socorro (TAS). Toque nos capítulos para expandir os módulos e teste os seus conhecimentos no quiz interativo.
         </p>
+
+        <!-- BANNER DE ACESSO RÁPIDO AO GUIA DE BOLSO IMPRIMÍVEL -->
+        <div class="mb-4 p-3 bg-gradient-to-r from-sky-950/80 to-slate-900 border border-sky-500/50 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">📄</span>
+            <div>
+              <strong class="text-white text-xs block font-bold">Guia Rápido de Bolso (Resumo A4)</strong>
+              <p class="text-[11px] text-sky-200">Algoritmos condensados prontos para imprimir ou guardar em PDF.</p>
+            </div>
+          </div>
+          <button type="button" class="btn-open-pocket-guide py-2 px-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow">
+            <span>🖨️</span> <span>Ver / Imprimir</span>
+          </button>
+        </div>
 
         <!-- CAPÍTULO 1: O SIEM E O PROTOCOLO PAS -->
         <div class="chapter-accordion open">
@@ -1890,6 +1939,164 @@
       </section>
 
     </main>
+
+    <!-- MODAL DO GUIA RÁPIDO DE BOLSO (RESUMO IMPRIMÍVEL A4 / PDF) -->
+    <div id="modal-pocket-guide" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl text-slate-200">
+        
+        <!-- CABEÇALHO DO MODAL (NÃO IMPRIMÍVEL NA FOLHA) -->
+        <div class="flex items-center justify-between p-3.5 border-b border-slate-800 flex-shrink-0 no-print">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📄</span>
+            <div>
+              <h3 class="font-black text-sm text-white">Guia Rápido de Bolso · Resumo A4</h3>
+              <p class="text-[11px] text-slate-400">Algoritmos Vitais de Primeiros Socorros (ERC 2025 &amp; INEM)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-print-pocket-guide" class="py-1.5 px-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition">
+              <span>🖨️</span> <span>Imprimir / PDF</span>
+            </button>
+            <button type="button" id="btn-close-pocket-guide" class="text-slate-400 hover:text-white text-2xl font-bold px-2 py-0.5 leading-none cursor-pointer">&times;</button>
+          </div>
+        </div>
+
+        <!-- ÁREA DE CONTEÚDO IMPRIMÍVEL (POCKET GUIDE PRINT AREA) -->
+        <div class="p-4 overflow-y-auto space-y-4 text-xs leading-relaxed" id="pocket-guide-print-area">
+          
+          <!-- CABEÇALHO CLÍNICO DO GUIA -->
+          <div class="border-b-2 border-slate-700 pb-3 mb-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h1 class="text-base font-black text-white uppercase tracking-wide">CUIDAR EM EMERGÊNCIA</h1>
+                <p class="text-[11px] text-sky-400 font-semibold">Guia Rápido de Bolso &bull; Suporte Básico de Vida, Pediatria &amp; Primeiros Socorros</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Diretrizes Oficiais: ERC 2025 &bull; INEM &bull; UFCD 9988</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <span class="text-[10px] bg-red-950 text-red-300 border border-red-600 px-2 py-0.5 rounded font-black block mb-1">EMERGÊNCIA: 112</span>
+                <span class="text-[10px] text-slate-400 block font-mono">SNS 24: 808 24 24 24</span>
+                <span class="text-[10px] text-slate-400 block font-mono">CIAV: 800 250 250</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO 1: SBV NO ADULTO (ERC 2025) -->
+          <div class="pocket-print-card p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <div class="flex items-center justify-between mb-1.5">
+              <strong class="text-xs text-red-400 uppercase font-black flex items-center gap-1.5">
+                <span>🫀</span> 1. Suporte Básico de Vida no Adulto (SBV / DAE)
+              </strong>
+              <span class="pocket-print-badge text-[10px] text-red-300 bg-red-950/60 px-2 py-0.5 rounded font-mono font-bold">Rácio 30 : 2</span>
+            </div>
+            <ol class="list-decimal pl-4 space-y-1 text-slate-300 text-[11px]">
+              <li><strong>Segurança (PAS):</strong> Assegurar que o local está livre de perigo para o socorrista e vítima.</li>
+              <li><strong>Avaliar Consciência:</strong> Abanar suavemente os ombros e perguntar em voz alta: <em>«Está a ouvir-me? Sente-se bem?»</em></li>
+              <li><strong>Se Não Responde (Inconsciente):</strong> Abrir a via aérea com extensão da cabeça e elevação do queixo.</li>
+              <li><strong>Avaliar Respiração (VOS):</strong> Ver, Ouvir e Sentir durante até 10 segundos.</li>
+              <li><strong>Se NÃO respira normalmente (ou respiração agónica/gasping):</strong> <strong>LIGAR 112 DE IMEDIATO EM ALTA-VOZ</strong> e pedir um DAE.</li>
+              <li><strong>Iniciar Compressões Torácicas:</strong> Mãos sobrepostas no centro do peito, braços verticais:
+                <br>&bull; Ritmo: <strong>100 a 120 por minuto</strong> (ideal: 110 bpm).
+                <br>&bull; Profundidade: <strong>5 a 6 cm</strong>, aliviando totalmente a pressão entre compressões.
+              </li>
+              <li><strong>Alternar:</strong> <strong>30 compressões : 2 insuflações</strong> de 1 segundo cada. Trocar de reanimador aos <strong>2 minutos</strong> por fadiga muscular.</li>
+              <li><strong>DAE (Desfibrilhador):</strong> Ligar logo que chegue e seguir estritamente as instruções de voz do aparelho.</li>
+            </ol>
+          </div>
+
+          <!-- BLOCO 2: ASFIXIA / OVA (ERC 2025) -->
+          <div class="pocket-print-card p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <div class="flex items-center justify-between mb-1.5">
+              <strong class="text-xs text-yellow-400 uppercase font-black flex items-center gap-1.5">
+                <span>🗣️</span> 2. Obstrução da Via Aérea (Asfixia / Engasgamento)
+              </strong>
+              <span class="pocket-print-badge text-[10px] text-yellow-300 bg-yellow-950/60 px-2 py-0.5 rounded font-mono font-bold">5 Pancadas : 5 Heimlich</span>
+            </div>
+            <div class="space-y-1.5 text-slate-300 text-[11px]">
+              <p>&bull; <strong>Obstrução Ligeira (Tosse Eficaz):</strong> Vítima tosse com força, fala ou emite sons. <u>Incentivar a tossir. NUNCA bater nas costas</u> (risco de empurrar o objeto para o fundo da traqueia!).</p>
+              <p>&bull; <strong>Obstrução Grave no Adulto/Criança &gt;1 ano (Tosse Ineficaz/Sem som):</strong>
+                <br>1. Inclinar a vítima para a frente, apoiar o peito e aplicar <strong>5 pancadas interescapulares</strong> secas com a base da mão.
+                <br>2. Se não resolver: colocar-se atrás, punho fechado acima do umbigo, e aplicar <strong>5 compressões abdominais (Heimlich)</strong> para dentro e para cima.
+                <br>3. Alternar 5 pancadas e 5 compressões até desobstruir ou até perda de sentidos.
+                <br>4. <u>Se ficar inconsciente:</u> Deitar suavemente no chão, ligar 112 e iniciar SBV com 30 compressões.</p>
+            </div>
+          </div>
+
+          <!-- BLOCO 3: PEDIATRIA E LACTENTES -->
+          <div class="pocket-print-card p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <div class="flex items-center justify-between mb-1.5">
+              <strong class="text-xs text-sky-400 uppercase font-black flex items-center gap-1.5">
+                <span>👶</span> 3. Abordagem Pediátrica &amp; Lactente (&lt;1 ano)
+              </strong>
+              <span class="pocket-print-badge text-[10px] text-sky-300 bg-sky-950/60 px-2 py-0.5 rounded font-bold">Criança ≠ Adulto Pequeno</span>
+            </div>
+            <div class="space-y-1.5 text-slate-300 text-[11px]">
+              <p>&bull; <strong>TAP (Triângulo de Avaliação Pediátrica):</strong> Avaliar sem tocar (30-60 seg):
+                <br>1. <em>Aparência (TICOS):</em> Tónus, Interatividade, Consolabilidade, Olhar e Sons do choro/fala.
+                <br>2. <em>Trabalho Respiratório:</em> Tiragem intercostal, batimento das asas do nariz, estridor e gemido.
+                <br>3. <em>Circulação Cutânea:</em> Palidez, pele marmoreada (*livedo*) e Tempo de Preenchimento Capilar (&gt;2 seg).
+              </p>
+              <p>&bull; <strong>Asfixia no Lactente (&lt;1 ano):</strong> Colocar de bruços sobre o antebraço com cabeça mais baixa que o tronco. Aplicar <strong>5 pancadas nas costas</strong> + virar para o outro braço e aplicar <strong>5 compressões torácicas</strong> com 2 dedos. <u>PROIBIÇÃO ABSOLUTA: NUNCA FAZER HEIMLICH NO BEBÉ!</u></p>
+              <p>&bull; <strong>SBV Pediátrico:</strong> Causa primária é quase sempre hipóxia. <strong>INICIAR OBRIGATORIAMENTE COM 5 INSUFLAÇÕES DE RESGATE</strong> antes das compressões torácicas.</p>
+              <p>&bull; <strong>Petéquias / Púrpura (Meningite/Sépsis):</strong> Manchas roxas com febre que <strong>NÃO somem ao pressionar um copo de vidro transparente</strong> (vitropressão) = <strong>LIGAR 112 DE IMEDIATO</strong>.</p>
+            </div>
+          </div>
+
+          <!-- BLOCO 4: SUSPEITA DE AVC (VIA VERDE) -->
+          <div class="pocket-print-card p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <div class="flex items-center justify-between mb-1.5">
+              <strong class="text-xs text-purple-400 uppercase font-black flex items-center gap-1.5">
+                <span>🧠</span> 4. Suspeita de AVC (Escala dos 3 Fs &bull; Via Verde)
+              </strong>
+              <span class="pocket-print-badge text-[10px] text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded font-bold">Tempo é Cérebro</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-[10px] text-center my-1 font-semibold">
+              <div class="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <span class="block text-purple-300 text-xs">F - FACE</span>
+                <span class="text-slate-300">Desvio da comissura labial (boca torta ao sorrir)</span>
+              </div>
+              <div class="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <span class="block text-purple-300 text-xs">F - FORÇA</span>
+                <span class="text-slate-300">Queda de um dos braços ao estender à frente</span>
+              </div>
+              <div class="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <span class="block text-purple-300 text-xs">F - FALA</span>
+                <span class="text-slate-300">Dificuldade em articular palavras ou compreender</span>
+              </div>
+            </div>
+            <p class="text-amber-300 text-[11px] font-semibold mt-1">
+              ➔ 1 sinal positivo: Registar a hora do início dos sintomas, manter a vítima em repouso e LIGAR 112 DE IMEDIATO (ativar Via Verde).
+            </p>
+          </div>
+
+          <!-- BLOCO 5: QUEIMADURAS, HEMORRAGIAS E TRAUMA -->
+          <div class="pocket-print-card p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <strong class="text-xs text-emerald-400 uppercase font-black flex items-center gap-1.5 mb-1.5">
+              <span>🩹</span> 5. Hemorragias, Queimaduras &amp; Posicionamentos
+            </strong>
+            <ul class="space-y-1 text-slate-300 text-[11px]">
+              <li>&bull; <strong>Hemorragia Externa Severa:</strong> Compressão direta firme com compressas limpas. Se hemorragia arterial em jato incontrolável num membro: aplicar Garrote/Torniquete a 5-7 cm proximal e anotar a hora exata.</li>
+              <li>&bull; <strong>Queimaduras:</strong> Arrefecer de imediato com <strong>água corrente tépida (15-20°C) durante 15 a 20 minutos</strong>. Proibido gelo, rebentar bolhas ou aplicar pomadas/gorduras caseiras.</li>
+              <li>&bull; <strong>Dispneia Grave / EAP:</strong> Manter sentada ereta a 90° com as pernas pendentes (Posição de Fowler). <u>Nunca deitar a vítima com falta de ar aguda!</u></li>
+              <li>&bull; <strong>Inconsciente com Respiração Normal:</strong> Colocar em Posição Lateral de Segurança (PLS) para manter a via aérea desobstruída e evitar aspiração de vómito.</li>
+            </ul>
+          </div>
+
+          <!-- RODAPÉ DO DOCUMENTO IMPRESSO -->
+          <div class="pt-3 border-t border-slate-700 text-center text-[10px] text-slate-500">
+            <p class="font-bold text-slate-400">Thinked by Hugo Fonte &bull; Cuidar em Emergência</p>
+            <p>Guia Clínico Universal &bull; Uso pedagógico e comunitário &bull; Em risco de vida ligue sempre 112</p>
+          </div>
+        </div>
+
+        <!-- RODAPÉ DO MODAL (NÃO IMPRIMÍVEL NA FOLHA) -->
+        <div class="p-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/70 flex-shrink-0 no-print">
+          <span class="text-[11px] text-slate-400">💡 Dica: Ao imprimir, pode escolher "Guardar como PDF".</span>
+          <button type="button" id="btn-dismiss-pocket-guide" class="py-1.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl cursor-pointer">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APP NATIVA -->
     <nav class="bottom-nav">

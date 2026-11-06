@@ -1206,6 +1206,170 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ========================================================
+  // GESTÃO DE ACESSO OFFLINE (GARANTIR CACHE EM SEGUNDO PLANO)
+  // ========================================================
+  const btnForceCache = document.getElementById('btn-force-cache');
+  const offlineCacheStatus = document.getElementById('offline-cache-status');
+  const badgeOfflineReady = document.getElementById('badge-offline-ready');
+  const badgeOfflineText = document.getElementById('badge-offline-text');
+
+  async function checkOfflineCacheStatus() {
+    if (!('caches' in window)) {
+      if (offlineCacheStatus) offlineCacheStatus.textContent = 'Modo offline não suportado neste navegador.';
+      return;
+    }
+    try {
+      const keys = await caches.keys();
+      const currentCacheKey = keys.find(k => k.startsWith('cuidar-emergencia') || k.startsWith('protocolo-tas') || k.startsWith('socorro112'));
+      if (currentCacheKey) {
+        const cache = await caches.open(currentCacheKey);
+        const cachedRequests = await cache.keys();
+        if (offlineCacheStatus) {
+          offlineCacheStatus.textContent = `✅ ${cachedRequests.length} recursos guardados na memória do telemóvel.`;
+        }
+        if (badgeOfflineReady) {
+          badgeOfflineReady.className = 'text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1';
+        }
+        if (badgeOfflineText) badgeOfflineText.textContent = navigator.onLine ? 'Pronto' : 'Offline Ativo';
+      } else {
+        if (offlineCacheStatus) offlineCacheStatus.textContent = 'Toque em "Descarregar Info" para garantir acesso offline.';
+      }
+    } catch (e) {
+      console.warn('Erro ao verificar cache offline:', e);
+    }
+  }
+
+  // Verificar estado offline no arranque
+  checkOfflineCacheStatus();
+
+  window.addEventListener('online', () => {
+    if (badgeOfflineReady) {
+      badgeOfflineReady.className = 'text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1';
+    }
+    if (badgeOfflineText) badgeOfflineText.textContent = 'Pronto';
+  });
+
+  window.addEventListener('offline', () => {
+    if (badgeOfflineReady) {
+      badgeOfflineReady.className = 'text-[10px] bg-amber-950/80 text-amber-300 border border-amber-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1';
+    }
+    if (badgeOfflineText) badgeOfflineText.textContent = 'Offline Ativo';
+  });
+
+  if (btnForceCache) {
+    btnForceCache.addEventListener('click', async () => {
+      if (!('caches' in window)) {
+        alert('O seu navegador não suporta a tecnologia de cache offline.');
+        return;
+      }
+      btnForceCache.disabled = true;
+      const originalHtml = btnForceCache.innerHTML;
+      btnForceCache.innerHTML = `
+        <span class="text-lg animate-spin">⏳</span>
+        <div class="min-w-0">
+          <strong class="text-white text-xs block font-bold truncate">A Descarregar...</strong>
+          <span class="text-[10px] text-yellow-300 block truncate">A guardar no telemóvel</span>
+        </div>
+      `;
+
+      try {
+        const cacheName = 'cuidar-emergencia-v27';
+        const cache = await caches.open(cacheName);
+        
+        const urlsToCache = [
+          './',
+          './index.html',
+          './manifest.json',
+          './css/styles.css?v=27',
+          './js/app.js?v=27',
+          './js/audio.js?v=27',
+          './js/geo.js?v=27',
+          './js/knowledge_base.js?v=27',
+          './js/rag.js?v=27',
+          './js/ai.js?v=27',
+          'https://cdn.tailwindcss.com/3.4.17',
+          './assets/images/estrela_da_vida.jpg',
+          './assets/images/cadeia_sobrevivencia.png',
+          './assets/images/sbv_consciencia.png',
+          './assets/images/sbv_abertura_via_aerea.png',
+          './assets/images/sbv_vos.png',
+          './assets/images/sbv_pls.png',
+          './assets/images/sbv_compressoes.png',
+          './assets/images/sbv_insuflacoes.png',
+          './assets/images/ova_pancadas.png',
+          './assets/images/ova_heimlich.png',
+          './assets/images/hemorragia_pressao_direta.jpg',
+          './assets/images/hemorragia_garrote.jpg',
+          './assets/images/hemorragia_elevacao.jpg',
+          './assets/images/queimadura_1grau.jpg',
+          './assets/images/queimadura_2grau.jpg',
+          './assets/images/queimadura_3grau.jpg',
+          './assets/images/avc_isquemico.png',
+          './assets/images/avc_hemorragico.png'
+        ];
+
+        let successCount = 0;
+        await Promise.allSettled(urlsToCache.map(async (url) => {
+          try {
+            await cache.add(url);
+            successCount++;
+          } catch (err) {
+            console.warn('Falha pontual no pré-carregamento:', url, err);
+          }
+        }));
+
+        if (navigator.storage && navigator.storage.persist) {
+          try { await navigator.storage.persist(); } catch (e) {}
+        }
+
+        await checkOfflineCacheStatus();
+
+        alert(`✅ Sucesso! Foram guardados ${successCount} recursos essenciais na memória local do seu dispositivo.\n\nA aplicação está 100% pronta para ser utilizada em zonas rurais, caves, montanha ou sem qualquer cobertura de rede móvel.`);
+      } catch (err) {
+        console.error('Erro ao forçar cache:', err);
+        alert('Não foi possível concluir o descarregamento de todos os recursos. Verifique a ligação à internet e tente novamente.');
+      } finally {
+        btnForceCache.disabled = false;
+        btnForceCache.innerHTML = originalHtml;
+      }
+    });
+  }
+
+  // ========================================================
+  // MODAL DO GUIA RÁPIDO DE BOLSO (RESUMO IMPRIMÍVEL A4)
+  // ========================================================
+  const modalPocketGuide = document.getElementById('modal-pocket-guide');
+  const btnPocketGuide = document.getElementById('btn-pocket-guide');
+  const btnClosePocketGuide = document.getElementById('btn-close-pocket-guide');
+  const btnDismissPocketGuide = document.getElementById('btn-dismiss-pocket-guide');
+  const btnPrintPocketGuide = document.getElementById('btn-print-pocket-guide');
+  const btnsOpenPocketGuideClass = document.querySelectorAll('.btn-open-pocket-guide');
+
+  function openPocketGuide() {
+    if (modalPocketGuide) modalPocketGuide.classList.remove('hidden');
+  }
+
+  function closePocketGuide() {
+    if (modalPocketGuide) modalPocketGuide.classList.add('hidden');
+  }
+
+  if (btnPocketGuide) btnPocketGuide.addEventListener('click', openPocketGuide);
+  btnsOpenPocketGuideClass.forEach(btn => btn.addEventListener('click', openPocketGuide));
+  if (btnClosePocketGuide) btnClosePocketGuide.addEventListener('click', closePocketGuide);
+  if (btnDismissPocketGuide) btnDismissPocketGuide.addEventListener('click', closePocketGuide);
+  if (btnPrintPocketGuide) {
+    btnPrintPocketGuide.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  if (modalPocketGuide) {
+    modalPocketGuide.addEventListener('click', (e) => {
+      if (e.target === modalPocketGuide) closePocketGuide();
+    });
+  }
+
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));
   };

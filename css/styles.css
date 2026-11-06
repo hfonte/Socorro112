@@ -697,3 +697,75 @@ body {
   align-items: center;
   gap: 6px;
 }
+
+/* ======================================================== */
+/* ESTILOS DE IMPRESSÃO (GUIA RÁPIDO DE BOLSO A4 / PDF)     */
+/* ======================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 9pt !important;
+    line-height: 1.3 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ocultar toda a interface da app ao imprimir */
+  .app-container > header,
+  .app-container > nav,
+  .mode-switch-bar,
+  .content-body,
+  .no-print,
+  #modal-share-ice,
+  #app-legal-disclaimer {
+    display: none !important;
+  }
+
+  /* Exibir exclusivamente o modal do Guia de Bolso */
+  #modal-pocket-guide {
+    display: block !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #modal-pocket-guide > div {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: none !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  #pocket-guide-print-area {
+    padding: 0 !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+  }
+
+  #pocket-guide-print-area * {
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  .pocket-print-card {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    page-break-inside: avoid;
+  }
+
+  .pocket-print-badge {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    border: 1px solid #94a3b8 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 1cm;
+  }
+}
