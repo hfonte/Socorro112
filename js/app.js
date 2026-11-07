@@ -1751,6 +1751,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ========================================================
+  // MODAL DE VÍDEOS DEMONSTRATIVOS (INEM OFICIAL)
+  // ========================================================
+  const modalVideoViewer = document.getElementById('modal-video-viewer');
+  const modalVideoIframe = document.getElementById('modal-video-iframe');
+  const modalVideoTitle = document.getElementById('modal-video-title');
+  const modalVideoDesc = document.getElementById('modal-video-desc');
+  const btnCloseVideoModal = document.getElementById('btn-close-video-modal');
+
+  function openVideoModal(videoId, title, desc) {
+    if (!modalVideoViewer || !modalVideoIframe) return;
+    if (modalVideoTitle) modalVideoTitle.textContent = title || 'Vídeo Demonstrativo';
+    if (modalVideoDesc) modalVideoDesc.textContent = desc || 'Demonstração técnica oficial do INEM (@INEMVIDEOS).';
+    modalVideoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    modalVideoViewer.classList.remove('hidden');
+  }
+
+  function closeVideoModal() {
+    if (!modalVideoViewer || !modalVideoIframe) return;
+    modalVideoIframe.src = '';
+    modalVideoViewer.classList.add('hidden');
+  }
+
+  if (btnCloseVideoModal) {
+    btnCloseVideoModal.addEventListener('click', closeVideoModal);
+  }
+  if (modalVideoViewer) {
+    modalVideoViewer.addEventListener('click', (e) => {
+      if (e.target === modalVideoViewer) closeVideoModal();
+    });
+  }
+
+  document.querySelectorAll('.btn-open-video-modal').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const vid = btn.dataset.video;
+      const title = btn.dataset.title || btn.textContent.trim();
+      const desc = btn.dataset.desc || '';
+      if (vid) openVideoModal(vid, title, desc);
+    });
+  });
+
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));
   };

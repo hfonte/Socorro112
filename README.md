@@ -31,7 +31,7 @@ Aplicação web progressiva (PWA) inclusiva, comunitária e universal para supor
 - **Algoritmo de Perda de Consciência:** Transição imediata para 30 compressões de SBV.
 
 ### 5. Motor de IA Multimodal com RAG & Follow-up com Reavaliação Clínica
-- **Base de Conhecimento Clínica Local:** Indexação direta de 21 módulos oficiais dos Manuais UFCD 9988 / TAS / INEM e Diretrizes ERC 2025.
+- **Base de Conhecimento Clínica Local:** Indexação direta de 21 módulos oficiais dos Manuais de Primeiros Socorros / TAS / INEM e Diretrizes ERC 2025.
 - **Triagem em 4 Blocos Rigorosos:** Diagnóstico, 3 Ações Prioritárias, Proibições Críticas e Conduta 112 / Linha SNS 24.
 - **Temporizador de Monitorização & Reavaliação Clínica:** Se o algoritmo indicar repouso ou observação, ativa um temporizador configurável (5, 10, 15, 20 min) com aviso sonoro (chime) e questionário interativo de evolução clínica (🟢 Melhorou / 🟡 Mantém-se igual com SNS 24 / 🔴 Piorou com alarme sonoro e escalada 112).
 - **Modo de Contingência:** Se os servidores da Google estiverem offline ou em pico de tráfego, o motor RAG debita as diretrizes diretamente do manual local sem falhar.

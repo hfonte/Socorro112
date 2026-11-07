@@ -133,7 +133,7 @@ Formato exato:
 
 Responde estritamente em Português de Portugal (pt-PT).`;
 
-    // 1. Pesquisa RAG na base de conhecimento oficial (Manuais UFCD 9988 / TAS)
+    // 1. Pesquisa RAG na base de conhecimento oficial (Manual de Primeiros Socorros / TAS)
     const matchResult = typeof RagEngine !== 'undefined' ? RagEngine.search(textPrompt) : null;
     let finalSystemInstruction = baseSystemInstruction;
     if (matchResult && matchResult.entry) {
@@ -240,7 +240,7 @@ REGRA: Considera estes antecedentes médicos reais para personalizar o diagnóst
     // o motor RAG fornece o protocolo de primeiros socorros diretamente do manual localmente, sem deixar a vítima desamparada!
     if (typeof RagEngine !== 'undefined') {
       const fallbackClinicalText = RagEngine.generateOfflineProtocolResponse(matchResult?.entry);
-      return `⚠️ **[Modo de Contingência • Protocolo Direto do Manual]**\n*(Servidores da Google temporariamente congestionados. A apresentar diretrizes oficiais dos teus Manuais de TAS/UFCD 9988)*\n\n${fallbackClinicalText}`;
+      return `⚠️ **[Modo de Contingência • Protocolo Direto do Manual]**\n*(Servidores da Google temporariamente congestionados. A apresentar diretrizes oficiais dos Manuais de Primeiros Socorros / TAS)*\n\n${fallbackClinicalText}`;
     }
 
     throw lastError || new Error('Não foi possível obter resposta em tempo útil. Em dúvida, ligue 112 imediatamente.');

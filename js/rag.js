@@ -1,4 +1,4 @@
-// MOTOR RAG (RETRIEVAL-AUGMENTED GENERATION) - BASEADO NOS MANUAIS UFCD 9988 / TAS (HUGO FONTE)
+// MOTOR RAG (RETRIEVAL-AUGMENTED GENERATION) - BASEADO NOS MANUAIS DE PRIMEIROS SOCORROS & TAS (HUGO FONTE)
 const RagEngine = {
   // Normalizar texto para correspondência semântica e por palavras-chave
   normalize(str) {
