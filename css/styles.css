@@ -699,6 +699,40 @@ body {
 }
 
 /* ======================================================== */
+/* AFUNILAMENTO DE TRIAGEM CLÍNICO (CHIPS E SELEÇÃO)        */
+/* ======================================================== */
+.triage-symptom-chip {
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  user-select: none;
+}
+.triage-symptom-chip:active {
+  transform: scale(0.985);
+}
+.triage-symptom-chip.is-selected {
+  background-color: rgba(120, 53, 15, 0.45) !important;
+  border-color: #f59e0b !important;
+  color: #fef3c7 !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+}
+.triage-symptom-chip.is-selected .chip-check {
+  background-color: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #0f172a !important;
+}
+.triage-quick-chip,
+.triage-none-chip,
+.btn-confirm-symptoms {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease-in-out;
+}
+.triage-quick-chip:active,
+.triage-none-chip:active {
+  transform: scale(0.985);
+}
+
+/* ======================================================== */
 /* ESTILOS DE IMPRESSÃO (GUIA RÁPIDO DE BOLSO A4 / PDF)     */
 /* ======================================================== */
 @media print {

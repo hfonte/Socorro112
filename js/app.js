@@ -754,6 +754,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function escapeTriageHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function formatAIMarkdown(rawText) {
     if (!rawText) return '';
     const lines = rawText.split('\n');
@@ -775,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (/^[1-5]\.\s+.*(DESPISTE|AFUNILAMENTO)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
-        formattedHtml += `<div class="mt-3 mb-1 text-purple-400 font-black text-sm flex items-center gap-1.5 border-b border-purple-800/60 pb-1">❓ Afunilamento de Gravidade (Responda num toque):</div>`;
+        formattedHtml += `<div class="mt-3 mb-1 text-purple-400 font-black text-sm flex items-center gap-1.5 border-b border-purple-800/60 pb-1">❓ Afunilamento de Triagem (Sinais de Gravidade):</div>`;
         return;
       }
 
@@ -804,14 +814,106 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (clean.includes('Opções:') || (clean.includes('?') && clean.includes('Sim'))) {
-        const questionText = clean.replace(/^-?\s*(Pergunta:)?\s*/i, '').replace(/Opções:.*$/i, '').trim();
+      // Afunilamento de Triagem: Perguntas Atómicas Sim/Não ou Múltipla Escolha Discriminada de Sintomas
+      const cleanNoBold = clean.replace(/\*\*/g, '');
+      const hasOptions = /Opções:\s*\[(.*?)\]/i.test(cleanNoBold) || (/\[(.*?)\]/.test(cleanNoBold) && cleanNoBold.includes('|'));
+
+      if (hasOptions) {
+        if (inList) { formattedHtml += '</ul>'; inList = false; }
+
+        let questionText = '';
+        let options = [];
+
+        const opcMatch = cleanNoBold.match(/Opções:\s*\[(.*?)\]/i);
+        if (opcMatch) {
+          options = opcMatch[1].split('|').map(s => s.trim()).filter(Boolean);
+          questionText = cleanNoBold.substring(0, opcMatch.index)
+            .replace(/^[-*•]?\s*(Pergunta:\s*)?/i, '')
+            .trim();
+        } else {
+          const bracketMatch = cleanNoBold.match(/\[(.*?)\]/);
+          if (bracketMatch && bracketMatch[1].includes('|')) {
+            options = bracketMatch[1].split('|').map(s => s.trim()).filter(Boolean);
+            questionText = cleanNoBold.replace(bracketMatch[0], '')
+              .replace(/^[-*•]?\s*(Pergunta:\s*)?/i, '')
+              .replace(/Opções:?/i, '')
+              .trim();
+          }
+        }
+
+        questionText = questionText.replace(/^[:\-\s]+/, '').trim();
+        if (!questionText) questionText = 'Identifique os sinais ou sintomas da vítima:';
+
+        // Modalidade A: Pergunta atómica binária Sim / Não
+        const isBinarySimNao = options.length === 2 &&
+          options.some(o => /^sim$/i.test(o)) &&
+          options.some(o => /^não$|^nao$/i.test(o));
+
+        const triageGroupId = 'triage-grp-' + Math.random().toString(36).substring(2, 9);
+
+        if (isBinarySimNao) {
+          formattedHtml += `
+            <div class="my-2.5 p-3 bg-slate-900/90 border border-amber-500/40 rounded-xl shadow-sm">
+              <div class="flex items-start gap-1.5 mb-2">
+                <span class="text-amber-400 text-xs">❓</span>
+                <p class="text-xs text-yellow-200 font-semibold leading-snug">${escapeTriageHtml(questionText)}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" class="triage-quick-chip flex-1 py-2 px-3 bg-emerald-950/80 hover:bg-emerald-800 text-emerald-300 border border-emerald-600 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" data-resp="Sim (Confirma: ${escapeTriageHtml(questionText)})">
+                  <span>✅</span> Sim
+                </button>
+                <button type="button" class="triage-quick-chip flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" data-resp="Não (Nega: ${escapeTriageHtml(questionText)})">
+                  <span>❌</span> Não
+                </button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // Modalidade B: Seleção discriminada de sintomas e sinais simultâneos
+        let chipsHtml = '';
+        options.forEach(opt => {
+          const isNone = /nenhum|nenhuma|nada|não sei|nenhum destes|nenhum dos anteriores/i.test(opt);
+          if (isNone) {
+            chipsHtml += `
+              <button type="button" 
+                class="triage-none-chip w-full text-left py-2 px-3 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600/70 rounded-lg text-xs font-semibold transition flex items-center justify-between active:scale-[0.99]"
+                data-resp="Nenhum destes sinais (Nega todos os sintomas de: ${escapeTriageHtml(questionText)})">
+                <span class="flex items-center gap-2"><span>⚪</span> ${escapeTriageHtml(opt)}</span>
+                <span class="text-[10px] bg-slate-700/80 text-slate-300 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Toque rápido</span>
+              </button>
+            `;
+          } else {
+            chipsHtml += `
+              <button type="button" 
+                class="triage-symptom-chip w-full text-left py-2 px-3 bg-slate-950/70 hover:bg-slate-800/80 text-slate-200 border border-slate-700 rounded-lg text-xs transition flex items-center gap-2.5 active:scale-[0.99]"
+                data-val="${escapeTriageHtml(opt)}">
+                <span class="chip-check w-4 h-4 rounded border border-slate-600 bg-slate-900 flex items-center justify-center text-[10px] text-transparent font-black shrink-0 transition">✓</span>
+                <span class="chip-label flex-1 font-medium leading-snug">${escapeTriageHtml(opt)}</span>
+              </button>
+            `;
+          }
+        });
+
         formattedHtml += `
-          <div class="my-2 p-2 bg-slate-900 border border-slate-700 rounded-lg">
-            <p class="text-xs text-yellow-300 font-semibold mb-1.5">${questionText}</p>
-            <div class="flex items-center gap-2">
-              <button type="button" class="triage-quick-chip bg-emerald-950/80 hover:bg-emerald-800 text-emerald-300 border border-emerald-600 px-3 py-1 rounded text-[11px] font-bold" data-resp="Sim (${questionText})">✅ Sim</button>
-              <button type="button" class="triage-quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-3 py-1 rounded text-[11px] font-bold" data-resp="Não (${questionText})">❌ Não</button>
+          <div id="${triageGroupId}" class="triage-multiselect-group my-3 p-3 bg-slate-900/90 border border-amber-500/50 rounded-xl shadow-md" data-question="${escapeTriageHtml(questionText)}">
+            <div class="flex items-start gap-2 mb-2">
+              <span class="text-amber-400 text-sm">📋</span>
+              <div>
+                <p class="text-xs text-yellow-200 font-bold leading-snug">${escapeTriageHtml(questionText)}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Pode selecionar um ou vários sintomas simultâneos, ou tocar em "Nenhum":</p>
+              </div>
+            </div>
+            <div class="space-y-1.5 my-2">
+              ${chipsHtml}
+            </div>
+            <div class="mt-2 pt-2 border-t border-slate-800 flex items-center justify-end">
+              <button type="button" 
+                class="btn-confirm-symptoms w-full py-2.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-black transition disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1.5 shadow-md" disabled>
+                <span>Confirmar Sintomas Selecionados</span>
+                <span class="font-mono">➔</span>
+              </button>
             </div>
           </div>
         `;
@@ -997,13 +1099,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const aiShareBox = document.getElementById('ai-share-box');
           if (aiShareBox) aiShareBox.classList.remove('hidden');
 
-          aiResponseBox.querySelectorAll('.triage-quick-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-              const resp = chip.dataset.resp;
-              aiTextPrompt.value += `\n[Despiste de Triagem: ${resp}]`;
-              btnAskAI.click();
-            });
-          });
+          // Inicializar listeners de afunilamento de triagem (chips atómicos e multi-seleção de sintomas)
+          initTriageDespisteListeners();
 
           // Inicializar temporizador e questionário de follow-up
           initFollowupTimerListeners();
@@ -1020,6 +1117,89 @@ document.addEventListener('DOMContentLoaded', () => {
           btnAskAI.textContent = '🔍 Analisar com Diretrizes Médicas';
         }
       }
+    });
+  }
+
+  // ========================================================
+  // AFUNILAMENTO DE TRIAGEM CLÍNICO (CHIPS ATÓMICOS E MULTI-SINTOMAS)
+  // ========================================================
+  function initTriageDespisteListeners() {
+    if (!aiResponseBox) return;
+
+    // 1. Respostas atómicas binárias rápidas (Sim / Não)
+    aiResponseBox.querySelectorAll('.triage-quick-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const resp = chip.dataset.resp;
+        aiTextPrompt.value += `\n[Despiste de Triagem: ${resp}]`;
+        if (btnAskAI) btnAskAI.click();
+      });
+    });
+
+    // 2. Exclusão rápida imediata ("Nenhum destes")
+    aiResponseBox.querySelectorAll('.triage-none-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const resp = chip.dataset.resp;
+        aiTextPrompt.value += `\n[Despiste de Triagem: ${resp}]`;
+        if (btnAskAI) btnAskAI.click();
+      });
+    });
+
+    // 3. Seleção de sintomas com suporte a múltiplos sinais simultâneos
+    aiResponseBox.querySelectorAll('.triage-symptom-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const isSelected = chip.classList.toggle('is-selected');
+        const checkIcon = chip.querySelector('.chip-check');
+
+        if (isSelected) {
+          chip.classList.remove('bg-slate-950/70', 'border-slate-700', 'text-slate-200');
+          chip.classList.add('bg-amber-950/60', 'border-amber-400', 'text-amber-200');
+          if (checkIcon) {
+            checkIcon.classList.remove('bg-slate-900', 'border-slate-600', 'text-transparent');
+            checkIcon.classList.add('bg-amber-500', 'border-amber-400', 'text-slate-950');
+          }
+        } else {
+          chip.classList.remove('bg-amber-950/60', 'border-amber-400', 'text-amber-200');
+          chip.classList.add('bg-slate-950/70', 'border-slate-700', 'text-slate-200');
+          if (checkIcon) {
+            checkIcon.classList.remove('bg-amber-500', 'border-amber-400', 'text-slate-950');
+            checkIcon.classList.add('bg-slate-900', 'border-slate-600', 'text-transparent');
+          }
+        }
+
+        // Atualizar estado e contador do botão Confirmar
+        const groupEl = chip.closest('.triage-multiselect-group');
+        if (groupEl) {
+          const selectedChips = groupEl.querySelectorAll('.triage-symptom-chip.is-selected');
+          const count = selectedChips.length;
+          const confirmBtn = groupEl.querySelector('.btn-confirm-symptoms');
+          if (confirmBtn) {
+            if (count > 0) {
+              confirmBtn.disabled = false;
+              confirmBtn.innerHTML = `<span>Confirmar Sintomas Selecionados (${count})</span> <span class="font-mono">➔</span>`;
+            } else {
+              confirmBtn.disabled = true;
+              confirmBtn.innerHTML = `<span>Confirmar Sintomas Selecionados</span> <span class="font-mono">➔</span>`;
+            }
+          }
+        }
+      });
+    });
+
+    // 4. Submissão dos sintomas simultâneos selecionados
+    aiResponseBox.querySelectorAll('.btn-confirm-symptoms').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const groupEl = btn.closest('.triage-multiselect-group');
+        if (!groupEl) return;
+        const selectedChips = groupEl.querySelectorAll('.triage-symptom-chip.is-selected');
+        if (!selectedChips.length) return;
+
+        const symptoms = Array.from(selectedChips).map(c => c.dataset.val.trim());
+        const question = groupEl.dataset.question || 'sintomas avaliados';
+        const symptomStr = symptoms.join(' + ');
+
+        aiTextPrompt.value += `\n[Despiste de Triagem: Vítima confirma presença simultânea de: ${symptomStr} (em resposta a: ${question})]`;
+        if (btnAskAI) btnAskAI.click();
+      });
     });
   }
 
