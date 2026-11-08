@@ -3452,24 +3452,18 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
 
     function handleCoachAction(action) {
       if (action === 'stop') {
-        stopCoach();
+        stopCoach(true);
         return;
       }
-      if (action === 'go_sbv') {
-        stopCoach();
-        const sbvBtn = document.querySelector('button[data-nav="screen-sbv"]') || document.querySelector('.bottom-nav button[data-target="screen-sbv"]');
-        if (sbvBtn) {
-          sbvBtn.click();
-        } else {
-          document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
-          document.getElementById('screen-sbv')?.classList.add('active');
-        }
+      if (action === 'unconscious' || action === 'go_sbv') {
+        renderCoachStep(currentProtocol, 'unconscious');
+        const delay = (action === 'unconscious') ? 1600 : 0;
         setTimeout(() => {
-          const btnStart = document.getElementById('btn-sbv-start');
-          if (btnStart && !btnStart.classList.contains('hidden')) {
-            btnStart.click();
-          }
-        }, 300);
+          stopCoach(false);
+          AudioManager.initContext();
+          navigateTo('screen-sbv');
+          startSBV();
+        }, delay);
         return;
       }
       if (action === 'record_tourniquet') {
@@ -3482,9 +3476,11 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
       renderCoachStep(currentProtocol, action);
     }
 
-    function stopCoach() {
+    function stopCoach(cancelVoice = true) {
       pauseListening();
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (cancelVoice && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
 
       document.querySelectorAll('.interactive-voice-coach-card').forEach(widget => {
         const panel = widget.querySelector('.voice-coach-panel');
