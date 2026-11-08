@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=32">
+  <link rel="stylesheet" href="./css/styles.css?v=33">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
 </head>
 <body>
@@ -21,9 +21,17 @@
         <img src="./assets/images/estrela_da_vida.jpg" alt="Estrela da Vida" class="brand-icon">
         <span>CUIDAR EM EMERGÊNCIA</span>
       </div>
-      <a href="tel:112" class="btn-header-112">
-        <span>📞 LIGAR 112</span>
-      </a>
+      <div class="flex items-center gap-1.5">
+        <button type="button" id="btn-toggle-lang" class="text-[11px] font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition shadow-sm" title="English / Tradução">
+          <span>🌐</span><span>EN</span>
+        </button>
+        <button type="button" id="btn-open-sbar" class="text-[11px] font-bold text-yellow-300 bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg border border-yellow-500/50 flex items-center gap-1 shadow-sm transition" title="Guião SBAR 112 & Chegada dos Meios">
+          <span>📋</span><span>SBAR 112</span>
+        </button>
+        <a href="tel:112" class="btn-header-112" translate="no">
+          <span>📞 112</span>
+        </a>
+      </div>
     </header>
 
     <!-- BANNER DE ISENÇÃO DE RESPONSABILIDADE MÉDICA (DISCLAIMER OBRIGATÓRIO) -->
@@ -182,6 +190,23 @@
             <div>
               <strong class="text-yellow-300 text-xs block font-bold">Assistente IA</strong>
               <span class="text-[11px] text-slate-400 block">Triagem &amp; Foto</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-2 mb-1">
+          <button type="button" id="btn-quick-simulator" class="p-3 bg-slate-900 border border-purple-500/50 rounded-xl flex items-center gap-2.5 text-left hover:bg-slate-800 transition-colors">
+            <span class="text-2xl">🎮</span>
+            <div>
+              <strong class="text-purple-300 text-xs block font-bold">Simulador Prático</strong>
+              <span class="text-[11px] text-slate-400 block">Casos Clínicos Interativos</span>
+            </div>
+          </button>
+          <button type="button" id="btn-quick-kit-checklist" class="p-3 bg-slate-900 border border-emerald-500/50 rounded-xl flex items-center gap-2.5 text-left hover:bg-slate-800 transition-colors">
+            <span class="text-2xl">📦</span>
+            <div>
+              <strong class="text-emerald-300 text-xs block font-bold">Caixa de Socorros</strong>
+              <span class="text-[11px] text-slate-400 block">Checklist por Local</span>
             </div>
           </button>
         </div>
@@ -418,7 +443,7 @@
             <li><strong>Alteração do estado de consciência:</strong> Confusão, agitação extrema ou sonolência.</li>
           </ul>
 
-          <a href="tel:112" class="action bg-red-600 text-white font-black text-xs w-full py-3 mt-3 block text-center">
+          <a href="tel:112" class="action bg-red-600 text-white font-black text-xs w-full py-3 mt-3 block text-center" translate="no">
             📞 LIGAR 112 AGORA COM DISPNEIA GRAVE
           </a>
         </div>
@@ -729,7 +754,7 @@
             </div>
           </div>
 
-          <a href="tel:112" class="action bg-red-600 hover:bg-red-500 text-white font-black text-xs w-full py-3 mt-3 block text-center rounded-xl shadow-lg shadow-red-900/60">
+          <a href="tel:112" class="action bg-red-600 hover:bg-red-500 text-white font-black text-xs w-full py-3 mt-3 block text-center rounded-xl shadow-lg shadow-red-900/60" translate="no">
             📞 LIGAR 112 EM EMERGÊNCIA PEDIÁTRICA
           </a>
         </div>
@@ -1091,7 +1116,20 @@
           <input type="file" id="ai-file-input" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-yellow-300 cursor-pointer">
           <img id="ai-img-preview" class="hidden w-full max-h-48 object-cover rounded-xl mt-3 border border-slate-700" alt="Pré-visualização">
 
-          <label class="block text-xs font-bold text-slate-300 mt-4 mb-2">2. Descreva o que está a acontecer:</label>
+          <div class="flex items-center justify-between mt-4 mb-2">
+            <label class="block text-xs font-bold text-slate-300">2. Descreva o que está a acontecer:</label>
+            <button type="button" id="btn-voice-input" class="text-xs py-1 px-2.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/50 rounded-lg flex items-center gap-1.5 transition font-semibold cursor-pointer">
+              <span id="voice-mic-icon">🎙️</span>
+              <span id="voice-mic-label">Modo Mãos Livres</span>
+            </button>
+          </div>
+          <div id="voice-recording-indicator" class="hidden mb-2 p-2.5 bg-red-950/80 border border-red-500/80 rounded-xl flex items-center justify-between text-xs text-red-200 shadow-sm">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+              <span class="font-semibold text-xs text-red-200">A ouvir voz... Fale continuamente com as mãos livres:</span>
+            </div>
+            <button type="button" id="btn-stop-voice" class="text-[10px] bg-red-700 hover:bg-red-600 text-white font-bold px-2.5 py-1 rounded-lg">Parar</button>
+          </div>
           <textarea id="ai-text-prompt" rows="3" placeholder="Ex.: Queimadura com óleo quente no antebraço, tem bolha transparente com líquido... o que devo fazer?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-xs"></textarea>
 
           <button type="button" id="btn-ask-ai" class="action bg-yellow-400 text-slate-950 font-black text-sm w-full mt-3 py-3">
@@ -2114,6 +2152,75 @@
           </div>
         </div>
 
+        <!-- CAPÍTULO 12: SIMULADOR INTERATIVO DE CASOS CLÍNICOS (TREINO PRÁTICO) -->
+        <div id="chapter-simulator" class="chapter-accordion open">
+          <button type="button" class="accordion-header">
+            <span>🎮 12. Simulador Interativo de Casos Clínicos (Modo Treino)</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+              Treine a sua capacidade de decisão em emergências reais. Cada escolha tem consequências clínicas diretas segundo as diretrizes oficiais ERC 2025:
+            </p>
+
+            <!-- SELETOR DE CENÁRIOS -->
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-purple-500 rounded-xl text-left transition" data-scenario="pcr_adulto">
+                <span class="text-lg block mb-0.5">🫀</span>
+                <strong class="text-xs text-white block">PCR Adulto</strong>
+                <span class="text-[10px] text-purple-300">Colapso Súbito</span>
+              </button>
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition" data-scenario="ova_adulto">
+                <span class="text-lg block mb-0.5">🗣️</span>
+                <strong class="text-xs text-white block">Engasgamento</strong>
+                <span class="text-[10px] text-slate-400">OVA no Adulto</span>
+              </button>
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition" data-scenario="ova_pediatrico">
+                <span class="text-lg block mb-0.5">👶</span>
+                <strong class="text-xs text-white block">Bebé a Engasgar</strong>
+                <span class="text-[10px] text-slate-400">Lactente &lt;1 ano</span>
+              </button>
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition" data-scenario="avc_idoso">
+                <span class="text-lg block mb-0.5">🧠</span>
+                <strong class="text-xs text-white block">Suspeita de AVC</strong>
+                <span class="text-[10px] text-slate-400">Regra dos 3 «F»</span>
+              </button>
+            </div>
+
+            <!-- ÁREA DO CENÁRIO ATIVO -->
+            <div id="sim-active-container" class="p-3.5 bg-slate-950 border border-purple-500/40 rounded-2xl space-y-3">
+              <!-- Gerado dinamicamente via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPÍTULO 13: CHECKLIST DA CAIXA DE PRIMEIROS SOCORROS POR LOCAL -->
+        <div id="chapter-kit-checklist" class="chapter-accordion open">
+          <button type="button" class="accordion-header">
+            <span>📦 13. Caixa de Primeiros Socorros por Local (Checklist Interativo)</span>
+            <span class="accordion-chevron">▼</span>
+          </button>
+          <div class="accordion-body">
+            <p class="text-xs text-slate-300 mb-2 leading-relaxed">
+              Consulte e verifique a sua mala ou estojo de primeiros socorros de acordo com o espaço onde se encontra, segundo as recomendações do INEM e normas europeias:
+            </p>
+
+            <!-- SELETOR DE LOCAL -->
+            <div class="flex gap-1.5 overflow-x-auto pb-2 text-xs font-bold no-scrollbar">
+              <button type="button" class="btn-kit-location-tab py-1.5 px-3 rounded-lg bg-emerald-600 text-white whitespace-nowrap active cursor-pointer" data-location="casa">🏠 Casa</button>
+              <button type="button" class="btn-kit-location-tab py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap cursor-pointer" data-location="carro">🚗 Carro</button>
+              <button type="button" class="btn-kit-location-tab py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap cursor-pointer" data-location="erpi">👵 ERPI / Lar</button>
+              <button type="button" class="btn-kit-location-tab py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap cursor-pointer" data-location="creche">🧒 Creche / Escola</button>
+              <button type="button" class="btn-kit-location-tab py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap cursor-pointer" data-location="empresa">🏢 Empresa</button>
+            </div>
+
+            <!-- CONTAINER DINÂMICO DA CHECKLIST -->
+            <div id="kit-checklist-container" class="mt-2 space-y-2.5">
+              <!-- Gerado dinamicamente via JS -->
+            </div>
+          </div>
+        </div>
+
         <!-- RODAPÉ DE CRÉDITOS: THINKED BY HUGO FONTE (ÚNICA REFERÊNCIA) -->
         <footer class="mt-10 mb-6 pt-5 border-t border-slate-800/80 text-center text-xs text-slate-500">
           <p class="font-semibold tracking-wide text-slate-400 text-sm">Thinked by Hugo Fonte</p>
@@ -2365,6 +2472,229 @@
       </div>
     </div>
 
+    <!-- MODAL DE GUIÃO 112 & PASSAGEM DE TESTEMUNHO SBAR (BOMBEIROS / INEM / CVP) -->
+    <div id="modal-sbar-handover" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl text-slate-200">
+        
+        <!-- CABEÇALHO DO MODAL -->
+        <div class="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-950 flex-shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📋</span>
+            <div>
+              <h3 class="font-black text-sm text-white">Guião 112 &amp; Passagem de Testemunho SBAR</h3>
+              <span class="text-[10px] text-amber-400 font-semibold">Comunicação CODU • Bombeiros / INEM / CVP</span>
+            </div>
+          </div>
+          <button type="button" id="btn-close-sbar-modal" class="text-slate-400 hover:text-white text-2xl font-bold px-2 py-0.5 leading-none cursor-pointer">&times;</button>
+        </div>
+
+        <!-- ABAS DO SBAR: 1. Chamada 112 vs 2. Chegada dos Meios -->
+        <div class="flex border-b border-slate-800 bg-slate-950/70 text-xs font-bold">
+          <button type="button" id="tab-btn-sbar-call" class="flex-1 py-2.5 px-3 text-center border-b-2 border-amber-500 text-amber-300 flex items-center justify-center gap-1.5 transition cursor-pointer">
+            <span>📞</span> 1. Guião para o 112
+          </button>
+          <button type="button" id="tab-btn-sbar-arrival" class="flex-1 py-2.5 px-3 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer">
+            <span>🚑</span> 2. Chegada dos Meios
+          </button>
+        </div>
+
+        <!-- CONTEÚDO SCROLLÁVEL -->
+        <div class="p-4 overflow-y-auto flex-1 space-y-3.5 text-xs">
+          
+          <!-- PAINEL 1: GUIÃO DE CHAMADA 112 (SBAR) -->
+          <div id="sbar-call-panel" class="space-y-3">
+            <div class="p-2.5 bg-amber-950/40 border border-amber-500/50 rounded-xl text-amber-200 text-xs">
+              <strong class="block font-bold mb-0.5">📢 Como falar com o operador 112:</strong>
+              Mantenha a calma, coloque a chamada em <strong>alta-voz</strong> e leia estes 4 pontos diretamente:
+            </div>
+
+            <!-- S - SITUAÇÃO -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-1">
+              <div class="flex items-center gap-1.5 text-sky-400 font-black text-xs uppercase tracking-wider">
+                <span class="bg-sky-500 text-slate-950 px-1.5 py-0.5 rounded font-black text-[10px]">S</span>
+                <span>Situação &amp; Localização Exata:</span>
+              </div>
+              <p class="text-white font-bold text-xs" id="sbar-loc-address">A carregar localização...</p>
+              <p class="text-[11px] text-yellow-300 font-medium" id="sbar-loc-ref">Ponto de referência: A detetar...</p>
+              <p class="text-[10px] text-slate-400 font-mono" id="sbar-loc-coords"></p>
+            </div>
+
+            <!-- B - BACKGROUND -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-1">
+              <div class="flex items-center gap-1.5 text-emerald-400 font-black text-xs uppercase tracking-wider">
+                <span class="bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded font-black text-[10px]">B</span>
+                <span>Breve Historial / Vítima:</span>
+              </div>
+              <p class="text-slate-200 text-xs" id="sbar-patient-info">Vítima: Idade/Sexo a apurar no local.</p>
+              <p class="text-[11px] text-slate-400" id="sbar-patient-ice">Histórico médico: Ficha ICE não configurada.</p>
+              <p class="text-[11px] text-amber-300" id="sbar-time-onset">Início dos sintomas: Marcado há instantes.</p>
+            </div>
+
+            <!-- A - ASSESSMENT -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-1">
+              <div class="flex items-center gap-1.5 text-purple-400 font-black text-xs uppercase tracking-wider">
+                <span class="bg-purple-500 text-slate-950 px-1.5 py-0.5 rounded font-black text-[10px]">A</span>
+                <span>Avaliação do Estado Atual:</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div class="bg-slate-900 p-2 rounded-lg">
+                  <span class="text-slate-400 block text-[10px]">Consciência:</span>
+                  <strong class="text-white" id="sbar-status-consciousness">Não responde / Inconsciente</strong>
+                </div>
+                <div class="bg-slate-900 p-2 rounded-lg">
+                  <span class="text-slate-400 block text-[10px]">Respiração:</span>
+                  <strong class="text-white" id="sbar-status-breathing">Ausente ou Gasping</strong>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-300 pt-1" id="sbar-status-symptoms">Sinais de alerta: Apurados pela triagem da aplicação.</p>
+            </div>
+
+            <!-- R - RECOMMENDATION -->
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-1">
+              <div class="flex items-center gap-1.5 text-amber-400 font-black text-xs uppercase tracking-wider">
+                <span class="bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded font-black text-[10px]">R</span>
+                <span>Recomendação &amp; Cuidados em Curso:</span>
+              </div>
+              <p class="text-slate-200 text-xs" id="sbar-actions-in-progress">
+                «Solicito envio urgente de ambulância com suporte de vida. Iniciei os primeiros socorros segundo as diretrizes de emergência.»
+              </p>
+            </div>
+
+            <div class="pt-2">
+              <a href="tel:112" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-red-900/60 flex items-center justify-center gap-2" translate="no">
+                <span>📞</span> LIGAR 112 EM ALTA-VOZ
+              </a>
+            </div>
+          </div>
+
+          <!-- PAINEL 2: PASSAGEM DE TESTEMUNHO (CHEGADA DOS MEIOS DE SOCORRO) -->
+          <div id="sbar-arrival-panel" class="hidden space-y-3">
+            
+            <!-- CARTÃO DE CHEGADA DA AMBULÂNCIA -->
+            <div class="p-3 bg-emerald-950/50 border border-emerald-500/60 rounded-xl text-center space-y-2">
+              <span class="text-2xl">🚑</span>
+              <h4 class="text-sm font-black text-white">Chegada dos Meios: Bombeiros / INEM / CVP</h4>
+              <p class="text-[11px] text-emerald-200">
+                Toque no botão abaixo quando a equipa de socorro chegar para registar a hora exata e consolidar o relatório de passagem de testemunho:
+              </p>
+              <button type="button" id="btn-mark-ambulance-arrival" class="action bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs w-full py-2.5 rounded-xl shadow cursor-pointer">
+                ⏱ Registar Chegada da Ambulância Agora
+              </button>
+              <div id="ambulance-arrival-timestamp-box" class="hidden mt-2 p-2 bg-slate-900 rounded-lg text-xs font-mono text-emerald-300">
+                <!-- Preenchido via JS -->
+              </div>
+            </div>
+
+            <!-- RELATÓRIO CONSOLIDADO DE HANDOVER -->
+            <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl space-y-2.5">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <strong class="text-xs text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📑</span> Relatório de Passagem de Testemunho
+                </strong>
+                <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono" id="handover-total-elapsed">Tempo: 00:00</span>
+              </div>
+
+              <div id="handover-report-content" class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                <!-- Gerado dinamicamente com base nas ações da sessão -->
+              </div>
+            </div>
+
+            <!-- BOTÕES DE PARTILHA E AÇÃO -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" id="btn-copy-handover" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl border border-slate-700 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <span>📋</span> Copiar Relatório
+              </button>
+              <button type="button" id="btn-share-handover" class="py-2.5 px-3 bg-sky-950 hover:bg-sky-900 text-sky-300 font-bold rounded-xl border border-sky-600/60 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <span>💬</span> Partilhar
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RODAPÉ DO MODAL -->
+        <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 flex-shrink-0">
+          <span>Metodologia SBAR • INEM &bull; TAS</span>
+          <button type="button" id="btn-dismiss-sbar" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-700 cursor-pointer">Fechar</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MODAL DE EMERGÊNCIA EM INGLÊS (ENGLISH QUICK GUIDE & TOURIST SBAR) -->
+    <div id="modal-english-guide" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl text-slate-200">
+        
+        <div class="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-950 flex-shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🇬🇧</span>
+            <div>
+              <h3 class="font-black text-sm text-white">Emergency Guide &bull; English / Tourists</h3>
+              <span class="text-[10px] text-sky-400 font-semibold">Immediate Assistance in Portugal</span>
+            </div>
+          </div>
+          <button type="button" id="btn-close-english-modal" class="text-slate-400 hover:text-white text-2xl font-bold px-2 py-0.5 leading-none cursor-pointer">&times;</button>
+        </div>
+
+        <div class="p-4 overflow-y-auto flex-1 space-y-3.5 text-xs">
+          
+          <!-- TOURIST 112 DISPATCH CARD -->
+          <div class="p-3 bg-red-950/60 border border-red-500 rounded-xl space-y-1.5">
+            <strong class="text-xs text-red-200 uppercase tracking-wider block font-bold flex items-center gap-1.5">
+              <span>🚨</span> Card to Show or Read to Emergency Services (112):
+            </strong>
+            <div class="p-2.5 bg-black/60 rounded-lg text-white font-mono text-xs leading-relaxed" id="en-dispatch-card">
+              «EMERGENCY IN PORTUGAL: I need an ambulance at: <span id="en-loc-address">[Detecting location...]</span>. Landmark: <span id="en-loc-ref">[Detecting landmark...]</span>. Victim is unconscious / in acute distress. Please send help immediately.»
+            </div>
+            <a href="tel:112" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-black text-center text-xs rounded-xl flex items-center justify-center gap-2 mt-2" translate="no">
+              <span>📞</span> CALL 112 (FREE EMERGENCY NUMBER IN PORTUGAL)
+            </a>
+          </div>
+
+          <!-- ESSENTIAL ALGORITHMS SUMMARY -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-yellow-300 uppercase tracking-wider">Life-Saving Steps (ERC 2025):</h4>
+            
+            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+              <strong class="text-sky-300 block mb-0.5">🫀 Adult CPR (Cardiac Arrest):</strong>
+              <p class="text-slate-300">If victim is unresponsive and not breathing normally: Call 112. Place hands in center of chest. Push hard and fast at <strong>100-120 bpm (5-6 cm deep)</strong>, 30 compressions followed by 2 rescue breaths (30:2) or continuous compressions.</p>
+            </div>
+
+            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+              <strong class="text-sky-300 block mb-0.5">🗣️ Severe Choking (Adult):</strong>
+              <p class="text-slate-300">Lean person forward. Give up to <strong>5 sharp back blows</strong> between shoulder blades. If unrelieved, give up to <strong>5 abdominal thrusts (Heimlich maneuver)</strong>.</p>
+            </div>
+
+            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+              <strong class="text-sky-300 block mb-0.5">👶 Infant Choking (&lt;1 year old):</strong>
+              <p class="text-slate-300"><u>NEVER perform Heimlich on babies!</u> Lay infant facedown along your forearm with head lower than chest. Give 5 back blows, then turn face-up and deliver 5 chest thrusts with 2 fingers.</p>
+            </div>
+
+            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+              <strong class="text-sky-300 block mb-0.5">🧠 Stroke (FAST Test):</strong>
+              <p class="text-slate-300"><strong>F</strong>ace drooping, <strong>A</strong>rm weakness, <strong>S</strong>peech difficulty &rarr; <strong>T</strong>ime to call 112 immediately. Note the exact time symptoms started.</p>
+            </div>
+          </div>
+
+          <!-- BROWSER TRANSLATION TIP -->
+          <div class="p-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-slate-300 text-[11px] flex items-start gap-2">
+            <span class="text-base">🌐</span>
+            <div>
+              <strong class="text-white block font-semibold">Automatic Browser Translation:</strong>
+              This app is fully compatible with Google Chrome and Safari auto-translation. Use your browser's "Translate Page" option to view all manuals in your native language.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 flex-shrink-0">
+          <span>European Resuscitation Council (ERC 2025)</span>
+          <button type="button" id="btn-dismiss-english" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-700 cursor-pointer">Close</button>
+        </div>
+
+      </div>
+    </div>
+
     <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APP NATIVA -->
     <nav class="bottom-nav">
       <button type="button" class="nav-item active" data-target="screen-emergency">
@@ -2411,11 +2741,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=32"></script>
-  <script src="./js/geo.js?v=32"></script>
-  <script src="./js/knowledge_base.js?v=32"></script>
-  <script src="./js/rag.js?v=32"></script>
-  <script src="./js/ai.js?v=32"></script>
-  <script src="./js/app.js?v=32"></script>
+  <script src="./js/audio.js?v=33"></script>
+  <script src="./js/geo.js?v=33"></script>
+  <script src="./js/knowledge_base.js?v=33"></script>
+  <script src="./js/rag.js?v=33"></script>
+  <script src="./js/ai.js?v=33"></script>
+  <script src="./js/app.js?v=33"></script>
 </body>
 </html>

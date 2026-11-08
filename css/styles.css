@@ -733,6 +733,39 @@ body {
 }
 
 /* ======================================================== */
+/* SIMULADOR DE CASOS CLÍNICOS & CHECKLIST DE SOCORROS      */
+/* ======================================================== */
+.btn-scenario-select.active {
+  border-color: #a855f7 !important;
+  background-color: rgba(88, 28, 135, 0.35) !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.25);
+}
+
+.btn-kit-location-tab.active {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.kit-item-row {
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  user-select: none;
+}
+.kit-item-row:active {
+  transform: scale(0.99);
+}
+.kit-item-row.is-checked {
+  background-color: rgba(6, 78, 59, 0.4) !important;
+  border-color: #10b981 !important;
+}
+.kit-item-row.is-checked .kit-checkbox {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #022c22 !important;
+}
+
+/* ======================================================== */
 /* ESTILOS DE IMPRESSÃO (GUIA RÁPIDO DE BOLSO A4 / PDF)     */
 /* ======================================================== */
 @media print {

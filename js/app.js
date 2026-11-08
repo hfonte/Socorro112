@@ -1973,6 +1973,902 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ========================================================
+  // SESSÃO DE EMERGÊNCIA & PASSAGEM DE TESTEMUNHO SBAR
+  // ========================================================
+  const emergencySession = {
+    alertTimestamp: null,
+    ambulanceArrivalTimestamp: null,
+    lastDiagnosis: 'Emergência reportada',
+    confirmedSymptoms: [],
+    cprCyclesCompleted: 0
+  };
+
+  // Intercetar todos os cliques em ligar 112 na app para iniciar o guião SBAR
+  document.querySelectorAll('a[href="tel:112"]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (!emergencySession.alertTimestamp) {
+        emergencySession.alertTimestamp = new Date();
+      }
+      openSbarModal('call');
+    });
+  });
+
+  const modalSbar = document.getElementById('modal-sbar-handover');
+  const btnOpenSbar = document.getElementById('btn-open-sbar');
+  const btnCloseSbarModal = document.getElementById('btn-close-sbar-modal');
+  const btnDismissSbar = document.getElementById('btn-dismiss-sbar');
+  const tabBtnSbarCall = document.getElementById('tab-btn-sbar-call');
+  const tabBtnSbarArrival = document.getElementById('tab-btn-sbar-arrival');
+  const sbarCallPanel = document.getElementById('sbar-call-panel');
+  const sbarArrivalPanel = document.getElementById('sbar-arrival-panel');
+
+  const sbarLocAddress = document.getElementById('sbar-loc-address');
+  const sbarLocRef = document.getElementById('sbar-loc-ref');
+  const sbarLocCoords = document.getElementById('sbar-loc-coords');
+  const sbarPatientInfo = document.getElementById('sbar-patient-info');
+  const sbarPatientIce = document.getElementById('sbar-patient-ice');
+  const sbarTimeOnset = document.getElementById('sbar-time-onset');
+  const sbarStatusConsciousness = document.getElementById('sbar-status-consciousness');
+  const sbarStatusBreathing = document.getElementById('sbar-status-breathing');
+  const sbarStatusSymptoms = document.getElementById('sbar-status-symptoms');
+  const sbarActionsInProgress = document.getElementById('sbar-actions-in-progress');
+
+  const btnMarkAmbulanceArrival = document.getElementById('btn-mark-ambulance-arrival');
+  const ambulanceArrivalTimestampBox = document.getElementById('ambulance-arrival-timestamp-box');
+  const handoverTotalElapsed = document.getElementById('handover-total-elapsed');
+  const handoverReportContent = document.getElementById('handover-report-content');
+  const btnCopyHandover = document.getElementById('btn-copy-handover');
+  const btnShareHandover = document.getElementById('btn-share-handover');
+
+  function openSbarModal(initialTab = 'call') {
+    if (!modalSbar) return;
+
+    // Atualizar dados de Localização (GPS + Ponto de Referência)
+    const loc = GeoManager.currentLocation;
+    if (sbarLocAddress) {
+      sbarLocAddress.textContent = (loc.address && !loc.address.includes('A obter')) ? loc.address : 'A obter morada exata via GPS...';
+    }
+    if (sbarLocRef) {
+      sbarLocRef.textContent = `Ponto de Referência / Entidade: ${loc.landmark || 'A detetar estabelecimentos próximos...'}`;
+    }
+    if (sbarLocCoords) {
+      sbarLocCoords.textContent = (loc.lat && loc.lng) ? `Coordenadas WGS84: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)} (precisão: ${loc.accuracy ? Math.round(loc.accuracy) + 'm' : 'alta'})` : '';
+    }
+
+    // Carregar dados da Ficha Médica ICE
+    try {
+      const iceData = JSON.parse(localStorage.getItem('user_medical_id') || '{}');
+      if (sbarPatientInfo) {
+        sbarPatientInfo.textContent = iceData.name ? `Vítima: ${iceData.name} (${iceData.blood || 'Tipo sanguíneo não indicado'})` : 'Vítima: Idade/Sexo a apurar no local.';
+      }
+      if (sbarPatientIce) {
+        const cond = iceData.conditions ? `Doenças: ${iceData.conditions}` : 'Sem doenças prévias registadas';
+        const alg = iceData.allergies ? ` • Alergias: ${iceData.allergies}` : '';
+        const med = iceData.medication ? ` • Medicação: ${iceData.medication}` : '';
+        const fam = iceData.contact_name ? ` • Contacto ICE: ${iceData.contact_name} (${iceData.contact_phone || ''})` : '';
+        sbarPatientIce.textContent = `${cond}${alg}${med}${fam}`;
+      }
+    } catch (e) {}
+
+    // Cronologia de início dos sintomas
+    if (sbarTimeOnset) {
+      if (emergencySession.alertTimestamp) {
+        const timeStr = emergencySession.alertTimestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        sbarTimeOnset.textContent = `Alerta 112 registado às ${timeStr}.`;
+      } else {
+        sbarTimeOnset.textContent = 'Alerta imediato em curso.';
+      }
+    }
+
+    // Estado da Vítima com base no ecrã ativo
+    const activeScreen = document.querySelector('.screen-view.active')?.id || '';
+    if (activeScreen === 'screen-sbv') {
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Inconsciente (não responde)';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Ausente ou Gasping (Paragem PCR)';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Iniciei compressões torácicas no centro do peito a 110 bpm com o metrónomo da aplicação. Solicito envio urgente de ambulância e DAE.»';
+    } else if (activeScreen === 'screen-ova') {
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente mas sem conseguir falar ou tossir';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Asfixia por corpo estranho (Obstrução grave)';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«A executar manobras de desobstrução (pancadas interescapulares e compressões abdominais de Heimlich).»';
+    } else if (activeScreen === 'screen-stroke') {
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente / Confuso';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Respiração presente';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Suspeita de AVC agudo (Via Verde). Teste dos 3 Fs positivo. Hora dos sintomas registada. Vítima em repouso.»';
+    } else if (activeScreen === 'screen-pediatria') {
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Criança / Lactente prostrado';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Dificuldade respiratória aguda / Tiragem';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Emergência pediátrica. Avaliação pelo Triângulo Pediátrico (TEP). Solicito equipa diferenciada com urgência.»';
+    }
+
+    // Alternar para a aba correta
+    switchSbarTab(initialTab);
+    modalSbar.classList.remove('hidden');
+  }
+
+  function closeSbarModal() {
+    if (modalSbar) modalSbar.classList.add('hidden');
+  }
+
+  function switchSbarTab(tab) {
+    if (tab === 'arrival') {
+      if (tabBtnSbarCall) {
+        tabBtnSbarCall.classList.remove('border-amber-500', 'text-amber-300');
+        tabBtnSbarCall.classList.add('border-transparent', 'text-slate-400');
+      }
+      if (tabBtnSbarArrival) {
+        tabBtnSbarArrival.classList.remove('border-transparent', 'text-slate-400');
+        tabBtnSbarArrival.classList.add('border-emerald-500', 'text-emerald-300');
+      }
+      if (sbarCallPanel) sbarCallPanel.classList.add('hidden');
+      if (sbarArrivalPanel) sbarArrivalPanel.classList.remove('hidden');
+      renderHandoverReport();
+    } else {
+      if (tabBtnSbarArrival) {
+        tabBtnSbarArrival.classList.remove('border-emerald-500', 'text-emerald-300');
+        tabBtnSbarArrival.classList.add('border-transparent', 'text-slate-400');
+      }
+      if (tabBtnSbarCall) {
+        tabBtnSbarCall.classList.remove('border-transparent', 'text-slate-400');
+        tabBtnSbarCall.classList.add('border-amber-500', 'text-amber-300');
+      }
+      if (sbarArrivalPanel) sbarArrivalPanel.classList.add('hidden');
+      if (sbarCallPanel) sbarCallPanel.classList.remove('hidden');
+    }
+  }
+
+  function generateHandoverReportText() {
+    const loc = GeoManager.currentLocation;
+    const now = emergencySession.ambulanceArrivalTimestamp || new Date();
+    const alertTime = emergencySession.alertTimestamp || now;
+    const diffMs = Math.max(0, now - alertTime);
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffSec = Math.floor((diffMs % 60000) / 1000);
+    const timeFormatted = `${diffMin} min e ${diffSec} seg`;
+
+    let iceInfo = 'Sem ficha ICE registada.';
+    try {
+      const ice = JSON.parse(localStorage.getItem('user_medical_id') || '{}');
+      if (ice.name || ice.conditions || ice.allergies || ice.medication) {
+        iceInfo = `Nome: ${ice.name || 'Próprio'}\n- Sangue: ${ice.blood || 'Não especificado'}\n- Antecedentes: ${ice.conditions || 'Nenhum'}\n- Alergias: ${ice.allergies || 'Nenhuma'}\n- Medicação: ${ice.medication || 'Nenhuma'}\n- Contacto ICE: ${ice.contact_name || ''} (${ice.contact_phone || ''})`;
+      }
+    } catch (e) {}
+
+    const address = (loc.address && !loc.address.includes('A obter')) ? loc.address : 'Morada GPS registada na app';
+    const landmark = loc.landmark || 'Estabelecimento local próximo';
+    const coords = (loc.lat && loc.lng) ? `${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}` : 'N/D';
+
+    return `📋 RELATÓRIO SBAR DE PASSAGEM DE TESTEMUNHO
+Assunto: Chegada dos Meios de Socorro (Bombeiros / INEM / CVP)
+Hora do Alerta 112: ${alertTime.toLocaleTimeString('pt-PT')}
+Hora de Chegada dos Meios: ${now.toLocaleTimeString('pt-PT')}
+Tempo de Assistência Comunitária Decorrido: ${timeFormatted}
+
+==================================================
+1. SITUAÇÃO (S):
+- Morada: ${address}
+- Ponto de Referência: ${landmark}
+- Coordenadas: ${coords}
+
+==================================================
+2. BREVE HISTORIAL & FICHA ICE (B):
+- ${iceInfo}
+
+==================================================
+3. AVALIAÇÃO DO ESTADO DA VÍTIMA (A):
+- Consciência: ${sbarStatusConsciousness?.textContent || 'Apurada no local'}
+- Respiração: ${sbarStatusBreathing?.textContent || 'Apurada no local'}
+- Sintomas e Queixas: Avaliados de acordo com os algoritmos de triagem oficiais ERC 2025.
+
+==================================================
+4. RECOMENDAÇÃO & CUIDADOS PRESTADOS NO LOCAL (R):
+- Cuidados Imediatos: ${sbarActionsInProgress?.textContent || 'Primeiros socorros prestados sob orientação da aplicação.'}
+- Duração das manobras: Assistência mantida continuamente até à chegada da equipa de socorro.
+
+Thinked by Hugo Fonte • Cuidar em Emergência`;
+  }
+
+  function renderHandoverReport() {
+    if (!handoverReportContent) return;
+    const now = emergencySession.ambulanceArrivalTimestamp || new Date();
+    const alertTime = emergencySession.alertTimestamp || now;
+    const diffMs = Math.max(0, now - alertTime);
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffSec = Math.floor((diffMs % 60000) / 1000);
+
+    if (handoverTotalElapsed) {
+      handoverTotalElapsed.textContent = `Tempo: ${diffMin}m ${diffSec}s`;
+    }
+
+    const reportRaw = generateHandoverReportText();
+    handoverReportContent.innerHTML = reportRaw
+      .split('\n\n')
+      .map(par => `<div class="p-2 bg-slate-900/90 rounded-lg border border-slate-800">${par.replace(/\n/g, '<br>')}</div>`)
+      .join('');
+  }
+
+  if (btnOpenSbar) btnOpenSbar.addEventListener('click', () => openSbarModal('call'));
+  if (btnCloseSbarModal) btnCloseSbarModal.addEventListener('click', closeSbarModal);
+  if (btnDismissSbar) btnDismissSbar.addEventListener('click', closeSbarModal);
+  if (tabBtnSbarCall) tabBtnSbarCall.addEventListener('click', () => switchSbarTab('call'));
+  if (tabBtnSbarArrival) tabBtnSbarArrival.addEventListener('click', () => switchSbarTab('arrival'));
+
+  if (modalSbar) {
+    modalSbar.addEventListener('click', (e) => {
+      if (e.target === modalSbar) closeSbarModal();
+    });
+  }
+
+  if (btnMarkAmbulanceArrival) {
+    btnMarkAmbulanceArrival.addEventListener('click', () => {
+      emergencySession.ambulanceArrivalTimestamp = new Date();
+      if (ambulanceArrivalTimestampBox) {
+        ambulanceArrivalTimestampBox.classList.remove('hidden');
+        ambulanceArrivalTimestampBox.innerHTML = `✅ <strong>Chegada registada às ${emergencySession.ambulanceArrivalTimestamp.toLocaleTimeString('pt-PT')}</strong>. O relatório abaixo foi consolidado com o tempo total de assistência.`;
+      }
+      btnMarkAmbulanceArrival.disabled = true;
+      btnMarkAmbulanceArrival.classList.add('opacity-60', 'pointer-events-none');
+      btnMarkAmbulanceArrival.textContent = '✓ Chegada dos Meios Registada';
+      renderHandoverReport();
+    });
+  }
+
+  if (btnCopyHandover) {
+    btnCopyHandover.addEventListener('click', async () => {
+      const text = generateHandoverReportText();
+      try {
+        await navigator.clipboard.writeText(text);
+        btnCopyHandover.innerHTML = '<span>✅</span> Copiado!';
+        setTimeout(() => {
+          btnCopyHandover.innerHTML = '<span>📋</span> Copiar Relatório';
+        }, 2500);
+      } catch (err) {
+        alert('Não foi possível copiar automaticamente. Selecione e copie o texto no ecrã.');
+      }
+    });
+  }
+
+  if (btnShareHandover) {
+    btnShareHandover.addEventListener('click', async () => {
+      const text = generateHandoverReportText();
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Relatório SBAR • Cuidar em Emergência',
+            text: text
+          });
+        } catch (e) {}
+      } else {
+        const url = `whatsapp://send?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+      }
+    });
+  }
+
+  // ========================================================
+  // RECONHECIMENTO DE VOZ • MODO MÃOS LIVRES (SPEECH-TO-TEXT)
+  // ========================================================
+  function initHandsFreeVoice() {
+    const btnVoice = document.getElementById('btn-voice-input');
+    const voiceIndicator = document.getElementById('voice-recording-indicator');
+    const btnStopVoice = document.getElementById('btn-stop-voice');
+    const micIcon = document.getElementById('voice-mic-icon');
+    const micLabel = document.getElementById('voice-mic-label');
+    const promptInput = document.getElementById('ai-text-prompt');
+
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      if (btnVoice) {
+        btnVoice.addEventListener('click', () => {
+          alert('O reconhecimento de voz não é suportado pelo seu navegador atual. Por favor, utilize o teclado para descrever a situação.');
+        });
+      }
+      return;
+    }
+
+    const recognition = new SpeechRec();
+    recognition.lang = 'pt-PT';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    let isListening = false;
+
+    function startListening() {
+      try {
+        recognition.start();
+        isListening = true;
+        if (voiceIndicator) voiceIndicator.classList.remove('hidden');
+        if (micIcon) micIcon.textContent = '🔴';
+        if (micLabel) micLabel.textContent = 'A Ouvir...';
+        if (btnVoice) {
+          btnVoice.classList.add('bg-red-950', 'border-red-500', 'text-red-300');
+          btnVoice.classList.remove('bg-slate-800', 'border-sky-500/50', 'text-sky-300');
+        }
+      } catch (e) {
+        console.warn('Erro ao iniciar voz:', e);
+      }
+    }
+
+    function stopListening() {
+      try {
+        recognition.stop();
+      } catch (e) {}
+      isListening = false;
+      if (voiceIndicator) voiceIndicator.classList.add('hidden');
+      if (micIcon) micIcon.textContent = '🎙️';
+      if (micLabel) micLabel.textContent = 'Modo Mãos Livres';
+      if (btnVoice) {
+        btnVoice.classList.remove('bg-red-950', 'border-red-500', 'text-red-300');
+        btnVoice.classList.add('bg-slate-800', 'border-sky-500/50', 'text-sky-300');
+      }
+    }
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript + ' ';
+        }
+      }
+      if (promptInput && transcript.trim()) {
+        const current = promptInput.value.trim();
+        promptInput.value = current ? `${current} ${transcript.trim()}` : transcript.trim();
+      }
+    };
+
+    recognition.onerror = () => stopListening();
+    recognition.onend = () => {
+      if (isListening) stopListening();
+    };
+
+    if (btnVoice) {
+      btnVoice.addEventListener('click', () => {
+        if (isListening) stopListening();
+        else startListening();
+      });
+    }
+
+    if (btnStopVoice) {
+      btnStopVoice.addEventListener('click', stopListening);
+    }
+  }
+
+  // ========================================================
+  // SIMULADOR INTERATIVO DE CASOS CLÍNICOS (MODO TREINO)
+  // ========================================================
+  const clinicalScenarios = {
+    pcr_adulto: {
+      title: "Paragem Cardiorrespiratória no Adulto",
+      icon: "🫀",
+      context: "Está no local de trabalho ou espaço público. Um homem de 55 anos cai inanimado e fica imóvel no chão.",
+      steps: [
+        {
+          question: "Passo 1: Qual é a sua PRIMEIRA ação ao aproximar-se da vítima?",
+          options: [
+            { text: "Verificar a segurança do local e avaliar se a vítima responde (abanar ombros e chamar em voz firme).", correct: true, feedback: "Excelente! A segurança do socorrista é sempre a prioridade nº 1. Em seguida, testa-se a resposta da vítima." },
+            { text: "Iniciar compressões torácicas no peito imediatamente.", correct: false, feedback: "Incorreto. Nunca se iniciam compressões sem antes avaliar a consciência e a respiração da vítima." },
+            { text: "Dar um copo de água com açúcar para reanimar a pessoa.", correct: false, feedback: "PERIGO CRÍTICO: Nunca administrar líquidos a pessoas inconscientes pelo risco fatal de asfixia e aspiração pulmonar." }
+          ]
+        },
+        {
+          question: "Passo 2: A vítima não responde a estímulos. Como avalia a respiração?",
+          options: [
+            { text: "Abrir a via aérea (extensão da cabeça e elevação do queixo) e fazer o VOS (Ver, Ouvir e Sentir) até 10 segundos.", correct: true, feedback: "Correto! A extensão da cabeça afasta a língua da faringe. Observa-se a expansão torácica até 10 segundos." },
+            { text: "Colocar um espelho ou telemóvel junto ao nariz para ver se embacia.", correct: false, feedback: "Incorreto. Métodos empíricos atrasam a reanimação. O protocolo ERC 2025 exige abertura da via aérea e VOS até 10s." },
+            { text: "Assumir que está a respirar porque ouve alguns suspiros ruidosos e espaçados.", correct: false, feedback: "ERRO GRAVE: Respiração agónica (gasping) é um sinal inequívoco de PARAGEM CARDIORRESPIRATÓRIA e não respiração normal!" }
+          ]
+        },
+        {
+          question: "Passo 3: A vítima não respira (ou apenas apresenta gasping). O que faz a seguir?",
+          options: [
+            { text: "Ligar 112 de imediato (em alta-voz), pedir um DAE e iniciar compressões torácicas (30:2) a 110 bpm.", correct: true, feedback: "Perfeito! O alerta precoce com DAE e o início imediato de compressões a 110 bpm é a chave da sobrevivência segundo as diretrizes ERC 2025." },
+            { text: "Fazer 5 minutos de massagem cardíaca antes de telefonar para o 112.", correct: false, feedback: "Incorreto. Sem meios diferenciados a caminho e sem DAE, as hipóteses diminuem 10% por minuto." },
+            { text: "Colocar a vítima em Posição Lateral de Segurança (PLS).", correct: false, feedback: "ERRO FATAL: A PLS é exclusiva para vítimas que respiram normalmente. Vítima em PCR morre se for colocada em PLS!" }
+          ]
+        }
+      ]
+    },
+    ova_adulto: {
+      title: "Obstrução da Via Aérea (Engasgamento Adulto)",
+      icon: "🗣️",
+      context: "Durante uma refeição, uma pessoa engasga-se com comida. De repente para de falar e leva ambas as mãos ao pescoço.",
+      steps: [
+        {
+          question: "Passo 1: A pessoa tosse com muita força e ainda consegue respirar ruidosamente. O que deve fazer?",
+          options: [
+            { text: "Encorajar a tosse e vigiar a vítima continuamente sem interferir nem bater nas costas.", correct: true, feedback: "Muito bem! Em obstrução ligeira com tosse eficaz, bater nas costas pode desviar o corpo estranho e transformá-lo em obstrução total." },
+            { text: "Fazer de imediato a manobra de Heimlich.", correct: false, feedback: "Incorreto. A manobra de Heimlich está reservada para obstrução grave/total (tosse ineficaz ou ausente)." },
+            { text: "Dar água ou miolo de pão para empurrar o objeto.", correct: false, feedback: "Perigo: Dar comida ou água agrava a obstrução das vias aéreas." }
+          ]
+        },
+        {
+          question: "Passo 2: A vítima deixa de conseguir tossir, não emite som e fica cianosada (lábios arroxeados). O que faz?",
+          options: [
+            { text: "Inclinar a vítima para a frente e aplicar até 5 pancadas interescapulares; se não resolver, aplicar até 5 compressões abdominais (Heimlich).", correct: true, feedback: "Excelente! Esta é a sequência padrão do ERC 2025: alternar ciclos de 5 pancadas com 5 compressões abdominais." },
+            { text: "Tentar puxar o alimento às cegas introduzindo o dedo indicador profundamente na garganta.", correct: false, feedback: "ERRO: O varrimento digital às cegas é proibido porque empurra o corpo estranho mais fundo na laringe." }
+          ]
+        },
+        {
+          question: "Passo 3: Se durante as manobras a vítima perder os sentidos e colapsar, como deve atuar?",
+          options: [
+            { text: "Amparar a vítima até ao chão, ligar 112 (se ainda não tiver sido feito) e iniciar Suporte Básico de Vida (30 compressões torácicas).", correct: true, feedback: "Perfeito! Vítima inconsciente passa imediatamente a protocolo de SBV com compressões para tentar expelir o corpo estranho e manter fluxo cerebral." },
+            { text: "Continuar a fazer compressões abdominais de Heimlich na vítima deitada.", correct: false, feedback: "Incorreto. Heimlich deitado foi abandonado pelas diretrizes internacionais em favor das compressões torácicas de SBV." }
+          ]
+        }
+      ]
+    },
+    ova_pediatrico: {
+      title: "Desobstrução no Bebé / Lactente (< 1 ano)",
+      icon: "👶",
+      context: "Um bebé de 8 meses engasga-se com comida/objeto, fica subitamente silencioso e com dificuldade respiratória extrema.",
+      steps: [
+        {
+          question: "Passo 1: O bebé não tosse nem chora. Como posiciona o bebé para desengasgar?",
+          options: [
+            { text: "Deitá-lo de barriga para baixo sobre o antebraço, com a cabeça mais baixa que o tronco e a mandíbula apoiada, aplicando até 5 pancadas entre as omoplatas.", correct: true, feedback: "Correto! A gravidade e as pancadas interescapulares coordenadas ajudam a expulsar o objeto sem magoar o pescoço." },
+            { text: "Fazer compressões abdominais de Heimlich como no adulto.", correct: false, feedback: "PROIBIÇÃO ABSOLUTA: Manobra de Heimlich em lactentes (<1 ano) causa rotura do fígado e baço devido à sua imaturidade anatómica!" },
+            { text: "Segurar o bebé de cabeça para baixo pelos tornozelos e sacudir.", correct: false, feedback: "Perigo extremo: Risco de luxação articular, queda e hemorragia craniana por sacudidela." }
+          ]
+        },
+        {
+          question: "Passo 2: Após 5 pancadas interescapulares, o objeto não saiu. Qual o próximo passo?",
+          options: [
+            { text: "Virar o bebé para o outro antebraço de face para cima e aplicar até 5 compressões torácicas no terço inferior do esterno com 2 dedos.", correct: true, feedback: "Excelente! As compressões torácicas com 2 dedos no esterno aumentam a pressão intratorácica com segurança." },
+            { text: "Dar goles de água com colher de chá.", correct: false, feedback: "Incorreto e perigoso: Inunda a via respiratória e causa paragem respiratória." }
+          ]
+        }
+      ]
+    },
+    avc_idoso: {
+      title: "Suspeita de AVC num Familiar Idoso",
+      icon: "🧠",
+      context: "Um familiar à mesa deixa cair o talher, apresenta fala arrastada e um olhar ausente.",
+      steps: [
+        {
+          question: "Passo 1: Qual o algoritmo de despiste rápido que deve aplicar imediatamente?",
+          options: [
+            { text: "Regra dos 3 «F»: Pedir para sorrir (Face), levantar os dois braços (Força) e repetir uma frase (Fala).", correct: true, feedback: "Exato! É a escala pré-hospitalar de Cincinnati recomendada pelo INEM e DGS." },
+            { text: "Pedir para caminhar em linha reta e fazer flexões.", correct: false, feedback: "Inadequado: Vítima com défice neurológico pode sofrer queda grave e traumatismo craniano." }
+          ]
+        },
+        {
+          question: "Passo 2: A boca está descaída e o braço esquerdo não sobe. Qual a conduta prioritária?",
+          options: [
+            { text: "Ligar 112 imediatamente, declarar suspeita de AVC (critério Via Verde) e registar a hora exata do início dos sintomas.", correct: true, feedback: "Perfeito! A janela terapêutica de trombólise é de apenas 4h30. A hora de início é o dado mais crítico para o hospital." },
+            { text: "Deitar a pessoa na cama e esperar 2 horas para ver se passa.", correct: false, feedback: "ERRO CRÍTICO: 'Tempo é cérebro'. Cada minuto de atraso destrói milhões de neurónios irreversivelmente." },
+            { text: "Dar um comprimido de aspirina ou medicação para a tensão.", correct: false, feedback: "PROIBIDO: Se for um AVC hemorrágico, a aspirina agrava a hemorragia intracraniana e pode ser fatal." }
+          ]
+        }
+      ]
+    }
+  };
+
+  let currentScenarioKey = 'pcr_adulto';
+  let currentScenarioStep = 0;
+
+  function renderClinicalScenario(key, stepIndex = 0) {
+    const container = document.getElementById('sim-active-container');
+    if (!container) return;
+
+    const scenario = clinicalScenarios[key];
+    if (!scenario) return;
+
+    currentScenarioKey = key;
+    currentScenarioStep = stepIndex;
+
+    // Atualizar botões de seleção
+    document.querySelectorAll('.btn-scenario-select').forEach(b => {
+      if (b.dataset.scenario === key) {
+        b.classList.add('active', 'border-purple-500');
+        b.classList.remove('border-slate-700');
+      } else {
+        b.classList.remove('active', 'border-purple-500');
+        b.classList.add('border-slate-700');
+      }
+    });
+
+    const isFinished = stepIndex >= scenario.steps.length;
+    if (isFinished) {
+      container.innerHTML = `
+        <div class="text-center py-4 space-y-2">
+          <span class="text-4xl block">🏅</span>
+          <h4 class="text-sm font-black text-white">Cenário Concluído com Sucesso!</h4>
+          <p class="text-xs text-emerald-300">
+            Demonstrou rigor e prontidão nas decisões prioritárias segundo as Diretrizes Europeias de Ressuscitação ERC 2025.
+          </p>
+          <div class="pt-2 flex items-center justify-center gap-2">
+            <button type="button" class="btn-restart-scenario py-2 px-4 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow cursor-pointer">
+              🔄 Repetir Cenário
+            </button>
+          </div>
+        </div>
+      `;
+      container.querySelector('.btn-restart-scenario')?.addEventListener('click', () => {
+        renderClinicalScenario(key, 0);
+      });
+      return;
+    }
+
+    const step = scenario.steps[stepIndex];
+    const totalSteps = scenario.steps.length;
+
+    let optionsHtml = '';
+    step.options.forEach((opt, idx) => {
+      optionsHtml += `
+        <button type="button" class="btn-scenario-opt w-full text-left p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs transition flex items-start gap-2.5 cursor-pointer" data-idx="${idx}">
+          <span class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-[10px] text-slate-300 shrink-0 mt-0.5">${String.fromCharCode(65 + idx)}</span>
+          <span class="text-slate-200 leading-snug flex-1">${opt.text}</span>
+        </button>
+      `;
+    });
+
+    container.innerHTML = `
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">${scenario.icon}</span>
+          <div>
+            <h4 class="text-xs font-black text-white">${scenario.title}</h4>
+            <span class="text-[10px] text-purple-300">Passo ${stepIndex + 1} de ${totalSteps}</span>
+          </div>
+        </div>
+        <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-600/40 px-2 py-0.5 rounded font-mono font-bold">Modo Treino</span>
+      </div>
+
+      <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] text-slate-300 italic">
+        «${scenario.context}»
+      </div>
+
+      <p class="text-xs text-yellow-200 font-bold leading-snug pt-1">${step.question}</p>
+
+      <div class="space-y-1.5" id="sim-options-list">
+        ${optionsHtml}
+      </div>
+
+      <div id="sim-feedback-box" class="hidden p-3 rounded-xl text-xs leading-relaxed">
+        <!-- Preenchido ao responder -->
+      </div>
+    `;
+
+    // Event listeners para as opções
+    const optButtons = container.querySelectorAll('.btn-scenario-opt');
+    const feedbackBox = container.querySelector('#sim-feedback-box');
+
+    optButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const chosen = step.options[idx];
+
+        optButtons.forEach(b => {
+          b.disabled = true;
+          b.classList.add('pointer-events-none');
+        });
+
+        if (chosen.correct) {
+          btn.classList.remove('bg-slate-900', 'border-slate-800');
+          btn.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+          feedbackBox.className = 'p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/80 border border-emerald-500 text-emerald-200';
+          feedbackBox.innerHTML = `
+            <div class="flex items-start gap-2">
+              <span class="text-lg">✅</span>
+              <div class="space-y-1">
+                <strong>Decisão Correta:</strong>
+                <p>${chosen.feedback}</p>
+                <div class="pt-2">
+                  <button type="button" id="btn-next-sim-step" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs cursor-pointer shadow">
+                    Continuar para o Passo ${stepIndex + 2} ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          feedbackBox.classList.remove('hidden');
+          container.querySelector('#btn-next-sim-step')?.addEventListener('click', () => {
+            renderClinicalScenario(key, stepIndex + 1);
+          });
+        } else {
+          btn.classList.remove('bg-slate-900', 'border-slate-800');
+          btn.classList.add('bg-red-950/80', 'border-red-500', 'text-red-200');
+          feedbackBox.className = 'p-3 rounded-xl text-xs leading-relaxed bg-red-950/80 border border-red-500 text-red-200';
+          feedbackBox.innerHTML = `
+            <div class="flex items-start gap-2">
+              <span class="text-lg">❌</span>
+              <div class="space-y-1">
+                <strong>Atenção Clínica:</strong>
+                <p>${chosen.feedback}</p>
+                <div class="pt-2">
+                  <button type="button" id="btn-retry-sim-step" class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-xs border border-slate-700 cursor-pointer">
+                    🔄 Repensar e Tentar Novamente
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          feedbackBox.classList.remove('hidden');
+          container.querySelector('#btn-retry-sim-step')?.addEventListener('click', () => {
+            renderClinicalScenario(key, stepIndex);
+          });
+        }
+      });
+    });
+  }
+
+  function initClinicalSimulator() {
+    document.querySelectorAll('.btn-scenario-select').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sc = btn.dataset.scenario;
+        if (sc) renderClinicalScenario(sc, 0);
+      });
+    });
+
+    renderClinicalScenario('pcr_adulto', 0);
+
+    const btnQuickSim = document.getElementById('btn-quick-simulator');
+    if (btnQuickSim) {
+      btnQuickSim.addEventListener('click', () => {
+        const navBtn = document.querySelector('.bottom-nav button[data-target="screen-learning-hub"]');
+        if (navBtn) navBtn.click();
+        const ch = document.getElementById('chapter-simulator');
+        if (ch) {
+          ch.classList.add('open');
+          setTimeout(() => ch.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        }
+      });
+    }
+  }
+
+  // ========================================================
+  // CHECKLIST DA CAIXA DE PRIMEIROS SOCORROS POR LOCAL
+  // ========================================================
+  const firstAidKitData = {
+    casa: {
+      title: "Caixa de Primeiros Socorros • Casa (Familiar)",
+      icon: "🏠",
+      desc: "Material indispensável para tratamento de feridas ligeiras, queimaduras e acidentes caseiros:",
+      items: [
+        { id: "c_luvas", name: "Luvas de nitrilo descartáveis (3 pares)", cat: "Proteção" },
+        { id: "c_soro", name: "Soro fisiológico unidose 5ml/10ml (10 un)", cat: "Lavagem" },
+        { id: "c_comp_est", name: "Compressas esterilizadas 10x10cm (5 emb)", cat: "Curativo" },
+        { id: "c_adesivo", name: "Fita adesiva hipoalergénica / micropore", cat: "Fixação" },
+        { id: "c_ligadura", name: "Ligadura elástica de crepe 7cm e 10cm", cat: "Imobilização" },
+        { id: "c_pensos", name: "Pensos rápidos adesivos sortidos", cat: "Curativo" },
+        { id: "c_tesoura", name: "Tesoura de pontas redondas", cat: "Instrumental" },
+        { id: "c_pinca", name: "Pinça de pontas finas para farpas/espinhos", cat: "Instrumental" },
+        { id: "c_termom", name: "Termómetro digital corporal", cat: "Avaliação" },
+        { id: "c_manta", name: "Manta térmica aluminizada de sobrevivência", cat: "Isolamento" },
+        { id: "c_gel_frio", name: "Bolsa de frio instantâneo (contusões/torções)", cat: "Crioterapia" },
+        { id: "c_pocket", name: "Máscara facial pocket com válvula para RCP", cat: "Suporte de Vida" }
+      ]
+    },
+    carro: {
+      title: "Estojo de Primeiros Socorros • Carro / Viatura",
+      icon: "🚗",
+      desc: "Norma europeia DIN 13164 para assistência rápida em viagens e acidentes de viação:",
+      items: [
+        { id: "v_colete", name: "Colete retrorrefletor extra e triângulo", cat: "Segurança" },
+        { id: "v_luvas", name: "Luvas descartáveis de nitrilo (2 pares)", cat: "Proteção" },
+        { id: "v_manta", name: "Manta térmica aluminizada (anti-hipotermia)", cat: "Isolamento" },
+        { id: "v_tesoura", name: "Tesoura de corte romba (corta cintos/roupa)", cat: "Desencarceramento" },
+        { id: "v_comp_abs", name: "Compressas estéreis absorventes grandes", cat: "Hemostase" },
+        { id: "v_ligaduras", name: "Ligaduras elásticas de fixação (2 rolos)", cat: "Curativo" },
+        { id: "v_adesivo", name: "Fita adesiva médica resistente", cat: "Fixação" },
+        { id: "v_soro", name: "Soro fisiológico estéril unidose (5 un)", cat: "Lavagem" },
+        { id: "v_pocket", name: "Máscara de reanimação pocket com filtro", cat: "Suporte de Vida" },
+        { id: "v_lanterna", name: "Lanterna estanque de alta visibilidade", cat: "Segurança" }
+      ]
+    },
+    erpi: {
+      title: "Mala de Primeiros Socorros • ERPI / Lar de Idosos",
+      icon: "👵",
+      desc: "Adequada à fragilidade cutânea, polipatologia e controlo de sinais vitais no idoso:",
+      items: [
+        { id: "e_tensio", name: "Tensiómetro digital de braço calibrado", cat: "Monitorização" },
+        { id: "e_oxim", name: "Oxímetro de pulso digital portátil", cat: "Monitorização" },
+        { id: "e_glic", name: "Medidor de glicemia capilar + tiras no prazo", cat: "Glicemia" },
+        { id: "e_termom", name: "Termómetro timpânico ou de infravermelhos", cat: "Monitorização" },
+        { id: "e_luvas", name: "Luvas de nitrilo descartáveis (caixa)", cat: "Proteção" },
+        { id: "e_silicone", name: "Pensos de silicone atraumáticos (pele senil)", cat: "Curativo" },
+        { id: "e_antiss", name: "Solução antisséptica aquosa (clorexidina a 0,2%)", cat: "Antisepsia" },
+        { id: "e_soro", name: "Frascos de soro fisiológico para irrigação", cat: "Lavagem" },
+        { id: "e_comp", name: "Compressas estéreis e ligaduras tubulares", cat: "Curativo" },
+        { id: "e_manta", name: "Manta térmica aluminizada", cat: "Isolamento" },
+        { id: "e_pocket", name: "Máscara pocket com filtro bacteriano para RCP", cat: "Suporte de Vida" },
+        { id: "e_fichas", name: "Ficha médica atualizada de cada utente (alergias/medicação)", cat: "Documentação" }
+      ]
+    },
+    creche: {
+      title: "Estojo de Primeiros Socorros • Creche & Escola",
+      icon: "🧒",
+      desc: "Adaptado a crianças, lactentes e acidentes infantis comuns:",
+      items: [
+        { id: "k_gel_frio", name: "Compressas de frio instantâneo (galos/quedas)", cat: "Crioterapia" },
+        { id: "k_soro", name: "Soro fisiológico unidose em abundância", cat: "Lavagem" },
+        { id: "k_pensos_inf", name: "Pensos rápidos hipoalergénicos infantis", cat: "Curativo" },
+        { id: "k_termom", name: "Termómetro digital de ponta flexível rápida", cat: "Avaliação" },
+        { id: "k_sro", name: "Saquetas de sais de reidratação oral (SRO)", cat: "Hidratação" },
+        { id: "k_luvas", name: "Luvas descartáveis de nitrilo", cat: "Proteção" },
+        { id: "k_comp", name: "Compressas de gaze estéril pequenas e médias", cat: "Curativo" },
+        { id: "k_ligaduras", name: "Ligaduras elásticas macias para pulsos/tornozelos", cat: "Imobilização" },
+        { id: "k_tesoura", name: "Tesoura infantil de pontas redondas", cat: "Instrumental" },
+        { id: "k_masc_ped", name: "Máscara pocket pediátrica (lactente e criança)", cat: "Suporte de Vida" },
+        { id: "k_alergias", name: "Plano Individual de Saúde e autorizações de emergência", cat: "Documentação" }
+      ]
+    },
+    empresa: {
+      title: "Posto de Primeiros Socorros • Empresa / Trabalho",
+      icon: "🏢",
+      desc: "Conforme as diretrizes de Segurança no Trabalho (SST / ACT):",
+      items: [
+        { id: "w_lava_olhos", name: "Frascos de solução lava-olhos estéril com ocular", cat: "Oftalmo" },
+        { id: "w_torniquete", name: "Torniquete comercial homologado (risco de corte)", cat: "Hemostase Crítica" },
+        { id: "w_penso_valv", name: "Penso torácico valvular / pensos hemostáticos", cat: "Trauma" },
+        { id: "w_luvas", name: "Luvas de nitrilo de alta espessura", cat: "Proteção" },
+        { id: "w_comp_grandes", name: "Compressas absorventes para queimaduras e feridas", cat: "Curativo" },
+        { id: "w_manta", name: "Manta térmica aluminizada de sobrevivência", cat: "Isolamento" },
+        { id: "w_tesoura", name: "Tesoura de trauma corta-vestuário pesada", cat: "Instrumental" },
+        { id: "w_ligaduras", name: "Ligaduras elásticas de compressão", cat: "Imobilização" },
+        { id: "w_pocket", name: "Máscara pocket de RCP com válvula antirretorno", cat: "Suporte de Vida" },
+        { id: "w_contactos", name: "Quadro visível com socorristas internos e 112", cat: "Procedimento" }
+      ]
+    }
+  };
+
+  let currentKitLocation = 'casa';
+
+  function renderKitChecklist(locationKey) {
+    const container = document.getElementById('kit-checklist-container');
+    if (!container) return;
+
+    currentKitLocation = locationKey;
+    const kit = firstAidKitData[locationKey];
+    if (!kit) return;
+
+    // Atualizar abas
+    document.querySelectorAll('.btn-kit-location-tab').forEach(b => {
+      if (b.dataset.location === locationKey) {
+        b.classList.add('bg-emerald-600', 'text-white', 'active');
+        b.classList.remove('bg-slate-800', 'text-slate-300');
+      } else {
+        b.classList.remove('bg-emerald-600', 'text-white', 'active');
+        b.classList.add('bg-slate-800', 'text-slate-300');
+      }
+    });
+
+    const savedState = JSON.parse(localStorage.getItem(`first_aid_kit_${locationKey}`) || '{}');
+    const totalItems = kit.items.length;
+    let checkedCount = 0;
+
+    let itemsHtml = '';
+    kit.items.forEach(item => {
+      const isChecked = !!savedState[item.id];
+      if (isChecked) checkedCount++;
+
+      itemsHtml += `
+        <div class="kit-item-row p-2.5 bg-slate-900 border ${isChecked ? 'border-emerald-500 is-checked' : 'border-slate-800'} rounded-xl flex items-center justify-between gap-2.5" data-id="${item.id}">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="kit-checkbox w-5 h-5 rounded border ${isChecked ? 'bg-emerald-500 border-emerald-500 text-slate-950 font-black' : 'border-slate-600 bg-slate-950 text-transparent'} flex items-center justify-center text-xs shrink-0 transition">✓</span>
+            <div class="min-w-0">
+              <strong class="text-xs text-white block truncate leading-tight">${item.name}</strong>
+              <span class="text-[10px] text-slate-400 block">${item.cat}</span>
+            </div>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded font-mono ${isChecked ? 'bg-emerald-950 text-emerald-300' : 'bg-slate-800 text-slate-500'}">
+            ${isChecked ? 'Conferido' : 'Pendente'}
+          </span>
+        </div>
+      `;
+    });
+
+    const percent = Math.round((checkedCount / totalItems) * 100);
+
+    container.innerHTML = `
+      <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">${kit.icon}</span>
+            <div>
+              <h4 class="text-xs font-bold text-white">${kit.title}</h4>
+              <p class="text-[10px] text-slate-400">${kit.desc}</p>
+            </div>
+          </div>
+          <span class="text-xs font-bold font-mono text-emerald-400">${checkedCount}/${totalItems}</span>
+        </div>
+
+        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+          <div class="bg-emerald-500 h-full transition-all duration-300" style="width: ${percent}%;"></div>
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-slate-400">
+          <span>Prontidão da mala: <strong>${percent}%</strong></span>
+          <button type="button" id="btn-reset-kit" class="text-slate-400 hover:text-white underline cursor-pointer">Limpar seleção</button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5 mt-2">
+        ${itemsHtml}
+      </div>
+    `;
+
+    // Listeners de alternância nos itens
+    container.querySelectorAll('.kit-item-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.id;
+        savedState[id] = !savedState[id];
+        localStorage.setItem(`first_aid_kit_${locationKey}`, JSON.stringify(savedState));
+        renderKitChecklist(locationKey);
+      });
+    });
+
+    container.querySelector('#btn-reset-kit')?.addEventListener('click', () => {
+      if (confirm('Deseja reiniciar a verificação desta mala?')) {
+        localStorage.removeItem(`first_aid_kit_${locationKey}`);
+        renderKitChecklist(locationKey);
+      }
+    });
+  }
+
+  function initFirstAidKitChecklist() {
+    document.querySelectorAll('.btn-kit-location-tab').forEach(b => {
+      b.addEventListener('click', () => {
+        const loc = b.dataset.location;
+        if (loc) renderKitChecklist(loc);
+      });
+    });
+
+    renderKitChecklist('casa');
+
+    const btnQuickKit = document.getElementById('btn-quick-kit-checklist');
+    if (btnQuickKit) {
+      btnQuickKit.addEventListener('click', () => {
+        const navBtn = document.querySelector('.bottom-nav button[data-target="screen-learning-hub"]');
+        if (navBtn) navBtn.click();
+        const ch = document.getElementById('chapter-kit-checklist');
+        if (ch) {
+          ch.classList.add('open');
+          setTimeout(() => ch.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        }
+      });
+    }
+  }
+
+  // ========================================================
+  // MODAL EM INGLÊS & APOIO A TURISTAS (ENGLISH GUIDE)
+  // ========================================================
+  const modalEnglishGuide = document.getElementById('modal-english-guide');
+  const btnToggleLang = document.getElementById('btn-toggle-lang');
+  const btnCloseEnglishModal = document.getElementById('btn-close-english-modal');
+  const btnDismissEnglish = document.getElementById('btn-dismiss-english');
+  const enLocAddress = document.getElementById('en-loc-address');
+  const enLocRef = document.getElementById('en-loc-ref');
+
+  function openEnglishModal() {
+    if (!modalEnglishGuide) return;
+    const loc = GeoManager.currentLocation;
+    if (enLocAddress) {
+      enLocAddress.textContent = (loc.address && !loc.address.includes('A obter')) ? loc.address : 'GPS coordinates in Portugal';
+    }
+    if (enLocRef) {
+      enLocRef.textContent = loc.landmark || 'Nearby local enterprise / landmark';
+    }
+    modalEnglishGuide.classList.remove('hidden');
+  }
+
+  function closeEnglishModal() {
+    if (modalEnglishGuide) modalEnglishGuide.classList.add('hidden');
+  }
+
+  if (btnToggleLang) btnToggleLang.addEventListener('click', openEnglishModal);
+  if (btnCloseEnglishModal) btnCloseEnglishModal.addEventListener('click', closeEnglishModal);
+  if (btnDismissEnglish) btnDismissEnglish.addEventListener('click', closeEnglishModal);
+
+  if (modalEnglishGuide) {
+    modalEnglishGuide.addEventListener('click', (e) => {
+      if (e.target === modalEnglishGuide) closeEnglishModal();
+    });
+  }
+
+  // Inicializar novos módulos
+  initHandsFreeVoice();
+  initClinicalSimulator();
+  initFirstAidKitChecklist();
+
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));
   };
