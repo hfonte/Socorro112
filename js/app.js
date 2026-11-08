@@ -2616,6 +2616,75 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
   }
 
   // ========================================================
+  // CONFIGURAÇÃO DE AFILIADOS AMAZON (MONETIZAÇÃO ÉTICA)
+  // ========================================================
+  const AMAZON_AFFILIATE_CONFIG = {
+    // Insira aqui a sua Tag oficial do Programa de Associados da Amazon (ex: 'hfonte-21' ou 'cuidaremerg-21')
+    associateTag: 'cuidaremerg-21',
+    buildSearchUrl(query) {
+      return `https://www.amazon.es/s?k=${encodeURIComponent(query)}&tag=${this.associateTag}`;
+    },
+    locationKits: {
+      casa: {
+        title: "Mala de Primeiros Socorros Completa para Casa (90+ Peças Homologada)",
+        query: "kit primeiros socorros casa completo homologado",
+        priceHint: "Aprox. 15€ - 25€ • Entrega 24h Prime",
+        badge: "Mais Vendido Casa"
+      },
+      carro: {
+        title: "Estojo de Primeiros Socorros para Carro (Norma Europeia DIN 13164)",
+        query: "estojo primeiros socorros carro din 13164 homologado",
+        priceHint: "Aprox. 12€ - 19€ • Obrigatório em Viagens",
+        badge: "Certificado DIN"
+      },
+      erpi: {
+        title: "Mala de Emergência Médica Geriátrica com Oxímetro e Tensiómetro",
+        query: "mala primeiros socorros geriatria oximetro tensiometro",
+        priceHint: "Aprox. 29€ - 49€ • Cuidados de Idosos",
+        badge: "Equipamento Clínico"
+      },
+      creche: {
+        title: "Kit de Primeiros Socorros Infantil com Bolsas de Frio e Curativos",
+        query: "kit primeiros socorros infantil escola creche",
+        priceHint: "Aprox. 14€ - 22€ • Seguro para Crianças",
+        badge: "Aprovado Pediátrico"
+      },
+      empresa: {
+        title: "Posto / Armário de Primeiros Socorros SST para Empresas e Armazéns",
+        query: "posto primeiros socorros empresa sst lava olhos torniquete",
+        priceHint: "Aprox. 29€ - 55€ • Normas de Trabalho",
+        badge: "Segurança no Trabalho"
+      }
+    },
+    essentialItems: [
+      {
+        icon: "🫀",
+        name: "Máscara Pocket de RCP com Válvula",
+        desc: "Protege o socorrista em insuflações de Suporte Básico de Vida",
+        query: "mascara pocket reanimacao rcp valvula estojo"
+      },
+      {
+        icon: "🩸",
+        name: "Torniquete Comercial Homologado CAT",
+        desc: "Essencial para estancar hemorragias graves em membros",
+        query: "torniquete tatico militar homologado cat hemostase"
+      },
+      {
+        icon: "🧊",
+        name: "Bolsas de Frio Instantâneo (Pack)",
+        desc: "Alívio imediato de pancadas, galos e entorses sem congelador",
+        query: "bolsa frio instantaneo descartavel primeiros socorros"
+      },
+      {
+        icon: "🩹",
+        name: "Mantas Térmicas de Sobrevivência (Pack)",
+        desc: "Isolamento térmico indispensável contra choque e hipotermia",
+        query: "manta termica sobrevivencia aluminizada primeiros socorros"
+      }
+    ]
+  };
+
+  // ========================================================
   // CHECKLIST DA CAIXA DE PRIMEIROS SOCORROS POR LOCAL
   // ========================================================
   const firstAidKitData = {
@@ -2802,6 +2871,66 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
         renderKitChecklist(locationKey);
       }
     });
+
+    // Renderizar Recomendações de Compra de Material & Afiliados Amazon
+    const amazonBox = document.getElementById('kit-amazon-recommendations');
+    if (amazonBox) {
+      const mainKit = AMAZON_AFFILIATE_CONFIG.locationKits[locationKey] || AMAZON_AFFILIATE_CONFIG.locationKits.casa;
+      const mainKitUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(mainKit.query);
+
+      let essentialsHtml = '';
+      AMAZON_AFFILIATE_CONFIG.essentialItems.forEach(item => {
+        const itemUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(item.query);
+        essentialsHtml += `
+          <a href="${itemUrl}" target="_blank" rel="noopener noreferrer nofollow" class="amazon-product-pill p-2 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-between gap-2 text-left transition text-xs group">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-base">${item.icon}</span>
+              <div class="min-w-0">
+                <strong class="text-white text-[11px] block truncate group-hover:text-amber-300">${item.name}</strong>
+                <span class="text-[10px] text-slate-400 block truncate">${item.desc}</span>
+              </div>
+            </div>
+            <span class="text-[10px] text-amber-400 font-bold shrink-0 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-600/40">Ver na Amazon ➔</span>
+          </a>
+        `;
+      });
+
+      amazonBox.innerHTML = `
+        <div class="flex items-center justify-between border-b border-amber-500/30 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🛒</span>
+            <div>
+              <h4 class="text-xs font-black text-amber-300">Onde encontrar o material em falta?</h4>
+              <p class="text-[10px] text-slate-300">Produtos homologados na Amazon com entrega rápida em Portugal:</p>
+            </div>
+          </div>
+          <span class="text-[9px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-600/50 font-bold uppercase tracking-wider">Afiliados</span>
+        </div>
+
+        <!-- KIT PRINCIPAL RECOMENDADO PARA ESTE LOCAL -->
+        <div class="p-3 bg-slate-950/80 border border-amber-500/60 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-600/40">${mainKit.badge}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${mainKit.priceHint}</span>
+          </div>
+          <strong class="text-xs text-white block leading-snug">${mainKit.title}</strong>
+          <a href="${mainKitUrl}" target="_blank" rel="noopener noreferrer nofollow" class="w-full py-2 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow transition cursor-pointer">
+            <span>🛒</span> Ver Kit Completo na Amazon (Entrega Rápida) ➔
+          </a>
+        </div>
+
+        <!-- ITENS CRÍTICOS INDIVIDUAIS -->
+        <div class="space-y-1.5">
+          <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Artigos de Segurança Essenciais (Avulso):</span>
+          ${essentialsHtml}
+        </div>
+
+        <!-- AVISO DE TRANSPARÊNCIA ÉTICA -->
+        <p class="text-[9px] text-slate-500 leading-tight pt-1 text-center">
+          Transparência: Ao encomendar através destes links da Amazon, o projeto recebe uma pequena comissão sem qualquer custo adicional para si. Toda a receita reverte para manter a aplicação 100% gratuita.
+        </p>
+      `;
+    }
   }
 
   function initFirstAidKitChecklist() {

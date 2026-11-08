@@ -766,6 +766,34 @@ body {
 }
 
 /* ======================================================== */
+/* MONETIZAÇÃO ÉTICA: AFILIADOS AMAZON & ADSENSE NA FORMAÇÃO*/
+/* ======================================================== */
+.amazon-affiliate-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.amazon-product-pill {
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  user-select: none;
+}
+.amazon-product-pill:hover {
+  border-color: #f59e0b;
+  background-color: rgba(30, 41, 59, 0.9);
+  transform: translateY(-1px);
+}
+.amazon-product-pill:active {
+  transform: scale(0.985);
+}
+
+.adsense-training-slot {
+  transition: all 0.2s ease-in-out;
+}
+
+/* ======================================================== */
 /* ESTILOS DE IMPRESSÃO (GUIA RÁPIDO DE BOLSO A4 / PDF)     */
 /* ======================================================== */
 @media print {
