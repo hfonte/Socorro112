@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=40">
+  <link rel="stylesheet" href="./css/styles.css?v=41">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE ADSENSE (PUB ID OFICIAL: ca-pub-1221675661029327) -->
@@ -314,6 +314,20 @@
               <span class="counter-lbl">Ciclos</span>
               <div class="counter-num text-emerald-400" id="sbv-cycles-count">0</div>
             </div>
+          </div>
+
+          <!-- BANNER VISUAL DINÂMICO DE INSUFLAÇÕES (QUANDO EM 30:2) -->
+          <div id="sbv-ventilation-banner" class="hidden my-3 p-3 bg-sky-950/90 border-2 border-sky-400 rounded-2xl text-center shadow-lg transition-all">
+            <div class="flex items-center justify-center gap-2">
+              <span class="text-2xl animate-bounce">🫁</span>
+              <strong id="sbv-ventilation-text" class="text-xs sm:text-sm font-black text-sky-200 uppercase tracking-wide">
+                1ª Insuflação (1 segundo)
+              </strong>
+            </div>
+            <div class="w-full bg-slate-900 h-2 rounded-full mt-2.5 overflow-hidden border border-slate-700">
+              <div id="sbv-ventilation-progress" class="bg-sky-400 h-full transition-all duration-300" style="width: 50%;"></div>
+            </div>
+            <p class="text-[10px] text-sky-300/80 mt-1.5">Insufle suavemente até o peito expandir (1 seg). Não interrompa mais de 5s!</p>
           </div>
 
           <div class="flex gap-2 mt-4">
@@ -2893,11 +2907,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=40"></script>
-  <script src="./js/geo.js?v=40"></script>
-  <script src="./js/knowledge_base.js?v=40"></script>
-  <script src="./js/rag.js?v=40"></script>
-  <script src="./js/ai.js?v=40"></script>
-  <script src="./js/app.js?v=40"></script>
+  <script src="./js/audio.js?v=41"></script>
+  <script src="./js/geo.js?v=41"></script>
+  <script src="./js/knowledge_base.js?v=41"></script>
+  <script src="./js/rag.js?v=41"></script>
+  <script src="./js/ai.js?v=41"></script>
+  <script src="./js/app.js?v=41"></script>
 </body>
 </html>

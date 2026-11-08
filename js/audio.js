@@ -6,6 +6,8 @@ const AudioManager = {
   bpm: 110,
   voiceEnabled: true,
   wakeLock: null,
+  isVentilating: false,
+  ventilationTimerIds: [],
 
   initContext() {
     if (!this.audioCtx) {
@@ -39,12 +41,12 @@ const AudioManager = {
     }
   },
 
+  // 1. Clique penetrante de compressão torácica (110 bpm)
   playTick(time) {
     if (!this.audioCtx) return;
     const osc = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();
 
-    // Som agudo e penetrante para altifalantes de smartphone
     osc.type = 'square';
     osc.frequency.setValueAtTime(1080, time);
 
@@ -57,15 +59,14 @@ const AudioManager = {
 
     osc.start(time);
     osc.stop(time + 0.065);
-    // Nota: feedback háptico/vibração desativado para poupar a bateria do smartphone durante manobras prolongadas
   },
 
+  // 2. Tom distintivo da 30ª compressão (marca fim do ciclo)
   playBeatThirty(time) {
     if (!this.audioCtx) return;
     const osc = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();
 
-    // Tom distintivo e duplo mais agudo para marcar o fim do ciclo de 30 compressões
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(1450, time);
 
@@ -80,9 +81,110 @@ const AudioManager = {
     osc.stop(time + 0.13);
   },
 
-  schedule() {
+  // 3. Som de insuflação de ar suave e contínuo durante 1 segundo
+  playVentilationTone(time) {
     if (!this.audioCtx) return;
+    const now = time || this.audioCtx.currentTime;
+    const osc = this.audioCtx.createOscillator();
+    const gain = this.audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(450, now + 0.85);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.15);
+    gain.gain.setValueAtTime(0.25, now + 0.75);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.98);
+
+    osc.connect(gain);
+    gain.connect(this.audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + 1.0);
+  },
+
+  // 4. Bip duplo enérgico para retomar compressões após as insuflações
+  playResumeTone(time) {
+    if (!this.audioCtx) return;
+    const now = time || this.audioCtx.currentTime;
+    [880, 1174].forEach((freq, idx) => {
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+      gain.gain.setValueAtTime(0.001, now + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.4, now + idx * 0.12 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.09);
+
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+
+      osc.start(now + idx * 0.12);
+      osc.stop(now + idx * 0.12 + 0.1);
+    });
+  },
+
+  // Sequência de Insuflações (máximo 4 a 5 segundos de pausa segundo o ERC 2025)
+  triggerVentilation(onStep, onComplete) {
+    this.cancelVentilation();
+    this.isVentilating = true;
+    this.initContext();
+
+    // Insuflação 1: Inicia aos 300ms e dura 1 segundo
+    const t1 = setTimeout(() => {
+      if (!this.isVentilating) return;
+      this.playVentilationTone();
+      if (typeof onStep === 'function') onStep(1);
+    }, 300);
+    this.ventilationTimerIds.push(t1);
+
+    // Insuflação 2: Inicia aos 2000ms e dura 1 segundo
+    const t2 = setTimeout(() => {
+      if (!this.isVentilating) return;
+      this.playVentilationTone();
+      if (typeof onStep === 'function') onStep(2);
+    }, 2000);
+    this.ventilationTimerIds.push(t2);
+
+    // Aviso de retoma de compressões aos 3600ms
+    const t3 = setTimeout(() => {
+      if (!this.isVentilating) return;
+      this.playResumeTone();
+      if (typeof onStep === 'function') onStep(3);
+    }, 3600);
+    this.ventilationTimerIds.push(t3);
+
+    // Fim da pausa e retoma imediata do metrónomo aos 4000ms
+    const t4 = setTimeout(() => {
+      if (!this.isVentilating) return;
+      this.isVentilating = false;
+      if (this.audioCtx) {
+        this.nextTick = this.audioCtx.currentTime + 0.05;
+      }
+      if (typeof onComplete === 'function') onComplete();
+    }, 4000);
+    this.ventilationTimerIds.push(t4);
+  },
+
+  cancelVentilation() {
+    this.isVentilating = false;
+    this.ventilationTimerIds.forEach(id => clearTimeout(id));
+    this.ventilationTimerIds = [];
+  },
+
+  schedule() {
+    if (!this.audioCtx || this.isVentilating) return;
+
+    // Resincroniza o relógio caso tenha ficado desfasado
+    if (this.nextTick < this.audioCtx.currentTime - 0.2) {
+      this.nextTick = this.audioCtx.currentTime + 0.05;
+    }
+
     while (this.nextTick < this.audioCtx.currentTime + 0.1) {
+      if (this.isVentilating) break;
+
       let isThirty = false;
       if (typeof window.onBeatTick === 'function') {
         const res = window.onBeatTick();
@@ -90,11 +192,13 @@ const AudioManager = {
           isThirty = true;
         }
       }
+
       if (isThirty) {
         this.playBeatThirty(this.nextTick);
       } else {
         this.playTick(this.nextTick);
       }
+
       this.nextTick += 60 / this.bpm;
     }
   },
@@ -102,6 +206,7 @@ const AudioManager = {
   startMetronome() {
     this.initContext();
     this.requestWakeLock();
+    this.cancelVentilation();
     this.nextTick = this.audioCtx.currentTime + 0.05;
     this.schedule();
     if (this.metroInterval) clearInterval(this.metroInterval);
@@ -109,6 +214,7 @@ const AudioManager = {
   },
 
   stopMetronome() {
+    this.cancelVentilation();
     if (this.metroInterval) {
       clearInterval(this.metroInterval);
       this.metroInterval = null;
@@ -118,11 +224,13 @@ const AudioManager = {
 
   speak(text) {
     if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-PT';
-    utterance.rate = 1.05;
-    window.speechSynthesis.speak(utterance);
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-PT';
+      utterance.rate = 1.05;
+      window.speechSynthesis.speak(utterance);
+    } catch (_) {}
   },
 
   playChime() {
@@ -142,9 +250,6 @@ const AudioManager = {
       osc.start(now + idx * 0.12);
       osc.stop(now + idx * 0.12 + 0.4);
     });
-    if ('vibrate' in navigator) {
-      try { navigator.vibrate([100, 50, 100]); } catch (_) {}
-    }
   },
 
   playAlarmTone() {
@@ -164,9 +269,6 @@ const AudioManager = {
       gain.connect(this.audioCtx.destination);
       osc.start(t);
       osc.stop(t + 0.18);
-    }
-    if ('vibrate' in navigator) {
-      try { navigator.vibrate([200, 100, 200]); } catch (_) {}
     }
   }
 };

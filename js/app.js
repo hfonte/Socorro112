@@ -548,9 +548,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnMode30_2 = document.getElementById('btn-mode-30-2');
   const btnModeContinuous = document.getElementById('btn-mode-continuous');
+  const sbvVentilationBanner = document.getElementById('sbv-ventilation-banner');
+  const sbvVentilationText = document.getElementById('sbv-ventilation-text');
+  const sbvVentilationProgress = document.getElementById('sbv-ventilation-progress');
 
   function setSBVRatioMode(mode) {
     AppState.ratioMode = mode;
+    const cycleSize = AppState.isAdult ? 30 : 15;
     if (mode === '30_2') {
       if (btnMode30_2) {
         btnMode30_2.className = 'py-1.5 px-2 rounded-lg bg-yellow-400 text-slate-950 font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer';
@@ -558,12 +562,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnModeContinuous) {
         btnModeContinuous.className = 'py-1.5 px-2 rounded-lg bg-transparent text-slate-400 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer';
       }
+      if (labelBeats && !AppState.sbvActive) {
+        labelBeats.textContent = `0/${cycleSize}`;
+      }
     } else {
       if (btnModeContinuous) {
         btnModeContinuous.className = 'py-1.5 px-2 rounded-lg bg-yellow-400 text-slate-950 font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer';
       }
       if (btnMode30_2) {
         btnMode30_2.className = 'py-1.5 px-2 rounded-lg bg-transparent text-slate-400 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer';
+      }
+      if (labelBeats && !AppState.sbvActive) {
+        labelBeats.textContent = '0';
       }
     }
   }
@@ -589,8 +599,34 @@ document.addEventListener('DOMContentLoaded', () => {
       AppState.cycles++;
       if (labelCycles) labelCycles.textContent = AppState.cycles;
       isThirty = true;
+
+      // Se estiver em modo 30:2, aciona o protocolo sonoro e visual de insuflações
       if (AppState.ratioMode === '30_2') {
-        AudioManager.speak(`${cycleSize}! Duas insuflações.`);
+        if (sbvVentilationBanner) {
+          sbvVentilationBanner.classList.remove('hidden');
+          if (sbvVentilationText) sbvVentilationText.textContent = '🫁 1ª Insuflação... (1 segundo)';
+          if (sbvVentilationProgress) sbvVentilationProgress.style.width = '30%';
+        }
+
+        AudioManager.triggerVentilation(
+          (step) => {
+            if (step === 1) {
+              if (sbvVentilationText) sbvVentilationText.textContent = '🫁 1ª Insuflação (1 segundo)';
+              if (sbvVentilationProgress) sbvVentilationProgress.style.width = '50%';
+            } else if (step === 2) {
+              if (sbvVentilationText) sbvVentilationText.textContent = '🫁 2ª Insuflação (1 segundo)';
+              if (sbvVentilationProgress) sbvVentilationProgress.style.width = '85%';
+            } else if (step === 3) {
+              if (sbvVentilationText) sbvVentilationText.textContent = '⚡ A retomar compressões!';
+              if (sbvVentilationProgress) sbvVentilationProgress.style.width = '100%';
+            }
+          },
+          () => {
+            // Retoma automática das compressões
+            if (sbvVentilationBanner) sbvVentilationBanner.classList.add('hidden');
+            if (labelBeats) labelBeats.textContent = `0/${cycleSize}`;
+          }
+        );
       }
     }
     return { isThirty };
@@ -618,13 +654,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }, 1000);
     }
-
-    AudioManager.speak('Iniciando compressões no centro do peito. Acompanhe o ritmo.');
   }
 
   function pauseSBV() {
     AppState.sbvActive = false;
     AudioManager.stopMetronome();
+    AudioManager.cancelVentilation();
+    if (sbvVentilationBanner) sbvVentilationBanner.classList.add('hidden');
     if (btnStartSBV) btnStartSBV.classList.remove('hidden');
     if (btnPauseSBV) btnPauseSBV.classList.add('hidden');
     if (AppState.timerInterval) {
@@ -638,7 +674,8 @@ document.addEventListener('DOMContentLoaded', () => {
     AppState.beats = 0;
     AppState.cycles = 0;
     AppState.secondsElapsed = 0;
-    if (labelBeats) labelBeats.textContent = '0';
+    const cycleSize = AppState.isAdult ? 30 : 15;
+    if (labelBeats) labelBeats.textContent = (AppState.ratioMode === '30_2') ? `0/${cycleSize}` : '0';
     if (labelCycles) labelCycles.textContent = '0';
     if (labelTime) labelTime.textContent = '00:00';
     if (alertRotation) alertRotation.classList.add('hidden');
