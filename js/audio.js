@@ -57,19 +57,43 @@ const AudioManager = {
 
     osc.start(time);
     osc.stop(time + 0.065);
+    // Nota: feedback háptico/vibração desativado para poupar a bateria do smartphone durante manobras prolongadas
+  },
 
-    // Feedback háptico (vibração no telemóvel para sentir o ritmo)
-    if ('vibrate' in navigator) {
-      try { navigator.vibrate(35); } catch (_) {}
-    }
+  playBeatThirty(time) {
+    if (!this.audioCtx) return;
+    const osc = this.audioCtx.createOscillator();
+    const gain = this.audioCtx.createGain();
+
+    // Tom distintivo e duplo mais agudo para marcar o fim do ciclo de 30 compressões
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1450, time);
+
+    gain.gain.setValueAtTime(0.001, time);
+    gain.gain.exponentialRampToValueAtTime(0.5, time + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+
+    osc.connect(gain);
+    gain.connect(this.audioCtx.destination);
+
+    osc.start(time);
+    osc.stop(time + 0.13);
   },
 
   schedule() {
     if (!this.audioCtx) return;
     while (this.nextTick < this.audioCtx.currentTime + 0.1) {
-      this.playTick(this.nextTick);
+      let isThirty = false;
       if (typeof window.onBeatTick === 'function') {
-        window.onBeatTick();
+        const res = window.onBeatTick();
+        if (res === 30 || (res && res.isThirty)) {
+          isThirty = true;
+        }
+      }
+      if (isThirty) {
+        this.playBeatThirty(this.nextTick);
+      } else {
+        this.playTick(this.nextTick);
       }
       this.nextTick += 60 / this.bpm;
     }

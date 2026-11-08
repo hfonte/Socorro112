@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=38">
+  <link rel="stylesheet" href="./css/styles.css?v=39">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE ADSENSE (PUB ID OFICIAL: ca-pub-1221675661029327) -->
@@ -290,6 +290,16 @@
         <div class="metro-display">
           <span class="text-xs uppercase text-slate-400 font-bold block mb-1">Cadência de Compressões:</span>
           <div class="metro-bpm" id="metro-bpm-val">110 <span class="text-sm font-sans text-slate-400">BPM</span></div>
+
+          <!-- SELETOR DE MODO: 30:2 COM AVISO DE VOZ vs CONTÍNUO -->
+          <div class="grid grid-cols-2 gap-1.5 my-2.5 p-1 bg-slate-950/70 border border-slate-800 rounded-xl text-xs font-semibold">
+            <button type="button" id="btn-mode-30-2" class="py-1.5 px-2 rounded-lg bg-yellow-400 text-slate-950 font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer">
+              <span>🫁</span> <span>Rácio 30:2 (Aviso Voz)</span>
+            </button>
+            <button type="button" id="btn-mode-continuous" class="py-1.5 px-2 rounded-lg bg-transparent text-slate-400 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer">
+              <span>⚡</span> <span>Contínuo (Hands-Only)</span>
+            </button>
+          </div>
           
           <div class="counter-grid">
             <div class="counter-cell">
@@ -786,6 +796,40 @@
           </div>
         </div>
 
+        <!-- GUIA FALADO INTERATIVO MÃOS-LIVRES (OVA) -->
+        <div id="voice-coach-ova" class="interactive-voice-coach-card mb-4 p-3 bg-slate-900 border border-amber-500/60 rounded-2xl shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🎙️</span>
+              <div>
+                <h4 class="text-xs font-black text-white">Guia Falado Interativo (Mãos-Livres)</h4>
+                <p class="text-[10px] text-amber-300">A app dita cada ação e reage à evolução da vítima por voz</p>
+              </div>
+            </div>
+            <button type="button" class="btn-start-voice-coach px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1" data-protocol="ova">
+              <span>▶ Iniciar Guia por Voz</span>
+            </button>
+          </div>
+
+          <div class="voice-coach-panel hidden mt-2.5 pt-2.5 border-t border-slate-800 space-y-2">
+            <div class="voice-coach-bubble p-3 bg-slate-950 border border-amber-500/40 rounded-xl text-xs text-amber-200 leading-relaxed font-medium">
+              <!-- Mensagem falada atual -->
+            </div>
+            
+            <div class="flex items-center justify-between text-[11px] text-slate-400 px-0.5">
+              <span class="voice-coach-status flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="status-lbl">A ouvir... Diga uma resposta ou toque num botão:</span>
+              </span>
+              <button type="button" class="btn-stop-voice-coach text-slate-400 hover:text-white underline text-[10px]">Parar Voz</button>
+            </div>
+
+            <div class="voice-coach-actions grid grid-cols-2 gap-1.5 pt-1">
+              <!-- Botões rápidos de feedback -->
+            </div>
+          </div>
+        </div>
+
         <!-- IMAGENS REAIS DE OVA DO MANUAL -->
         <div class="card">
           <h3 class="card-title text-sm">Sequência Oficial 5 + 5 (Manual TAS):</h3>
@@ -831,6 +875,40 @@
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xl font-black text-white">Trauma &amp; Hemorragias Graves</h2>
           <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
+        </div>
+
+        <!-- GUIA FALADO INTERATIVO MÃOS-LIVRES (HEMORRAGIAS / TRAUMA) -->
+        <div id="voice-coach-trauma" class="interactive-voice-coach-card mb-4 p-3 bg-slate-900 border border-red-500/60 rounded-2xl shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🎙️</span>
+              <div>
+                <h4 class="text-xs font-black text-white">Guia Falado Interativo (Hemorragias)</h4>
+                <p class="text-[10px] text-red-300">A app dita cada passo e reage ao estado do sangramento</p>
+              </div>
+            </div>
+            <button type="button" class="btn-start-voice-coach px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1" data-protocol="trauma">
+              <span>▶ Iniciar Guia por Voz</span>
+            </button>
+          </div>
+
+          <div class="voice-coach-panel hidden mt-2.5 pt-2.5 border-t border-slate-800 space-y-2">
+            <div class="voice-coach-bubble p-3 bg-slate-950 border border-red-500/40 rounded-xl text-xs text-red-200 leading-relaxed font-medium">
+              <!-- Mensagem falada atual -->
+            </div>
+            
+            <div class="flex items-center justify-between text-[11px] text-slate-400 px-0.5">
+              <span class="voice-coach-status flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="status-lbl">A ouvir... Diga uma resposta ou toque num botão:</span>
+              </span>
+              <button type="button" class="btn-stop-voice-coach text-slate-400 hover:text-white underline text-[10px]">Parar Voz</button>
+            </div>
+
+            <div class="voice-coach-actions grid grid-cols-2 gap-1.5 pt-1">
+              <!-- Botões rápidos de feedback -->
+            </div>
+          </div>
         </div>
 
         <!-- RELÓGIO DO GARROTE / TORNIQUETE -->
@@ -1337,6 +1415,18 @@
           <button type="button" class="btn-open-pocket-guide py-2 px-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow">
             <span>🖨️</span> <span>Ver / Imprimir</span>
           </button>
+        </div>
+
+        <!-- BARRA DE PESQUISA RÁPIDA NO MANUAL -->
+        <div class="mb-4">
+          <div class="relative">
+            <input type="text" id="learning-hub-search-input" placeholder="🔍 Pesquisar nos 13 capítulos (ex: queimadura, torniquete, heimlich, avc, creche)..." class="w-full py-2.5 pl-3.5 pr-10 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition shadow-inner">
+            <button type="button" id="btn-clear-hub-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-base font-bold leading-none cursor-pointer">&times;</button>
+          </div>
+          <div id="learning-search-results-info" class="hidden mt-1.5 px-1 text-[11px] text-purple-300 font-semibold flex items-center justify-between">
+            <span id="learning-search-count">0 capítulos encontrados</span>
+            <button type="button" id="btn-reset-search-filter" class="text-slate-400 hover:text-white underline text-[10px] cursor-pointer">Ver todos os capítulos</button>
+          </div>
         </div>
 
         <!-- CAPÍTULO 1: O SIEM E O PROTOCOLO PAS -->
@@ -2193,26 +2283,41 @@
             </p>
 
             <!-- SELETOR DE CENÁRIOS -->
-            <div class="grid grid-cols-2 gap-2 mb-3">
-              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-purple-500 rounded-xl text-left transition" data-scenario="pcr_adulto">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-3">
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-purple-500 rounded-xl text-left transition cursor-pointer" data-scenario="pcr_adulto">
                 <span class="text-lg block mb-0.5">🫀</span>
                 <strong class="text-xs text-white block">PCR Adulto</strong>
                 <span class="text-[10px] text-purple-300">Colapso Súbito</span>
               </button>
-              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition" data-scenario="ova_adulto">
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer" data-scenario="ova_adulto">
                 <span class="text-lg block mb-0.5">🗣️</span>
                 <strong class="text-xs text-white block">Engasgamento</strong>
                 <span class="text-[10px] text-slate-400">OVA no Adulto</span>
               </button>
-              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition" data-scenario="ova_pediatrico">
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer" data-scenario="ova_pediatrico">
                 <span class="text-lg block mb-0.5">👶</span>
                 <strong class="text-xs text-white block">Bebé a Engasgar</strong>
                 <span class="text-[10px] text-slate-400">Lactente &lt;1 ano</span>
               </button>
-              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition" data-scenario="avc_idoso">
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer" data-scenario="avc_idoso">
                 <span class="text-lg block mb-0.5">🧠</span>
                 <strong class="text-xs text-white block">Suspeita de AVC</strong>
                 <span class="text-[10px] text-slate-400">Regra dos 3 «F»</span>
+              </button>
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer" data-scenario="anafilaxia">
+                <span class="text-lg block mb-0.5">🐝</span>
+                <strong class="text-xs text-white block">Anafilaxia</strong>
+                <span class="text-[10px] text-slate-400">Caneta Adrenalina</span>
+              </button>
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer" data-scenario="hemorragia">
+                <span class="text-lg block mb-0.5">🩸</span>
+                <strong class="text-xs text-white block">Hemorragia</strong>
+                <span class="text-[10px] text-slate-400">Garrote / CAT</span>
+              </button>
+              <button type="button" class="btn-scenario-select p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer col-span-2 sm:col-span-1" data-scenario="convulsao">
+                <span class="text-lg block mb-0.5">⚡</span>
+                <strong class="text-xs text-white block">Crise Epiléptica</strong>
+                <span class="text-[10px] text-slate-400">Espaço Público / PLS</span>
               </button>
             </div>
 
@@ -2788,11 +2893,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=38"></script>
-  <script src="./js/geo.js?v=38"></script>
-  <script src="./js/knowledge_base.js?v=38"></script>
-  <script src="./js/rag.js?v=38"></script>
-  <script src="./js/ai.js?v=38"></script>
-  <script src="./js/app.js?v=38"></script>
+  <script src="./js/audio.js?v=39"></script>
+  <script src="./js/geo.js?v=39"></script>
+  <script src="./js/knowledge_base.js?v=39"></script>
+  <script src="./js/rag.js?v=39"></script>
+  <script src="./js/ai.js?v=39"></script>
+  <script src="./js/app.js?v=39"></script>
 </body>
 </html>

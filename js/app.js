@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentScreen: 'screen-emergency',
     isEmergencyMode: true,
     isAdult: true,
+    ratioMode: '30_2',
     sbvActive: false,
     beats: 0,
     cycles: 0,
@@ -545,15 +546,54 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSelectChild.addEventListener('click', () => setPediatricMode(true));
   }
 
+  const btnMode30_2 = document.getElementById('btn-mode-30-2');
+  const btnModeContinuous = document.getElementById('btn-mode-continuous');
+
+  function setSBVRatioMode(mode) {
+    AppState.ratioMode = mode;
+    if (mode === '30_2') {
+      if (btnMode30_2) {
+        btnMode30_2.className = 'py-1.5 px-2 rounded-lg bg-yellow-400 text-slate-950 font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer';
+      }
+      if (btnModeContinuous) {
+        btnModeContinuous.className = 'py-1.5 px-2 rounded-lg bg-transparent text-slate-400 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer';
+      }
+    } else {
+      if (btnModeContinuous) {
+        btnModeContinuous.className = 'py-1.5 px-2 rounded-lg bg-yellow-400 text-slate-950 font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer';
+      }
+      if (btnMode30_2) {
+        btnMode30_2.className = 'py-1.5 px-2 rounded-lg bg-transparent text-slate-400 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer';
+      }
+    }
+  }
+
+  if (btnMode30_2) btnMode30_2.addEventListener('click', () => setSBVRatioMode('30_2'));
+  if (btnModeContinuous) btnModeContinuous.addEventListener('click', () => setSBVRatioMode('continuous'));
+
   window.onBeatTick = () => {
     AppState.beats++;
-    if (labelBeats) labelBeats.textContent = AppState.beats;
-
     const cycleSize = AppState.isAdult ? 30 : 15;
+    const currentInCycle = ((AppState.beats - 1) % cycleSize) + 1;
+
+    if (labelBeats) {
+      if (AppState.ratioMode === '30_2') {
+        labelBeats.textContent = `${currentInCycle}/${cycleSize}`;
+      } else {
+        labelBeats.textContent = AppState.beats;
+      }
+    }
+
+    let isThirty = false;
     if (AppState.beats % cycleSize === 0) {
       AppState.cycles++;
       if (labelCycles) labelCycles.textContent = AppState.cycles;
+      isThirty = true;
+      if (AppState.ratioMode === '30_2') {
+        AudioManager.speak(`${cycleSize}! Duas insuflações.`);
+      }
     }
+    return { isThirty };
   };
 
   function startSBV() {
@@ -2459,6 +2499,89 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
           ]
         }
       ]
+    },
+    anafilaxia: {
+      title: "Choque Anafilático (Reação Alérgica Grave)",
+      icon: "🐝",
+      context: "Num piquenique ou almoço, uma jovem de 24 anos é picada por uma vespa (ou ingere frutos secos). Passados 5 minutos, surge comichão intensa, urticária generalizada, inchaço visível nos lábios e respiração ruidosa (pieira/estridor).",
+      steps: [
+        {
+          question: "Passo 1: Perante inchaço na face/língua e dificuldade respiratória rápida, qual a gravidade da situação?",
+          options: [
+            { text: "Emergência médica com risco de vida (Anafilaxia / Edema de Glote). Ligar 112 de imediato e procurar autoinjetor de adrenalina.", correct: true, feedback: "Correto! O edema da via aérea superior e broncoconstrição levam à asfixia se não tratados nos primeiros minutos." },
+            { text: "Dar um chá morno com mel e colocar uma toalha húmida na cara.", correct: false, feedback: "Incorreto e perigoso: Não reverte o edema da glote e o chá pode ser aspirado para os pulmões." },
+            { text: "Esperar 30 minutos para ver se o inchaço desaparece sozinho.", correct: false, feedback: "ERRO GRAVE: A anafilaxia progride em minutos para choque e paragem respiratória." }
+          ]
+        },
+        {
+          question: "Passo 2: A vítima tem na mala uma caneta autoinjetora de Adrenalina (Epipen). Como e onde a administra?",
+          options: [
+            { text: "Na face lateral externa da coxa, perpendicularmente (90º), pressionando 5 a 10 segundos até acionar o mecanismo.", correct: true, feedback: "Excelente! O vasto lateral da coxa tem excelente vascularização. Pode ser administrado mesmo através da roupa fina." },
+            { text: "No abdómen, ao lado do umbigo, como se fosse insulina.", correct: false, feedback: "Incorreto. A adrenalina de emergência deve ser administrada estritamente no músculo da coxa para absorção ultrarrápida." },
+            { text: "Nas veias do antebraço ou no peito perto do coração.", correct: false, feedback: "ERRO CRÍTICO: Risco de arritmia letal e necrose. Apenas no músculo da coxa." }
+          ]
+        },
+        {
+          question: "Passo 3: Após a administração da adrenalina e com o 112 acionado, como posiciona a vítima?",
+          options: [
+            { text: "Sentada ou deitada de costas com pernas ligeiramente elevadas se tiver tonturas; nunca levantar de pé bruscamente.", correct: true, feedback: "Perfeito! A hipotensão na anafilaxia pode causar paragem cardíaca súbita se a vítima for colocada de pé (síndrome do ventrículo vazio)." },
+            { text: "Obrigar a vítima a andar para o sangue circular melhor.", correct: false, feedback: "PERIGO FATAL: Fazer a vítima andar em choque anafilático precipita colapso circulatório imediato." }
+          ]
+        }
+      ]
+    },
+    hemorragia: {
+      title: "Hemorragia Exsanguinante em Membro (Trauma Cortante)",
+      icon: "🩸",
+      context: "Um operador corta profundamente o antebraço com serra circular ou vidro. O sangue vermelho vivo jorra em jato contínuo (hemorragia arterial maciça).",
+      steps: [
+        {
+          question: "Passo 1: Qual é a PRIMEIRA intervenção prioritária a realizar?",
+          options: [
+            { text: "Compressão direta firme e sustentada com compressa limpa ou a própria mão enluvada sobre o foco de sangramento.", correct: true, feedback: "Exato! A compressão direta oclui a luz do vaso e inicia a hemostase primária." },
+            { text: "Lavar a ferida com bastante água e sabão antes de fazer qualquer pressão.", correct: false, feedback: "Incorreto: Numa hemorragia arterial em jato, lavar o corte remove os coágulos e atrasa a hemostase vital." },
+            { text: "Dar um copo de água e tentar elevar o braço sem comprimir.", correct: false, feedback: "Incorreto. A elevação sem compressão direta é ineficaz para hemorragias arteriais graves." }
+          ]
+        },
+        {
+          question: "Passo 2: Após 3 minutos de compressão firme e sobreposição de pensos, o sangue continua a jorrar abundantemente através do tecido. Qual o passo seguinte?",
+          options: [
+            { text: "Aplicar imediatamente um torniquete comercial homologado (CAT) 5 a 7 cm acima da ferida no membro e rodar o molinete até estancar.", correct: true, feedback: "Excelente! Em hemorragias exsanguinantes de membros que não cedem à compressão direta, o torniquete salva vidas segundo o protocolo ERC/PHTLS." },
+            { text: "Retirar todos os pensos ensopados e começar do zero com uma toalha seca.", correct: false, feedback: "ERRO CRÍTICO: Nunca retirar o primeiro penso, pois desfaz o coágulo embrionário que o corpo está a tentar formar." },
+            { text: "Deixar sangrar um pouco para 'limpar as impurezas' da ferida.", correct: false, feedback: "Mito perigoso: Uma perda arterial de 1.5L de sangue leva ao choque hipovolémico irreversível em minutos." }
+          ]
+        },
+        {
+          question: "Passo 3: O sangramento estancou após apertar o torniquete. Qual o cuidado obrigatório agora?",
+          options: [
+            { text: "Registar a hora exata da colocação do torniquete e NUNCA o desapertar até à intervenção médica no hospital.", correct: true, feedback: "Perfeito! A hora é essencial para a viabilidade do membro e aliviar o torniquete liberta toxinas e reinicia o choque." },
+            { text: "Desapertar o torniquete de 10 em 10 minutos para deixar o braço respirar.", correct: false, feedback: "ERRO HISTÓRICO PERIGOSO: Diretrizes internacionais baniram o alívio intermitente pelo risco de morte por hemorragia súbita." }
+          ]
+        }
+      ]
+    },
+    convulsao: {
+      title: "Crise Convulsiva / Epilepsia num Espaço Público",
+      icon: "⚡",
+      context: "Numa estação ou loja, uma pessoa cai subitamente desamparada, perde a consciência e inicia tremores musculares violentos e involuntários com salivação.",
+      steps: [
+        {
+          question: "Passo 1: Qual é a sua prioridade durante a fase convulsiva com movimentos descoordenados?",
+          options: [
+            { text: "Afastar objetos cortantes/móveis em redor e proteger a cabeça com um casaco dobrado, cronometrando a crise.", correct: true, feedback: "Correto! O objetivo principal é prevenir traumatismos cranianos secundários enquanto a crise decorre." },
+            { text: "Segurar com toda a força os braços e pernas da vítima para parar os tremores.", correct: false, feedback: "Incorreto: Tentar travar as contrações pode provocar fraturas ósseas e ruturas musculares graves." },
+            { text: "Enfiar uma colher ou os dedos na boca da pessoa para 'não enrolar a língua'.", correct: false, feedback: "ERRO GRAVE E MITO: NUNCA colocar nada na boca. Provoca fratura de dentes, amputação dos dedos do socorrista e asfixia mecânica." }
+          ]
+        },
+        {
+          question: "Passo 2: Os tremores cessam passados 2 minutos. A vítima está inconsciente, sonolenta, mas respira ruidosamente. O que faz?",
+          options: [
+            { text: "Colocar em Posição Lateral de Segurança (PLS) para manter a via aérea aberta e deixar drenar a saliva.", correct: true, feedback: "Excelente! A PLS no período pós-crítico previne que a língua obstrua a garganta e evita a broncoaspiração de secreções." },
+            { text: "Abanar a pessoa e dar estaladas na face para acordar mais depressa.", correct: false, feedback: "Inadequado: A sonolência (estado pós-ictal) é um processo fisiológico normal do cérebro a recuperar da crise." },
+            { text: "Iniciar massagem cardíaca imediatamente.", correct: false, feedback: "Incorreto: Se a vítima está a respirar normalmente, nunca se iniciam compressões torácicas." }
+          ]
+        }
+      ]
     }
   };
 
@@ -3043,10 +3166,367 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
     });
   }
 
+  // ========================================================
+  // BARRA DE PESQUISA RÁPIDA NO HUB DE FORMAÇÃO
+  // ========================================================
+  function initLearningHubSearch() {
+    const searchInput = document.getElementById('learning-hub-search-input');
+    const clearBtn = document.getElementById('btn-clear-hub-search');
+    const resultsInfo = document.getElementById('learning-search-results-info');
+    const countEl = document.getElementById('learning-search-count');
+    const resetBtn = document.getElementById('btn-reset-search-filter');
+    const chapters = document.querySelectorAll('#screen-learning-hub .chapter-accordion');
+
+    if (!searchInput || !chapters.length) return;
+
+    function runSearch(query) {
+      const q = (query || '').trim().toLowerCase();
+      if (!q) {
+        chapters.forEach(ch => ch.classList.remove('hidden'));
+        if (clearBtn) clearBtn.classList.add('hidden');
+        if (resultsInfo) resultsInfo.classList.add('hidden');
+        return;
+      }
+
+      if (clearBtn) clearBtn.classList.remove('hidden');
+      if (resultsInfo) resultsInfo.classList.remove('hidden');
+
+      let matches = 0;
+      chapters.forEach(ch => {
+        const text = (ch.innerText || ch.textContent || '').toLowerCase();
+        if (text.includes(q)) {
+          ch.classList.remove('hidden');
+          ch.classList.add('open');
+          matches++;
+        } else {
+          ch.classList.add('hidden');
+          ch.classList.remove('open');
+        }
+      });
+
+      if (countEl) {
+        countEl.textContent = matches === 1 ? '1 capítulo encontrado' : `${matches} capítulos encontrados`;
+      }
+    }
+
+    searchInput.addEventListener('input', (e) => runSearch(e.target.value));
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        runSearch('');
+        searchInput.focus();
+      });
+    }
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        runSearch('');
+      });
+    }
+  }
+
+  // ========================================================
+  // GUIA FALADO INTERATIVO COM FEEDBACK HUMANO BIDIRECIONAL
+  // ========================================================
+  const VOICE_COACH_PROTOCOLS = {
+    ova: {
+      steps: [
+        {
+          id: 'step1_pancadas',
+          speech: 'Incline a vítima para a frente com apoio no peito. Aplique até 5 pancadas secas entre as omoplatas. Diga "já fiz", "desobstruiu" ou "ficou inconsciente".',
+          display: '1. Incline a vítima para a frente com a mão de apoio no peito.<br>2. Aplique até <strong>5 pancadas secas entre as omoplatas</strong> com a base da mão.<br><span class="text-amber-300 font-bold">👉 Diga "Já fiz", "Desobstruiu" ou "Ficou inconsciente".</span>',
+          quickReplies: [
+            { label: '✓ Já fiz (não saiu)', action: 'step2_heimlich', cls: 'bg-amber-600 hover:bg-amber-500' },
+            { label: '🎉 Desobstruiu!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-600 hover:bg-red-500 col-span-2' }
+          ],
+          triggers: {
+            step2_heimlich: ['fiz', 'ja fiz', 'já fiz', 'feito', 'continua', 'nao saiu', 'não saiu', 'proximo', 'próximo'],
+            resolved: ['desobstruiu', 'saiu', 'tosse', 'já tosse', 'ja tosse', 'respira', 'está a respirar', 'resolvido', 'melhorou'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'parou', 'chao', 'chão', 'colapso', 'apagou']
+          }
+        },
+        {
+          id: 'step2_heimlich',
+          speech: 'Coloque-se atrás da vítima. Feche o punho acima do umbigo e puxe com força para dentro e para cima até 5 vezes. Diga "já fiz", "desobstruiu" ou "ficou inconsciente".',
+          display: '1. Coloque-se atrás da vítima.<br>2. Punho fechado entre o umbigo e o esterno.<br>3. Puxe com força para dentro e para cima até <strong>5 vezes (Heimlich)</strong>.<br><span class="text-amber-300 font-bold">👉 Diga "Já fiz", "Desobstruiu" ou "Ficou inconsciente".</span>',
+          quickReplies: [
+            { label: '↻ Repetir 5 pancadas', action: 'step1_pancadas', cls: 'bg-amber-600 hover:bg-amber-500' },
+            { label: '🎉 Desobstruiu!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-600 hover:bg-red-500 col-span-2' }
+          ],
+          triggers: {
+            step1_pancadas: ['fiz', 'ja fiz', 'já fiz', 'feito', 'continua', 'repetir', 'mais', 'nao saiu', 'não saiu'],
+            resolved: ['desobstruiu', 'saiu', 'tosse', 'já tosse', 'ja tosse', 'respira', 'está a respirar', 'resolvido'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'parou', 'chao', 'chão', 'apagou']
+          }
+        },
+        {
+          id: 'resolved',
+          speech: 'Excelente! A via aérea está desobstruída. Mantenha a vítima sentada, calma e vigie a respiração normal.',
+          display: '✅ <strong>Obstrução resolvida com sucesso!</strong><br>Mantenha a pessoa sentada, calma e observe a respiração. Se foram feitas compressões abdominais, deve ser avaliada por um médico.',
+          quickReplies: [
+            { label: '⏹ Concluir Guia por Voz', action: 'stop', cls: 'bg-slate-700 hover:bg-slate-600 col-span-2' }
+          ]
+        },
+        {
+          id: 'unconscious',
+          speech: 'Atenção: Ampara a vítima até ao chão com cuidado. Liga 112 ou coloca em alta-voz de imediato. Vou abrir o suporte básico de vida para iniciares compressões no peito!',
+          display: '🚨 <strong>VÍTIMA FICOU INCONSCIENTE!</strong><br>1. Amparar a vítima até ao chão sem bater com a cabeça.<br>2. Ligar 112 em alta-voz.<br>3. A abrir o metrónomo de SBV (30 compressões no centro do peito)...',
+          quickReplies: [
+            { label: 'Abrir Suporte Básico de Vida (SBV) ➔', action: 'go_sbv', cls: 'bg-red-600 hover:bg-red-500 col-span-2 font-black' }
+          ]
+        }
+      ]
+    },
+    trauma: {
+      steps: [
+        {
+          id: 'step1_pressao',
+          speech: 'Aplique compressão direta e firme sobre o corte com uma compressa ou pano limpo. Mantenha sem aliviar. Diga "já parou", "continua a sangrar" ou "ficou inconsciente".',
+          display: '1. Coloque compressas ou pano limpo sobre o ferimento.<br>2. Pressione com firmeza contínua durante 3 a 5 minutos sem aliviar.<br><span class="text-red-300 font-bold">👉 Diga "Já parou", "Continua a sangrar" ou "Ficou inconsciente".</span>',
+          quickReplies: [
+            { label: '🩸 Continua a sangrar', action: 'step2_garrote', cls: 'bg-red-600 hover:bg-red-500' },
+            { label: '✓ Já parou o sangue', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-700 hover:bg-red-600 col-span-2' }
+          ],
+          triggers: {
+            step2_garrote: ['sangra', 'continua', 'continua a sangrar', 'muito sangue', 'jato', 'não para', 'nao para', 'ensopou'],
+            resolved: ['parou', 'já parou', 'ja parou', 'controlado', 'estancou', 'pouco'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'pálido', 'palido', 'caiu', 'apagou']
+          }
+        },
+        {
+          id: 'step2_garrote',
+          speech: 'Se for num membro e o sangue jorrar em jato sem parar, aplique o torniquete comercial 5 a 7 centímetros acima do corte. Rode o molinete até parar o sangue. Diga "já apliquei", "estancou" ou "ficou inconsciente".',
+          display: '1. Se for num membro com sangramento em jato contínuo, aplique o <strong>Torniquete (CAT)</strong> 5 a 7 cm acima da ferida.<br>2. Aperte e rode o molinete até parar o sangramento.<br>3. Registe a hora da aplicação.<br><span class="text-red-300 font-bold">👉 Diga "Já apliquei", "Estancou" ou "Ficou inconsciente".</span>',
+          quickReplies: [
+            { label: '⏱ Registar hora do Garrote', action: 'record_tourniquet', cls: 'bg-amber-600 hover:bg-amber-500' },
+            { label: '✓ Estancou!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-700 hover:bg-red-600 col-span-2' }
+          ],
+          triggers: {
+            record_tourniquet: ['apliquei', 'já apliquei', 'ja apliquei', 'garrote', 'torniquete', 'apertei', 'coloquei'],
+            resolved: ['parou', 'estancou', 'já parou', 'ja parou', 'controlado'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'chão', 'apagou']
+          }
+        },
+        {
+          id: 'resolved',
+          speech: 'Muito bem. Hemorragia controlada. Mantenha a compressão com ligadura sem apertar em demasia. Cubra a vítima com manta para prevenir o choque.',
+          display: '✅ <strong>Hemorragia sob controlo.</strong><br>1. Mantenha a compressão com ligadura.<br>2. Aqueça a vítima com manta térmica para prevenir choque.<br>3. Vigie pulso e respiração.',
+          quickReplies: [
+            { label: '⏹ Concluir Guia por Voz', action: 'stop', cls: 'bg-slate-700 hover:bg-slate-600 col-span-2' }
+          ]
+        },
+        {
+          id: 'unconscious',
+          speech: 'Atenção: Deite a vítima no chão imediatamente. Mantenha a compressão da hemorragia. Se não responder e não respirar normalmente, inicie compressões torácicas no peito!',
+          display: '🚨 <strong>VÍTIMA INCONSCIENTE!</strong><br>1. Deitar de costas no chão.<br>2. Manter a compressão da ferida.<br>3. Se não respirar normalmente, ligue 112 e inicie compressões torácicas imediatas.',
+          quickReplies: [
+            { label: 'Abrir Suporte Básico de Vida (SBV) ➔', action: 'go_sbv', cls: 'bg-red-600 hover:bg-red-500 col-span-2 font-black' }
+          ]
+        }
+      ]
+    }
+  };
+
+  function initInteractiveVoiceCoach() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let coachRecognition = null;
+    let isListening = false;
+    let currentProtocol = null;
+    let currentStepId = null;
+
+    if (SpeechRec) {
+      try {
+        coachRecognition = new SpeechRec();
+        coachRecognition.lang = 'pt-PT';
+        coachRecognition.continuous = true;
+        coachRecognition.interimResults = false;
+
+        coachRecognition.onresult = (event) => {
+          if (!currentProtocol || !currentStepId) return;
+          const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+          console.log('[Voice Coach]:', transcript);
+
+          const proto = VOICE_COACH_PROTOCOLS[currentProtocol];
+          const step = proto.steps.find(s => s.id === currentStepId);
+          if (!step || !step.triggers) return;
+
+          for (const [action, keywords] of Object.entries(step.triggers)) {
+            if (keywords.some(k => transcript.includes(k))) {
+              handleCoachAction(action);
+              break;
+            }
+          }
+        };
+
+        coachRecognition.onerror = (e) => {
+          console.warn('[Voice Coach Error]:', e);
+        };
+
+        coachRecognition.onend = () => {
+          if (isListening) {
+            try { coachRecognition.start(); } catch (_) {}
+          }
+        };
+      } catch (e) {
+        console.warn('Voice coach SpeechRec unavailable:', e);
+      }
+    }
+
+    function startListening() {
+      if (!coachRecognition) return;
+      isListening = true;
+      try { coachRecognition.start(); } catch (_) {}
+    }
+
+    function pauseListening() {
+      if (!coachRecognition) return;
+      isListening = false;
+      try { coachRecognition.stop(); } catch (_) {}
+    }
+
+    function renderCoachStep(protocolKey, stepId) {
+      currentProtocol = protocolKey;
+      currentStepId = stepId;
+
+      const widget = document.getElementById(`voice-coach-${protocolKey}`);
+      if (!widget) return;
+
+      const panel = widget.querySelector('.voice-coach-panel');
+      const bubble = widget.querySelector('.voice-coach-bubble');
+      const actionsBox = widget.querySelector('.voice-coach-actions');
+      const statusLbl = widget.querySelector('.status-lbl');
+      const toggleBtn = widget.querySelector('.btn-start-voice-coach');
+
+      if (panel) panel.classList.remove('hidden');
+      if (toggleBtn) {
+        toggleBtn.textContent = '⏹ Parar Guia';
+        toggleBtn.classList.replace('bg-amber-500', 'bg-slate-700');
+        toggleBtn.classList.replace('bg-red-600', 'bg-slate-700');
+      }
+
+      const proto = VOICE_COACH_PROTOCOLS[protocolKey];
+      const step = proto.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      if (bubble) bubble.innerHTML = step.display;
+
+      if (actionsBox) {
+        actionsBox.innerHTML = '';
+        step.quickReplies.forEach(qr => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `py-2 px-2.5 rounded-xl text-white font-bold text-xs shadow transition cursor-pointer text-center ${qr.cls || 'bg-slate-800'}`;
+          btn.textContent = qr.label;
+          btn.addEventListener('click', () => handleCoachAction(qr.action));
+          actionsBox.appendChild(btn);
+        });
+      }
+
+      // Fala a instrução e escuta a resposta
+      pauseListening();
+      if (statusLbl) statusLbl.textContent = 'A falar instrução... Aguarde.';
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(step.speech);
+        utt.lang = 'pt-PT';
+        utt.rate = 1.02;
+        utt.onend = () => {
+          startListening();
+          if (statusLbl) statusLbl.textContent = '🎤 A ouvir... Diga uma resposta ou toque num botão:';
+        };
+        utt.onerror = () => {
+          startListening();
+          if (statusLbl) statusLbl.textContent = '🎤 A ouvir... Diga uma resposta ou toque num botão:';
+        };
+        window.speechSynthesis.speak(utt);
+      } else {
+        startListening();
+        if (statusLbl) statusLbl.textContent = '🎤 A ouvir... Diga uma resposta ou toque num botão:';
+      }
+    }
+
+    function handleCoachAction(action) {
+      if (action === 'stop') {
+        stopCoach();
+        return;
+      }
+      if (action === 'go_sbv') {
+        stopCoach();
+        const sbvBtn = document.querySelector('button[data-nav="screen-sbv"]') || document.querySelector('.bottom-nav button[data-target="screen-sbv"]');
+        if (sbvBtn) {
+          sbvBtn.click();
+        } else {
+          document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+          document.getElementById('screen-sbv')?.classList.add('active');
+        }
+        setTimeout(() => {
+          const btnStart = document.getElementById('btn-sbv-start');
+          if (btnStart && !btnStart.classList.contains('hidden')) {
+            btnStart.click();
+          }
+        }, 300);
+        return;
+      }
+      if (action === 'record_tourniquet') {
+        const btnT = document.getElementById('btn-tourniquet-start');
+        if (btnT) btnT.click();
+        renderCoachStep(currentProtocol, 'resolved');
+        return;
+      }
+
+      renderCoachStep(currentProtocol, action);
+    }
+
+    function stopCoach() {
+      pauseListening();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+      document.querySelectorAll('.interactive-voice-coach-card').forEach(widget => {
+        const panel = widget.querySelector('.voice-coach-panel');
+        if (panel) panel.classList.add('hidden');
+        const toggleBtn = widget.querySelector('.btn-start-voice-coach');
+        if (toggleBtn) {
+          const proto = toggleBtn.dataset.protocol;
+          toggleBtn.textContent = '▶ Iniciar Guia por Voz';
+          if (proto === 'ova') {
+            toggleBtn.className = 'btn-start-voice-coach px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1';
+          } else {
+            toggleBtn.className = 'btn-start-voice-coach px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1';
+          }
+        }
+      });
+      currentProtocol = null;
+      currentStepId = null;
+    }
+
+    document.querySelectorAll('.btn-start-voice-coach').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const proto = btn.dataset.protocol;
+        if (currentProtocol === proto) {
+          stopCoach();
+        } else {
+          const initialStep = proto === 'ova' ? 'step1_pancadas' : 'step1_pressao';
+          renderCoachStep(proto, initialStep);
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-stop-voice-coach').forEach(btn => {
+      btn.addEventListener('click', stopCoach);
+    });
+  }
+
   // Inicializar novos módulos
   initHandsFreeVoice();
   initClinicalSimulator();
   initFirstAidKitChecklist();
+  initLearningHubSearch();
+  initInteractiveVoiceCoach();
 
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));
