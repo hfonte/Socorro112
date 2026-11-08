@@ -2624,62 +2624,77 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
     buildSearchUrl(query) {
       return `https://www.amazon.es/s?k=${encodeURIComponent(query)}&tag=${this.associateTag}`;
     },
+    svgIcons: {
+      kit_bag: `<svg class="w-11 h-11 shrink-0 rounded-xl p-1 bg-red-950/70 border border-red-500/50" viewBox="0 0 48 48" fill="none"><rect x="6" y="14" width="36" height="26" rx="5" fill="#dc2626"/><rect x="18" y="8" width="12" height="7" rx="2" stroke="#f87171" stroke-width="2.5" fill="none"/><rect x="22" y="20" width="4" height="14" rx="1" fill="#ffffff"/><rect x="17" y="25" width="14" height="4" rx="1" fill="#ffffff"/><path d="M6 25 L42 25" stroke="#991b1b" stroke-width="1.5" stroke-dasharray="2 2"/></svg>`,
+      pocket_mask: `<svg class="w-11 h-11 shrink-0 rounded-xl p-1 bg-red-950/70 border border-amber-500/50" viewBox="0 0 48 48" fill="none"><path d="M10 24 C10 12, 38 12, 38 24 C38 34, 24 40, 24 40 C24 40, 10 34, 10 24 Z" fill="#ef4444" stroke="#fca5a5" stroke-width="1.5"/><ellipse cx="24" cy="23" rx="9" ry="11" fill="#38bdf8" fill-opacity="0.35" stroke="#bae6fd" stroke-width="1.5"/><circle cx="24" cy="22" r="4.5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/><circle cx="24" cy="22" r="2" fill="#0284c7"/><ellipse cx="24" cy="23" rx="7" ry="9" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 1" fill="none"/></svg>`,
+      tourniquet: `<svg class="w-11 h-11 shrink-0 rounded-xl p-1 bg-slate-900 border border-red-500/50" viewBox="0 0 48 48" fill="none"><rect x="6" y="20" width="36" height="8" rx="2" fill="#1e293b" stroke="#475569" stroke-width="1.5"/><rect x="18" y="16" width="12" height="16" rx="2" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/><rect x="12" y="22" width="24" height="4" rx="1.5" transform="rotate(-30 24 24)" fill="#dc2626" stroke="#fca5a5" stroke-width="1"/><rect x="30" y="21" width="10" height="6" rx="1" fill="#ffffff"/><text x="31" y="25.5" font-size="3.5" font-family="sans-serif" font-weight="900" fill="#000000">TIME</text></svg>`,
+      cold_pack: `<svg class="w-11 h-11 shrink-0 rounded-xl p-1 bg-sky-950/70 border border-sky-400/50" viewBox="0 0 48 48" fill="none"><rect x="8" y="10" width="32" height="28" rx="4" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/><path d="M24 16 L24 32 M16 24 L32 24 M18 18 L30 30 M18 30 L30 18" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="24" r="3" fill="#bae6fd"/><text x="13" y="36" font-size="3.5" font-family="sans-serif" font-weight="bold" fill="#bae6fd">ICE PACK</text></svg>`,
+      blanket: `<svg class="w-11 h-11 shrink-0 rounded-xl p-1 bg-slate-900 border border-amber-400/50" viewBox="0 0 48 48" fill="none"><polygon points="10,12 28,8 38,20 20,24" fill="#f59e0b" stroke="#fde047" stroke-width="1.2"/><polygon points="20,24 38,20 36,38 18,42" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2"/><polygon points="10,12 20,24 18,42 8,30" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1"/><path d="M22 14 L24 18 M30 26 L32 30" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/></svg>`
+    },
     locationKits: {
       casa: {
         title: "Mala de Primeiros Socorros Completa para Casa (90+ Peças Homologada)",
-        query: "kit primeiros socorros casa completo homologado",
+        query: "botiquin primeiros auxilios casa homologado completo",
         priceHint: "Aprox. 15€ - 25€ • Entrega 24h Prime",
         badge: "Mais Vendido Casa"
       },
       carro: {
         title: "Estojo de Primeiros Socorros para Carro (Norma Europeia DIN 13164)",
-        query: "estojo primeiros socorros carro din 13164 homologado",
+        query: "botiquin coche din 13164 homologado obligatorio",
         priceHint: "Aprox. 12€ - 19€ • Obrigatório em Viagens",
         badge: "Certificado DIN"
       },
       erpi: {
         title: "Mala de Emergência Médica Geriátrica com Oxímetro e Tensiómetro",
-        query: "mala primeiros socorros geriatria oximetro tensiometro",
+        query: "botiquin geriatria primeros auxilios oximetro tensiometro",
         priceHint: "Aprox. 29€ - 49€ • Cuidados de Idosos",
         badge: "Equipamento Clínico"
       },
       creche: {
         title: "Kit de Primeiros Socorros Infantil com Bolsas de Frio e Curativos",
-        query: "kit primeiros socorros infantil escola creche",
+        query: "botiquin infantil primeros auxilios guarderia colegio",
         priceHint: "Aprox. 14€ - 22€ • Seguro para Crianças",
         badge: "Aprovado Pediátrico"
       },
       empresa: {
         title: "Posto / Armário de Primeiros Socorros SST para Empresas e Armazéns",
-        query: "posto primeiros socorros empresa sst lava olhos torniquete",
+        query: "botiquin empresa primeros auxilios sst trabalho lava ojos",
         priceHint: "Aprox. 29€ - 55€ • Normas de Trabalho",
         badge: "Segurança no Trabalho"
       }
     },
     essentialItems: [
       {
-        icon: "🫀",
-        name: "Máscara Pocket de RCP com Válvula",
-        desc: "Protege o socorrista em insuflações de Suporte Básico de Vida",
-        query: "mascara pocket reanimacao rcp valvula estojo"
+        id: "pocket_mask",
+        svgKey: "pocket_mask",
+        name: "Máscara Pocket de RCP com Estojo Rígido",
+        desc: "Máscara transparente com almofada de ar e válvula de 1 via para insuflações seguras boca-a-máscara.",
+        visualTip: "⚠️ Como identificar na lista: Procure a máscara transparente em forma de coração/concha com estojo rígido (vermelho/laranja). NÃO compre máscaras FFP2 de poeiras/vírus!",
+        query: "pocket mask rcp primeros auxilios estuche rigido"
       },
       {
-        icon: "🩸",
-        name: "Torniquete Comercial Homologado CAT",
-        desc: "Essencial para estancar hemorragias graves em membros",
-        query: "torniquete tatico militar homologado cat hemostase"
+        id: "tourniquet",
+        svgKey: "tourniquet",
+        name: "Torniquete Comercial Homologado (CAT)",
+        desc: "Fita de garrote tático com molinete metálico/polímero para hemostase de emergência em membros.",
+        visualTip: "⚠️ Como identificar na lista: Procure a fita de nylon preta com haste/molinete de aperto e etiqueta branca «TIME».",
+        query: "torniquete cat homologado militar hemostatico primeros auxilios"
       },
       {
-        icon: "🧊",
-        name: "Bolsas de Frio Instantâneo (Pack)",
-        desc: "Alívio imediato de pancadas, galos e entorses sem congelador",
-        query: "bolsa frio instantaneo descartavel primeiros socorros"
+        id: "cold_pack",
+        svgKey: "cold_pack",
+        name: "Bolsas de Frio Instantâneo Descartáveis (Pack)",
+        desc: "Bolsa de frio por compressão instantânea para alívio imediato de pancadas, hematomas e entorses.",
+        visualTip: "⚠️ Como identificar na lista: Pacotes azuis de ativação rápida por aperto manual (sem congelador).",
+        query: "bolsas frio instantaneo primeros auxilios desechable"
       },
       {
-        icon: "🩹",
-        name: "Mantas Térmicas de Sobrevivência (Pack)",
-        desc: "Isolamento térmico indispensável contra choque e hipotermia",
-        query: "manta termica sobrevivencia aluminizada primeiros socorros"
+        id: "blanket",
+        svgKey: "blanket",
+        name: "Mantas Térmicas Aluminizadas de Sobrevivência (Pack)",
+        desc: "Folha isotérmica refletora ouro/prata indispensável contra choque térmico e hipotermia pós-acidente.",
+        visualTip: "⚠️ Como identificar na lista: Folhas metálicas brilhantes dobradas compactas douradas e prateadas.",
+        query: "manta termica supervivencia primeros auxilios oro plata"
       }
     ]
   };
@@ -2881,17 +2896,26 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
       let essentialsHtml = '';
       AMAZON_AFFILIATE_CONFIG.essentialItems.forEach(item => {
         const itemUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(item.query);
+        const iconSvg = AMAZON_AFFILIATE_CONFIG.svgIcons[item.svgKey] || '';
         essentialsHtml += `
-          <a href="${itemUrl}" target="_blank" rel="noopener noreferrer nofollow" class="amazon-product-pill p-2 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-between gap-2 text-left transition text-xs group">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="text-base">${item.icon}</span>
-              <div class="min-w-0">
-                <strong class="text-white text-[11px] block truncate group-hover:text-amber-300">${item.name}</strong>
-                <span class="text-[10px] text-slate-400 block truncate">${item.desc}</span>
+          <div class="p-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl flex flex-col gap-2 transition text-xs hover:border-amber-500/50">
+            <div class="flex items-start gap-2.5">
+              ${iconSvg}
+              <div class="min-w-0 flex-1">
+                <strong class="text-white text-xs font-bold block leading-snug">${item.name}</strong>
+                <p class="text-[10px] text-slate-300 leading-snug mt-0.5">${item.desc}</p>
               </div>
             </div>
-            <span class="text-[10px] text-amber-400 font-bold shrink-0 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-600/40">Ver na Amazon ➔</span>
-          </a>
+            ${item.visualTip ? `
+              <div class="bg-amber-950/50 border border-amber-500/40 rounded-lg p-1.5 text-[10px] text-amber-200 leading-tight flex items-start gap-1.5">
+                <span>🔍</span>
+                <span><strong>Identificação correta:</strong> ${item.visualTip.replace('⚠️ Como identificar na lista: ', '')}</span>
+              </div>
+            ` : ''}
+            <a href="${itemUrl}" target="_blank" rel="noopener noreferrer nofollow" class="w-full py-1.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] rounded-lg flex items-center justify-center gap-1.5 shadow transition cursor-pointer">
+              <span>🛒</span> Ver Opções Homologadas na Amazon.es ➔
+            </a>
+          </div>
         `;
       });
 
@@ -2908,20 +2932,26 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
         </div>
 
         <!-- KIT PRINCIPAL RECOMENDADO PARA ESTE LOCAL -->
-        <div class="p-3 bg-slate-950/80 border border-amber-500/60 rounded-xl space-y-2">
+        <div class="p-3 bg-slate-950/90 border border-amber-500/60 rounded-xl space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-600/40">${mainKit.badge}</span>
             <span class="text-[10px] text-slate-400 font-mono">${mainKit.priceHint}</span>
           </div>
-          <strong class="text-xs text-white block leading-snug">${mainKit.title}</strong>
+          <div class="flex items-start gap-2.5">
+            ${AMAZON_AFFILIATE_CONFIG.svgIcons.kit_bag}
+            <div class="min-w-0 flex-1">
+              <strong class="text-xs text-white block font-bold leading-snug">${mainKit.title}</strong>
+              <p class="text-[10px] text-slate-400 mt-0.5">Estojo estruturado com compartimentos para todos os itens obrigatórios e recomendados.</p>
+            </div>
+          </div>
           <a href="${mainKitUrl}" target="_blank" rel="noopener noreferrer nofollow" class="w-full py-2 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow transition cursor-pointer">
-            <span>🛒</span> Ver Kit Completo na Amazon (Entrega Rápida) ➔
+            <span>🛒</span> Ver Malas Homologadas na Amazon (Entrega 24h) ➔
           </a>
         </div>
 
         <!-- ITENS CRÍTICOS INDIVIDUAIS -->
         <div class="space-y-1.5">
-          <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Artigos de Segurança Essenciais (Avulso):</span>
+          <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Artigos de Segurança Essenciais (com Guia Visual):</span>
           ${essentialsHtml}
         </div>
 
