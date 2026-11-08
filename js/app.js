@@ -2879,6 +2879,71 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
     ]
   };
 
+  // Mapeamento de termos específicos na Amazon.es para cada artigo
+  const ITEM_AMAZON_QUERIES = {
+    // Casa
+    c_luvas: "luvas nitrilo descartaveis primeiros socorros",
+    c_soro: "soro fisiologico monodose primeiros socorros",
+    c_comp_est: "compressas esterilizadas gaze primeiros socorros",
+    c_adesivo: "fita adesiva medica micropore esparadrapo",
+    c_ligadura: "ligadura elastica crepe primeiros socorros",
+    c_pensos: "pensos rapidos curativos primeiros socorros",
+    c_tesoura: "tesoura pontas redondas primeiros socorros",
+    c_pinca: "pinca primeiros socorros farpas esteril",
+    c_termom: "termometro digital corporal febre",
+    c_manta: "manta termica sobrevivencia ouro prata",
+    c_gel_frio: "bolsas frio instantaneo descartavel primeiros socorros",
+    c_pocket: "pocket mask rcp primeiros auxilios estuche rigido",
+
+    // Carro
+    v_colete: "colete refletor triangulo homologado carro",
+    v_luvas: "luvas nitrilo descartaveis primeiros socorros",
+    v_manta: "manta termica sobrevivencia ouro prata",
+    v_tesoura: "tesoura trauma corta vestuario primeiros socorros",
+    v_comp_abs: "compressas estéreis gaze absorventes primeiros socorros",
+    v_ligaduras: "ligadura elastica fixacao primeiros socorros",
+    v_adesivo: "fita adesiva medica resistente",
+    v_soro: "soro fisiologico monodose primeiros socorros",
+    v_pocket: "pocket mask rcp primeiros auxilios estuche rigido",
+    v_lanterna: "lanterna led emergencia estanque alta potencia",
+
+    // ERPI / Lar de Idosos
+    e_tensio: "tensiometro digital braco omron homologado",
+    e_oxim: "oximetro pulso digital dedo homologado",
+    e_glic: "medidor glicemia capilar tiras teste",
+    e_termom: "termometro infravermelhos digital febre",
+    e_luvas: "caixa luvas nitrilo primeiros socorros",
+    e_silicone: "pensos silicone atraumaticos pele senil",
+    e_antiss: "clorexidina aquosa desinfetante feridas",
+    e_soro: "soro fisiologico irrigacao feridas",
+    e_comp: "compressas esterilizadas ligaduras primeiros socorros",
+    e_manta: "manta termica sobrevivencia primeiros socorros",
+    e_pocket: "pocket mask rcp primeiros auxilios estuche rigido",
+
+    // Creche & Escola
+    k_gel_frio: "bolsas frio instantaneo descartavel criancas",
+    k_soro: "soro fisiologico monodose lavagem olhos nariz",
+    k_pensos_inf: "pensos rapidos infantis hipoalergenicos",
+    k_termom: "termometro digital ponta flexivel criancas",
+    k_sro: "saquetas sais reidratacao oral criancas",
+    k_luvas: "luvas nitrilo descartaveis primeiros socorros",
+    k_comp: "compressas gaze esterilizada pequenas",
+    k_ligaduras: "ligaduras elasticas fixacao suaves",
+    k_tesoura: "tesoura infantil pontas redondas",
+    k_masc_ped: "pocket mask pediatrica mascara rcp crianca",
+
+    // Empresa / Trabalho (SST)
+    w_lava_olhos: "solucao lava olhos estacao primeiros socorros",
+    w_torniquete: "torniquete cat homologado militar primeiros auxilios",
+    w_penso_valv: "penso toracico valvular chest seal trauma",
+    w_luvas: "luvas nitrilo alta resistencia primeiros socorros",
+    w_comp_grandes: "compressas absorventes esterilizadas grandes queimaduras",
+    w_manta: "manta termica sobrevivencia ouro prata",
+    w_tesoura: "tesoura trauma corta vestuario socorrista",
+    w_ligaduras: "ligaduras compressivas primeiros socorros",
+    w_pocket: "pocket mask rcp primeiros auxilios estuche rigido"
+  };
+
   // ========================================================
   // CHECKLIST DA CAIXA DE PRIMEIROS SOCORROS POR LOCAL
   // ========================================================
@@ -3005,25 +3070,39 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
       const isChecked = !!savedState[item.id];
       if (isChecked) checkedCount++;
 
+      const query = ITEM_AMAZON_QUERIES[item.id] || (item.cat !== 'Documentação' ? `${item.name} primeiros socorros` : null);
+      const buyUrl = query ? AMAZON_AFFILIATE_CONFIG.buildSearchUrl(query) : null;
+
       itemsHtml += `
-        <div class="kit-item-row p-2.5 bg-slate-900 border ${isChecked ? 'border-emerald-500 is-checked' : 'border-slate-800'} rounded-xl flex items-center justify-between gap-2.5" data-id="${item.id}">
-          <div class="flex items-center gap-2.5 min-w-0">
+        <div class="kit-item-row p-2.5 bg-slate-900 border ${isChecked ? 'border-emerald-500/70 is-checked' : 'border-slate-800'} rounded-xl flex items-center justify-between gap-2.5 transition" data-id="${item.id}">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer">
             <span class="kit-checkbox w-5 h-5 rounded border ${isChecked ? 'bg-emerald-500 border-emerald-500 text-slate-950 font-black' : 'border-slate-600 bg-slate-950 text-transparent'} flex items-center justify-center text-xs shrink-0 transition">✓</span>
-            <div class="min-w-0">
+            <div class="min-w-0 flex-1">
               <strong class="text-xs text-white block truncate leading-tight">${item.name}</strong>
               <span class="text-[10px] text-slate-400 block">${item.cat}</span>
             </div>
           </div>
-          <span class="text-[10px] px-2 py-0.5 rounded font-mono ${isChecked ? 'bg-emerald-950 text-emerald-300' : 'bg-slate-800 text-slate-500'}">
-            ${isChecked ? 'Conferido' : 'Pendente'}
-          </span>
+
+          <div class="flex items-center gap-2 shrink-0">
+            ${buyUrl ? `
+              <a href="${buyUrl}" target="_blank" rel="noopener noreferrer nofollow" class="btn-item-buy py-1 px-2.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-[10px] rounded-lg flex items-center gap-1 shadow transition cursor-pointer" onclick="event.stopPropagation()" title="Ver e comprar na Amazon.es">
+                <span>🛒</span> <span>Comprar</span>
+              </a>
+            ` : ''}
+            <span class="text-[10px] px-2 py-0.5 rounded font-mono cursor-pointer ${isChecked ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/40' : 'bg-slate-800 text-slate-400'}">
+              ${isChecked ? 'Conferido' : 'Falta'}
+            </span>
+          </div>
         </div>
       `;
     });
 
     const percent = Math.round((checkedCount / totalItems) * 100);
+    const mainKit = AMAZON_AFFILIATE_CONFIG.locationKits[locationKey] || AMAZON_AFFILIATE_CONFIG.locationKits.casa;
+    const mainKitUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(mainKit.query);
 
     container.innerHTML = `
+      <!-- CARTÃO DE PRONTIDÃO DA MALA -->
       <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -3045,14 +3124,34 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
         </div>
       </div>
 
+      <!-- OPÇÃO RÁPIDA: COMPRAR MALA COMPLETA HOMOLOGADA -->
+      <div class="p-2.5 bg-gradient-to-r from-amber-950/60 to-slate-900 border border-amber-500/50 rounded-xl flex items-center justify-between gap-2.5 text-xs shadow-sm">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-xl shrink-0">🧰</span>
+          <div class="min-w-0">
+            <strong class="text-white text-xs block truncate">${mainKit.title}</strong>
+            <span class="text-[10px] text-amber-200/90 block truncate">${mainKit.priceHint}</span>
+          </div>
+        </div>
+        <a href="${mainKitUrl}" target="_blank" rel="noopener noreferrer nofollow" class="py-1.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] rounded-lg shrink-0 shadow flex items-center gap-1.5 transition cursor-pointer">
+          <span>🛒</span> <span>Mala Completa</span>
+        </a>
+      </div>
+
+      <!-- LISTA DE ITENS COM BOTÃO DIRETO DE COMPRA AMAZON -->
       <div class="space-y-1.5 mt-2">
         ${itemsHtml}
       </div>
+
+      <p class="text-[9px] text-slate-500 leading-tight pt-2 text-center">
+        Transparência: Links de afiliado Amazon (tag hfonte-21). Ao encomendar o material em falta através da app, o projeto recebe uma pequena comissão sem qualquer custo adicional para si, mantendo a aplicação 100% gratuita.
+      </p>
     `;
 
     // Listeners de alternância nos itens
     container.querySelectorAll('.kit-item-row').forEach(row => {
-      row.addEventListener('click', () => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('a') || e.target.closest('.btn-item-buy')) return;
         const id = row.dataset.id;
         savedState[id] = !savedState[id];
         localStorage.setItem(`first_aid_kit_${locationKey}`, JSON.stringify(savedState));
@@ -3067,80 +3166,9 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
       }
     });
 
-    // Renderizar Recomendações de Compra de Material & Afiliados Amazon
-    const amazonBox = document.getElementById('kit-amazon-recommendations');
-    if (amazonBox) {
-      const mainKit = AMAZON_AFFILIATE_CONFIG.locationKits[locationKey] || AMAZON_AFFILIATE_CONFIG.locationKits.casa;
-      const mainKitUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(mainKit.query);
-
-      let essentialsHtml = '';
-      AMAZON_AFFILIATE_CONFIG.essentialItems.forEach(item => {
-        const itemUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(item.query);
-        const iconSvg = AMAZON_AFFILIATE_CONFIG.svgIcons[item.svgKey] || '';
-        essentialsHtml += `
-          <div class="p-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl flex flex-col gap-2 transition text-xs hover:border-amber-500/50">
-            <div class="flex items-start gap-2.5">
-              ${iconSvg}
-              <div class="min-w-0 flex-1">
-                <strong class="text-white text-xs font-bold block leading-snug">${item.name}</strong>
-                <p class="text-[10px] text-slate-300 leading-snug mt-0.5">${item.desc}</p>
-              </div>
-            </div>
-            ${item.visualTip ? `
-              <div class="bg-amber-950/50 border border-amber-500/40 rounded-lg p-1.5 text-[10px] text-amber-200 leading-tight flex items-start gap-1.5">
-                <span>🔍</span>
-                <span><strong>Identificação correta:</strong> ${item.visualTip.replace('⚠️ Como identificar na lista: ', '')}</span>
-              </div>
-            ` : ''}
-            <a href="${itemUrl}" target="_blank" rel="noopener noreferrer nofollow" class="w-full py-1.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] rounded-lg flex items-center justify-center gap-1.5 shadow transition cursor-pointer">
-              <span>🛒</span> Ver Opções Homologadas na Amazon.es ➔
-            </a>
-          </div>
-        `;
-      });
-
-      amazonBox.innerHTML = `
-        <div class="flex items-center justify-between border-b border-amber-500/30 pb-2">
-          <div class="flex items-center gap-2">
-            <span class="text-xl">🛒</span>
-            <div>
-              <h4 class="text-xs font-black text-amber-300">Onde encontrar o material em falta?</h4>
-              <p class="text-[10px] text-slate-300">Produtos homologados na Amazon com entrega rápida em Portugal:</p>
-            </div>
-          </div>
-          <span class="text-[9px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-600/50 font-bold uppercase tracking-wider">Afiliados</span>
-        </div>
-
-        <!-- KIT PRINCIPAL RECOMENDADO PARA ESTE LOCAL -->
-        <div class="p-3 bg-slate-950/90 border border-amber-500/60 rounded-xl space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-600/40">${mainKit.badge}</span>
-            <span class="text-[10px] text-slate-400 font-mono">${mainKit.priceHint}</span>
-          </div>
-          <div class="flex items-start gap-2.5">
-            ${AMAZON_AFFILIATE_CONFIG.svgIcons.kit_bag}
-            <div class="min-w-0 flex-1">
-              <strong class="text-xs text-white block font-bold leading-snug">${mainKit.title}</strong>
-              <p class="text-[10px] text-slate-400 mt-0.5">Estojo estruturado com compartimentos para todos os itens obrigatórios e recomendados.</p>
-            </div>
-          </div>
-          <a href="${mainKitUrl}" target="_blank" rel="noopener noreferrer nofollow" class="w-full py-2 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow transition cursor-pointer">
-            <span>🛒</span> Ver Malas Homologadas na Amazon (Entrega 24h) ➔
-          </a>
-        </div>
-
-        <!-- ITENS CRÍTICOS INDIVIDUAIS -->
-        <div class="space-y-1.5">
-          <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Artigos de Segurança Essenciais (com Guia Visual):</span>
-          ${essentialsHtml}
-        </div>
-
-        <!-- AVISO DE TRANSPARÊNCIA ÉTICA -->
-        <p class="text-[9px] text-slate-500 leading-tight pt-1 text-center">
-          Transparência: Ao encomendar através destes links da Amazon, o projeto recebe uma pequena comissão sem qualquer custo adicional para si. Toda a receita reverte para manter a aplicação 100% gratuita.
-        </p>
-      `;
-    }
+    // Limpar qualquer elemento legado de recomendações para manter o ecrã limpo
+    const legacyBox = document.getElementById('kit-amazon-recommendations');
+    if (legacyBox) legacyBox.innerHTML = '';
   }
 
   function initFirstAidKitChecklist() {
