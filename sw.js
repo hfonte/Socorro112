@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuidar-emergencia-v42';
+const CACHE_NAME = 'cuidar-emergencia-v43';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -11,6 +11,8 @@ const ASSETS_TO_CACHE = [
   './js/rag.js',
   './js/ai.js',
   'https://cdn.tailwindcss.com/3.4.17',
+  './assets/docs/Ficha_Medica_Individual_ERPI.docx',
+  './assets/docs/Plano_Individual_Saude_Creche.docx',
   './assets/images/estrela_da_vida.jpg',
   './assets/images/cadeia_sobrevivencia.png',
   './assets/images/sbv_consciencia.png',

@@ -2944,6 +2944,22 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
     w_pocket: "pocket mask rcp primeiros auxilios estuche rigido"
   };
 
+  // Minutas Oficiais Descarregáveis em Formato Word (.docx)
+  const ITEM_DOC_TEMPLATES = {
+    e_fichas: {
+      file: './assets/docs/Ficha_Medica_Individual_ERPI.docx',
+      filename: 'Ficha_Medica_Individual_ERPI.docx',
+      label: 'Minuta .docx',
+      title: 'Descarregar Minuta Editável Word (.docx) para Utentes de Lar / ERPI'
+    },
+    k_alergias: {
+      file: './assets/docs/Plano_Individual_Saude_Creche.docx',
+      filename: 'Plano_Individual_Saude_Creche.docx',
+      label: 'Minuta .docx',
+      title: 'Descarregar Minuta Editável Word (.docx) do Plano Individual de Saúde para Creche & Escola'
+    }
+  };
+
   // ========================================================
   // CHECKLIST DA CAIXA DE PRIMEIROS SOCORROS POR LOCAL
   // ========================================================
@@ -3070,6 +3086,7 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
       const isChecked = !!savedState[item.id];
       if (isChecked) checkedCount++;
 
+      const docTemplate = ITEM_DOC_TEMPLATES[item.id];
       const query = ITEM_AMAZON_QUERIES[item.id] || (item.cat !== 'Documentação' ? `${item.name} primeiros socorros` : null);
       const buyUrl = query ? AMAZON_AFFILIATE_CONFIG.buildSearchUrl(query) : null;
 
@@ -3084,6 +3101,11 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
+            ${docTemplate ? `
+              <a href="${docTemplate.file}" download="${docTemplate.filename}" class="btn-item-doc py-1 px-2.5 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold text-[10px] rounded-lg flex items-center gap-1 shadow transition cursor-pointer" onclick="event.stopPropagation()" title="${docTemplate.title}">
+                <span>📥</span> <span>${docTemplate.label}</span>
+              </a>
+            ` : ''}
             ${buyUrl ? `
               <a href="${buyUrl}" target="_blank" rel="noopener noreferrer nofollow" class="btn-item-buy py-1 px-2.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-[10px] rounded-lg flex items-center gap-1 shadow transition cursor-pointer" onclick="event.stopPropagation()" title="Ver e comprar na Amazon.es">
                 <span>🛒</span> <span>Comprar</span>
@@ -3100,6 +3122,41 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
     const percent = Math.round((checkedCount / totalItems) * 100);
     const mainKit = AMAZON_AFFILIATE_CONFIG.locationKits[locationKey] || AMAZON_AFFILIATE_CONFIG.locationKits.casa;
     const mainKitUrl = AMAZON_AFFILIATE_CONFIG.buildSearchUrl(mainKit.query);
+
+    let institutionDocBanner = '';
+    if (locationKey === 'erpi') {
+      institutionDocBanner = `
+        <!-- MINUTA INSTITUCIONAL EDITÁVEL ERPI -->
+        <div class="p-2.5 bg-gradient-to-r from-sky-950/80 to-slate-900 border border-sky-500/50 rounded-xl flex items-center justify-between gap-2.5 text-xs shadow-sm">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xl shrink-0">📄</span>
+            <div class="min-w-0">
+              <strong class="text-sky-200 text-xs block truncate">Minuta Médica Individual (.docx)</strong>
+              <span class="text-[10px] text-sky-300/80 block leading-tight">Ficha editável para utentes de Lar / ERPI (normas DGS/ISS).</span>
+            </div>
+          </div>
+          <a href="./assets/docs/Ficha_Medica_Individual_ERPI.docx" download="Ficha_Medica_Individual_ERPI.docx" class="py-1.5 px-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-[11px] rounded-lg shrink-0 shadow flex items-center gap-1.5 transition cursor-pointer" title="Descarregar modelo Word para Lar / ERPI">
+            <span>📥</span> <span>Descarregar .docx</span>
+          </a>
+        </div>
+      `;
+    } else if (locationKey === 'creche') {
+      institutionDocBanner = `
+        <!-- MINUTA INSTITUCIONAL EDITÁVEL CRECHE -->
+        <div class="p-2.5 bg-gradient-to-r from-sky-950/80 to-slate-900 border border-sky-500/50 rounded-xl flex items-center justify-between gap-2.5 text-xs shadow-sm">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xl shrink-0">📋</span>
+            <div class="min-w-0">
+              <strong class="text-sky-200 text-xs block truncate">Plano Individual de Saúde (.docx)</strong>
+              <span class="text-[10px] text-sky-300/80 block leading-tight">Minuta editável para Creche &amp; Escola com alergias e SOS.</span>
+            </div>
+          </div>
+          <a href="./assets/docs/Plano_Individual_Saude_Creche.docx" download="Plano_Individual_Saude_Creche.docx" class="py-1.5 px-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-[11px] rounded-lg shrink-0 shadow flex items-center gap-1.5 transition cursor-pointer" title="Descarregar modelo Word para Creche &amp; Escola">
+            <span>📥</span> <span>Descarregar .docx</span>
+          </a>
+        </div>
+      `;
+    }
 
     container.innerHTML = `
       <!-- CARTÃO DE PRONTIDÃO DA MALA -->
@@ -3123,6 +3180,8 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
           <button type="button" id="btn-reset-kit" class="text-slate-400 hover:text-white underline cursor-pointer">Limpar seleção</button>
         </div>
       </div>
+
+      ${institutionDocBanner}
 
       <!-- OPÇÃO RÁPIDA: COMPRAR MALA COMPLETA HOMOLOGADA -->
       <div class="p-2.5 bg-gradient-to-r from-amber-950/60 to-slate-900 border border-amber-500/50 rounded-xl flex items-center justify-between gap-2.5 text-xs shadow-sm">
@@ -3151,7 +3210,7 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
     // Listeners de alternância nos itens
     container.querySelectorAll('.kit-item-row').forEach(row => {
       row.addEventListener('click', (e) => {
-        if (e.target.closest('a') || e.target.closest('.btn-item-buy')) return;
+        if (e.target.closest('a') || e.target.closest('.btn-item-buy') || e.target.closest('.btn-item-doc')) return;
         const id = row.dataset.id;
         savedState[id] = !savedState[id];
         localStorage.setItem(`first_aid_kit_${locationKey}`, JSON.stringify(savedState));
