@@ -2619,8 +2619,8 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
   // CONFIGURAÇÃO DE AFILIADOS AMAZON (MONETIZAÇÃO ÉTICA)
   // ========================================================
   const AMAZON_AFFILIATE_CONFIG = {
-    // Insira aqui a sua Tag oficial do Programa de Associados da Amazon (ex: 'hfonte-21' ou 'cuidaremerg-21')
-    associateTag: 'cuidaremerg-21',
+    // Tag oficial do Programa de Associados da Amazon de Hugo Fonte
+    associateTag: 'hfonte-21',
     buildSearchUrl(query) {
       return `https://www.amazon.es/s?k=${encodeURIComponent(query)}&tag=${this.associateTag}`;
     },
