@@ -2064,21 +2064,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // Estado da Vítima com base no ecrã ativo
     const activeScreen = document.querySelector('.screen-view.active')?.id || '';
     if (activeScreen === 'screen-sbv') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Inconsciente (não responde)';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Ausente ou Gasping (Paragem PCR)';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Iniciei compressões torácicas no centro do peito a 110 bpm com o metrónomo da aplicação. Solicito envio urgente de ambulância e DAE.»';
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Inconsciente (não responde ao estímulo)';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Ausente ou respiração agónica (Gasping)';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Paragem cardiorrespiratória (PCR) confirmada.';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Iniciei compressões torácicas no centro do peito com a aplicação. Solicito envio de socorro com DAE e sigo as vossas instruções.»';
     } else if (activeScreen === 'screen-ova') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente mas sem conseguir falar ou tossir';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Asfixia por corpo estranho (Obstrução grave)';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«A executar manobras de desobstrução (pancadas interescapulares e compressões abdominais de Heimlich).»';
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente (não consegue falar nem tossir)';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Asfixia súbita por corpo estranho (obstrução grave)';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Sinais de asfixia grave (mãos ao pescoço).';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«A executar manobras de desobstrução (pancadas nas costas e compressões de Heimlich). Solicito envio urgente de socorro.»';
     } else if (activeScreen === 'screen-stroke') {
       if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente / Confuso';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Respiração presente';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Suspeita de AVC agudo (Via Verde). Teste dos 3 Fs positivo. Hora dos sintomas registada. Vítima em repouso.»';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Respiração presente e regular';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Suspeita de AVC (alteração na Face, Força ou Fala).';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Sinais de alerta de AVC identificados. Vítima calma e em repouso. Solicito envio de socorro para ativação da Via Verde.»';
     } else if (activeScreen === 'screen-pediatria') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Criança / Lactente prostrado';
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Criança / Lactente prostrado ou sonolento';
       if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Dificuldade respiratória aguda / Tiragem';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Emergência pediátrica. Avaliação pelo Triângulo Pediátrico (TEP). Solicito equipa diferenciada com urgência.»';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Avaliação pelo Triângulo Pediátrico alterada.';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Emergência pediátrica no local. Solicito auxílio médico urgente e aguardo instruções telefónicas do CODU.»';
+    } else if (activeScreen === 'screen-trauma') {
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Vítima consciente / em choque';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Respiração presente';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Lesão traumática / hemorragia visível.';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«A efetuar compressão direta no local e a prevenir choque térmico. Solicito envio de socorro.»';
+    } else if (activeScreen === 'screen-ai') {
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Avaliada na Triagem Inteligente';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Avaliada na Triagem Inteligente';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = emergencySession.confirmedSymptoms.length > 0 ? emergencySession.confirmedSymptoms.join(', ') : 'Sintomas relatados na triagem da app.';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Solicito apoio médico urgente no local. Encontro-me junto da vítima e sigo as orientações do operador 112/CODU.»';
+    } else {
+      // Estado Inicial / Neutro (abriu o SBAR no ecrã inicial ou sem protocolo selecionado)
+      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'A verificar no local (Responde / Não responde)';
+      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'A verificar no local (Normal / Dificuldade / Ausente)';
+      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Descrever queixas e sintomas ao operador do 112.';
+      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Solicito apoio médico urgente no local. Encontro-me junto da vítima e aguardo as orientações do operador 112/CODU.»';
     }
 
     // Alternar para a aba correta
@@ -2161,9 +2181,9 @@ Tempo de Assistência Comunitária Decorrido: ${timeFormatted}
 - Sintomas e Queixas: Avaliados de acordo com os algoritmos de triagem oficiais ERC 2025.
 
 ==================================================
-4. RECOMENDAÇÃO & CUIDADOS PRESTADOS NO LOCAL (R):
-- Cuidados Imediatos: ${sbarActionsInProgress?.textContent || 'Primeiros socorros prestados sob orientação da aplicação.'}
-- Duração das manobras: Assistência mantida continuamente até à chegada da equipa de socorro.
+4. PEDIDO DE SOCORRO & CUIDADOS PRESTADOS (R):
+- Cuidados no Local: ${sbarActionsInProgress?.textContent || 'Primeiros socorros prestados sob orientação da aplicação.'}
+- Interação com CODU: Orientações telefónicas cumpridas continuamente até à chegada da equipa de socorro (Bombeiros / INEM / CVP).
 
 Thinked by Hugo Fonte • Cuidar em Emergência`;
   }
