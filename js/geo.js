@@ -143,12 +143,31 @@ const GeoManager = {
   init(onUpdateCallback) {
     if (!navigator.geolocation) {
       this.currentLocation.address = 'GPS não suportado neste equipamento';
+      this.currentLocation.landmark = 'Indique referências visuais da rua ao 112';
       if (onUpdateCallback) onUpdateCallback(this.currentLocation);
       return;
     }
 
+    let isResolved = false;
+    // Watchdog de 5.5s para garantir que o utilizador nunca fica preso em "A obter..."
+    const watchdogTimer = setTimeout(() => {
+      if (!isResolved && (!this.currentLocation.lat || this.currentLocation.address.includes('A obter'))) {
+        const cachedAddr = typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_address') : null;
+        if (cachedAddr) {
+          this.currentLocation.address = `${cachedAddr} (Última conhecida)`;
+          this.currentLocation.landmark = 'Confirme referências visuais da rua com o operador do 112';
+        } else {
+          this.currentLocation.address = 'Sinal GPS fraco ou em busca...';
+          this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112';
+        }
+        if (onUpdateCallback) onUpdateCallback(this.currentLocation);
+      }
+    }, 5500);
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        isResolved = true;
+        clearTimeout(watchdogTimer);
         const lat = pos.coords.latitude.toFixed(5);
         const lon = pos.coords.longitude.toFixed(5);
         this.currentLocation.lat = lat;
@@ -187,8 +206,16 @@ const GeoManager = {
         if (onUpdateCallback) onUpdateCallback(this.currentLocation);
       },
       () => {
-        this.currentLocation.address = 'Sinal GPS fraco ou não autorizado';
-        this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos';
+        isResolved = true;
+        clearTimeout(watchdogTimer);
+        const cachedAddr = typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_address') : null;
+        if (cachedAddr) {
+          this.currentLocation.address = `${cachedAddr} (Última conhecida)`;
+          this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112';
+        } else {
+          this.currentLocation.address = 'Sinal GPS fraco ou não autorizado';
+          this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112';
+        }
         if (onUpdateCallback) onUpdateCallback(this.currentLocation);
       },
       { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }

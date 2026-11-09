@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=43">
+  <link rel="stylesheet" href="./css/styles.css?v=44">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE ADSENSE (PUB ID OFICIAL: ca-pub-1221675661029327) -->
@@ -47,6 +47,9 @@
             <p class="text-[11px] text-amber-200/90 leading-relaxed mt-0.5">
               Esta aplicação tem fins de apoio pedagógico e orientação comunitária baseada em diretrizes de TAS e do INEM. <strong>NÃO substitui o contacto imediato com o 112 nem o aconselhamento médico qualificado.</strong> O recurso à aplicação nunca deve adiar a chamada de emergência.
             </p>
+            <button type="button" id="btn-open-legal-modal-from-banner" class="text-[10px] text-amber-300 hover:text-white underline font-semibold mt-1 inline-block cursor-pointer">
+              Ver Termos de Responsabilidade Legal &amp; Privacidade RGPD &rarr;
+            </button>
           </div>
         </div>
         <button type="button" id="btn-dismiss-disclaimer" class="text-amber-400 hover:text-white text-base font-bold leading-none px-1 py-0.5" title="Fechar aviso">&times;</button>
@@ -287,8 +290,13 @@
         </div>
 
         <!-- METRÓNOMO PROFISSIONAL -->
-        <div class="metro-display">
-          <span class="text-xs uppercase text-slate-400 font-bold block mb-1">Cadência de Compressões:</span>
+        <div class="metro-display relative">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs uppercase text-slate-400 font-bold block">Cadência de Compressões:</span>
+            <span class="wake-lock-indicator hidden text-[10px] font-mono text-emerald-400 flex items-center">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1"></span> Ecrã Sempre Ativo
+            </span>
+          </div>
           <div class="metro-bpm" id="metro-bpm-val">110 <span class="text-sm font-sans text-slate-400">BPM</span></div>
 
           <!-- SELETOR DE MODO: 30:2 COM AVISO DE VOZ vs CONTÍNUO -->
@@ -792,7 +800,12 @@
       <!-- ======================================================== -->
       <section id="screen-ova" class="screen-view">
         <div class="flex items-center justify-between mb-1">
-          <h2 class="text-xl font-black text-white">Obstrução da Via Aérea (OVA)</h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl font-black text-white">Obstrução da Via Aérea (OVA)</h2>
+            <span class="wake-lock-indicator hidden text-[10px] font-mono text-emerald-400 flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block mr-1"></span> Ativo
+            </span>
+          </div>
           <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
         </div>
         <div class="mb-3">
@@ -887,7 +900,12 @@
       <!-- ======================================================== -->
       <section id="screen-trauma" class="screen-view">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xl font-black text-white">Trauma &amp; Hemorragias Graves</h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl font-black text-white">Trauma &amp; Hemorragias Graves</h2>
+            <span class="wake-lock-indicator hidden text-[10px] font-mono text-emerald-400 flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block mr-1"></span> Ativo
+            </span>
+          </div>
           <button type="button" data-nav="screen-emergency" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">Voltar</button>
         </div>
 
@@ -2856,6 +2874,114 @@
       </div>
     </div>
 
+    <!-- MODAL DE TERMOS LEGAIS, ISENÇÃO DE RESPONSABILIDADE & RGPD -->
+    <div id="modal-legal-terms" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-fade-in text-slate-200">
+        
+        <!-- CABEÇALHO DO MODAL -->
+        <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">⚖️</span>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-white">Termos de Utilização &amp; Responsabilidade Legal</h3>
+              <p class="text-[11px] text-amber-400/90 font-medium">Isenção Médica, Regulamento (UE) 2017/745 e Privacidade RGPD</p>
+            </div>
+          </div>
+          <button type="button" id="btn-close-legal-modal" class="text-slate-400 hover:text-white text-2xl font-bold leading-none p-1 cursor-pointer" title="Fechar">&times;</button>
+        </div>
+
+        <!-- CONTEÚDO SCROLLÁVEL -->
+        <div class="p-4 sm:p-6 space-y-4 overflow-y-auto text-xs leading-relaxed text-slate-300">
+          
+          <div class="p-3 bg-amber-950/60 border border-amber-500/50 rounded-xl text-amber-200 text-xs">
+            <strong class="block text-white font-bold mb-1">🚨 AVISO FUNDAMENTAL DE EMERGÊNCIA:</strong>
+            O uso desta aplicação digital NUNCA deve adiar, substituir ou atrasar o contacto imediato com o Número Europeu de Emergência <strong>112</strong>. Em caso de discrepância entre os conteúdos deste guia e as ordens transmitidas pelo operador ou médico do CODU/INEM, prevalecem sem exceção as instruções recebidas por voz das autoridades de emergência.
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <h4 class="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5">
+                <span>1.</span> <span>Natureza Pedagógica &amp; Auxiliar de Memória (MDR UE)</span>
+              </h4>
+              <p class="mt-1 text-slate-300">
+                A aplicação <em>«Cuidar em Emergência / Socorro 112»</em> foi concebida por <strong>Hugo Fonte</strong> como uma plataforma digital de caráter exclusivamente pedagógico, formativo e de suporte de memória rápida para suporte básico de vida, primeiros socorros comunitários e preparação de kits institucionais.
+              </p>
+              <p class="mt-1 text-slate-300">
+                A aplicação <strong>não constitui um dispositivo médico de diagnóstico ou tratamento</strong> ao abrigo do Regulamento (UE) 2017/745 do Parlamento Europeu e do Conselho, não prescreve terapêuticas nem substitui o julgamento clínico presencial de médicos, enfermeiros ou técnicos de emergência pré-hospitalar.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5">
+                <span>2.</span> <span>Conformidade Científica com Diretrizes Internacionais</span>
+              </h4>
+              <p class="mt-1 text-slate-300">
+                Todos os algoritmos de reanimação (SBV), cadência do metrónomo (100–120 compressões/minuto), desobstrução da via aérea (OVA) e controlo de hemorragias foram desenhados com base nas diretrizes científicas do <em>European Resuscitation Council (ERC 2025)</em> e nos manuais e normas de atuação do <em>Instituto Nacional de Emergência Médica (INEM)</em> de Portugal.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5">
+                <span>3.</span> <span>Isenção e Limitação de Responsabilidade Civil</span>
+              </h4>
+              <p class="mt-1 text-slate-300">
+                O criador da aplicação ("Hugo Fonte"), a equipa de desenvolvimento e colaboradores associados recusam formalmente qualquer responsabilidade civil, contratual ou extracontratual por quaisquer danos corporais, lesões, sequelas ou óbito, bem como prejuízos materiais, resultantes direta ou indiretamente de:
+              </p>
+              <ul class="list-disc pl-5 mt-1 space-y-1 text-slate-300">
+                <li>Aplicação errada, imperfeita, atrasada ou negligente de qualquer técnica de primeiros socorros por parte do utilizador ou de terceiros;</li>
+                <li>Falhas temporárias de hardware do smartphone, quebras de bateria, ausência de sinal GPS/rede móvel ou bloqueio de som pelo dispositivo;</li>
+                <li>Decisões clínicas tomadas sem a supervisão direta das equipas médicas do 112/CODU;</li>
+                <li>Uso indevido das minutas editáveis (.docx) sem a devida validação prévia pelos diretores técnicos e equipas de saúde das respetivas instituições (ERPIs, Creches e Escolas).</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5">
+                <span>4.</span> <span>Privacidade Absoluta e Proteção de Dados (RGPD)</span>
+              </h4>
+              <p class="mt-1 text-slate-300">
+                A aplicação cumpre rigorosamente o Regulamento Geral sobre a Proteção de Dados (RGPD — Regulamento UE 2016/679).
+              </p>
+              <ul class="list-disc pl-5 mt-1 space-y-1 text-slate-300">
+                <li><strong>Arquitetura 100% Local (Client-Side):</strong> Não existem servidores remotos a recolher, rastrear ou armazenar os seus dados clínicos, coordenadas de geolocalização ou respostas a questionários.</li>
+                <li><strong>Ficha Médica ICE:</strong> Todos os dados de saúde que inserir na Ficha Médica de Emergência ficam guardados unicamente no <em>localStorage</em> do seu próprio navegador e podem ser limpos a qualquer momento nas definições do telefone.</li>
+                <li><strong>Geolocalização:</strong> As suas coordenadas GPS são consultadas em tempo real através da API do seu dispositivo exclusivamente para facilitar a leitura da morada ao operador do 112, nunca sendo transmitidas a terceiros.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5">
+                <span>5.</span> <span>Ética na Publicidade e Links de Afiliados</span>
+              </h4>
+              <p class="mt-1 text-slate-300">
+                Para manter este projeto livre, público e gratuito para toda a comunidade:
+              </p>
+              <ul class="list-disc pl-5 mt-1 space-y-1 text-slate-300">
+                <li><strong>Proteção Máxima no Socorro:</strong> Os ecrãs de emergência ativa (112, SBV, OVA, Trauma, Pediatria) contêm ZERO publicidade para garantir foco cognitivo absoluto e sem distrações.</li>
+                <li><strong>Modo Formação:</strong> O manual teórico e simuladores podem exibir anúncios geridos pela rede Google AdSense.</li>
+                <li><strong>Programa de Afiliados Amazon (tag hfonte-21):</strong> A checklist da caixa de primeiros socorros disponibiliza links diretos para aquisição de artigos médicos na Amazon.es. O projeto pode receber uma pequena comissão pelas compras qualificadas, sem qualquer encargo adicional para o utilizador.</li>
+              </ul>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+              <p><strong>Desenvolvido com dedicação por:</strong> Hugo Fonte • Socorrismo Comunitário e Formação em Emergência</p>
+              <p class="mt-0.5">Última revisão legal e clínica: <strong>Novembro de 2026 • Versão 1.0 (v44)</strong></p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RODAPÉ DO MODAL -->
+        <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between flex-shrink-0 text-xs">
+          <span class="text-slate-400 text-[11px]">ERC 2025 &bull; INEM &bull; RGPD</span>
+          <button type="button" id="btn-accept-legal-terms" class="py-2 px-5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer">
+            Compreendi e Concordo
+          </button>
+        </div>
+
+      </div>
+    </div>
+
     <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APP NATIVA -->
     <nav class="bottom-nav">
       <button type="button" class="nav-item active" data-target="screen-emergency">
@@ -2902,11 +3028,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=43"></script>
-  <script src="./js/geo.js?v=43"></script>
-  <script src="./js/knowledge_base.js?v=43"></script>
-  <script src="./js/rag.js?v=43"></script>
-  <script src="./js/ai.js?v=43"></script>
-  <script src="./js/app.js?v=43"></script>
+  <script src="./js/audio.js?v=44"></script>
+  <script src="./js/geo.js?v=44"></script>
+  <script src="./js/knowledge_base.js?v=44"></script>
+  <script src="./js/rag.js?v=44"></script>
+  <script src="./js/ai.js?v=44"></script>
+  <script src="./js/app.js?v=44"></script>
 </body>
 </html>

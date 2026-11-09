@@ -1,3 +1,62 @@
+// GESTOR DE BLOQUEIO DE ECRÃ (WAKE LOCK API - RESILIENTE A MUDANÇAS DE ABA/APP)
+const WakeLockManager = {
+  lock: null,
+  isActive: false,
+
+  async acquire() {
+    this.isActive = true;
+    if (!('wakeLock' in navigator)) return false;
+    try {
+      if (!this.lock) {
+        this.lock = await navigator.wakeLock.request('screen');
+        this.lock.addEventListener('release', () => {
+          this.lock = null;
+        });
+        this.updateBadge(true);
+        return true;
+      }
+    } catch (_) {
+      // Ignora falha em modo de poupança extrema de bateria
+    }
+    return false;
+  },
+
+  release() {
+    this.isActive = false;
+    if (this.lock) {
+      this.lock.release().catch(() => {});
+      this.lock = null;
+    }
+    this.updateBadge(false);
+  },
+
+  updateBadge(active) {
+    document.querySelectorAll('.wake-lock-indicator').forEach(el => {
+      if (active) {
+        el.classList.remove('hidden');
+        el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1"></span> Ecrã Sempre Ativo';
+        el.classList.add('text-emerald-400');
+        el.classList.remove('text-slate-500');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
+  },
+
+  init() {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible' && this.isActive) {
+          await this.acquire();
+        }
+      });
+    }
+  }
+};
+
+WakeLockManager.init();
+window.WakeLockManager = WakeLockManager;
+
 // MOTOR DE ÁUDIO, METRÓNOMO E VOZ (WEB AUDIO API + WAKE LOCK)
 const AudioManager = {
   audioCtx: null,
@@ -5,7 +64,6 @@ const AudioManager = {
   nextTick: 0,
   bpm: 110,
   voiceEnabled: true,
-  wakeLock: null,
   isVentilating: false,
   ventilationTimerIds: [],
 
@@ -27,18 +85,11 @@ const AudioManager = {
   },
 
   async requestWakeLock() {
-    try {
-      if ('wakeLock' in navigator) {
-        this.wakeLock = await navigator.wakeLock.request('screen');
-      }
-    } catch (_) {}
+    return WakeLockManager.acquire();
   },
 
   releaseWakeLock() {
-    if (this.wakeLock) {
-      this.wakeLock.release().catch(() => {});
-      this.wakeLock = null;
-    }
+    WakeLockManager.release();
   },
 
   // 1. Clique penetrante de compressão torácica (110 bpm)
@@ -225,10 +276,18 @@ const AudioManager = {
   speak(text) {
     if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
     try {
-      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+      }
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'pt-PT';
       utterance.rate = 1.05;
+      utterance.onerror = () => {
+        // Fallback silencioso para garantir que não bloqueia o fluxo em Safari / iOS
+      };
       window.speechSynthesis.speak(utterance);
     } catch (_) {}
   },
@@ -272,5 +331,16 @@ const AudioManager = {
     }
   }
 };
+
+// Desbloqueio pró-ativo do contexto de áudio em mobile no primeiro toque
+if (typeof document !== 'undefined') {
+  const unlockMobileAudio = () => {
+    AudioManager.initContext();
+    document.removeEventListener('touchstart', unlockMobileAudio);
+    document.removeEventListener('click', unlockMobileAudio);
+  };
+  document.addEventListener('touchstart', unlockMobileAudio, { once: true, passive: true });
+  document.addEventListener('click', unlockMobileAudio, { once: true });
+}
 
 window.AudioManager = AudioManager;

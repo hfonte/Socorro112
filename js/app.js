@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // NAVEGAÇÃO DE ECRÃS
+  // NAVEGAÇÃO DE ECRÃS (COM GESTÃO AUTOMÁTICA DE WAKE LOCK EM EMERGÊNCIA)
   function navigateTo(screenId) {
     document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(screenId);
@@ -56,6 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.target === screenId);
     });
+
+    // Se estiver num ecrã crítico de socorro, manter o ecrã ativo sem desligar
+    const emergencyScreens = ['screen-emergency', 'screen-sbv', 'screen-ova', 'screen-trauma', 'screen-pediatria'];
+    if (emergencyScreens.includes(screenId)) {
+      if (typeof WakeLockManager !== 'undefined') {
+        WakeLockManager.acquire();
+      }
+    } else {
+      if (typeof WakeLockManager !== 'undefined' && (!AudioManager || !AudioManager.metroInterval)) {
+        WakeLockManager.release();
+      }
+    }
 
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
@@ -1480,25 +1492,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // GESTÃO DO DISCLAIMER MÉDICO E LEGAL
+  // GESTÃO DO DISCLAIMER MÉDICO E MODAL FORMAL DE TERMOS LEGAIS (RGPD / MDR)
   const disclaimerBanner = document.getElementById('app-legal-disclaimer');
   const btnDismissDisclaimer = document.getElementById('btn-dismiss-disclaimer');
   const btnShowDisclaimer = document.getElementById('btn-show-disclaimer');
+  const modalLegalTerms = document.getElementById('modal-legal-terms');
+  const btnCloseLegalModal = document.getElementById('btn-close-legal-modal');
+  const btnAcceptLegalTerms = document.getElementById('btn-accept-legal-terms');
+  const btnOpenLegalModalFromBanner = document.getElementById('btn-open-legal-modal-from-banner');
+
+  function openLegalModal() {
+    if (modalLegalTerms) {
+      modalLegalTerms.classList.remove('hidden');
+    }
+  }
+
+  function closeLegalModal() {
+    if (modalLegalTerms) {
+      modalLegalTerms.classList.add('hidden');
+    }
+  }
+
+  if (btnCloseLegalModal) {
+    btnCloseLegalModal.addEventListener('click', closeLegalModal);
+  }
+
+  if (btnAcceptLegalTerms) {
+    btnAcceptLegalTerms.addEventListener('click', () => {
+      try {
+        localStorage.setItem('legal_terms_accepted', 'true');
+        sessionStorage.setItem('disclaimer_closed', 'true');
+      } catch (_) {}
+      closeLegalModal();
+      if (disclaimerBanner) disclaimerBanner.classList.add('hidden');
+    });
+  }
+
+  if (btnOpenLegalModalFromBanner) {
+    btnOpenLegalModalFromBanner.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLegalModal();
+    });
+  }
+
+  if (modalLegalTerms) {
+    modalLegalTerms.addEventListener('click', (e) => {
+      if (e.target === modalLegalTerms) closeLegalModal();
+    });
+  }
 
   if (btnDismissDisclaimer && disclaimerBanner) {
     btnDismissDisclaimer.addEventListener('click', () => {
       disclaimerBanner.classList.add('hidden');
       sessionStorage.setItem('disclaimer_closed', 'true');
     });
-    if (sessionStorage.getItem('disclaimer_closed') === 'true') {
+    if (sessionStorage.getItem('disclaimer_closed') === 'true' || localStorage.getItem('legal_terms_accepted') === 'true') {
       disclaimerBanner.classList.add('hidden');
     }
   }
 
-  if (btnShowDisclaimer && disclaimerBanner) {
-    btnShowDisclaimer.addEventListener('click', () => {
-      disclaimerBanner.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (btnShowDisclaimer) {
+    btnShowDisclaimer.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLegalModal();
     });
   }
 
