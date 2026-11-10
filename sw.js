@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuidar-emergencia-v49';
+const CACHE_NAME = 'cuidar-emergencia-v50';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
