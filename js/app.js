@@ -147,12 +147,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   // ACCORDIONS E AUTOESTUDO DO MODO FORMAÇÃO
   // ========================================================
+  // Garantir que a página da formação inicia com todos os módulos minimizados
+  document.querySelectorAll('#screen-learning-hub .chapter-accordion').forEach(ch => {
+    ch.classList.remove('open');
+  });
+
   document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', () => {
       const parent = header.closest('.chapter-accordion');
+      if (!parent) return;
       const wasOpen = parent.classList.contains('open');
-      
-      // Opcional: fechar outros ou permitir múltiplos
       parent.classList.toggle('open', !wasOpen);
     });
   });
@@ -860,6 +864,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiResponseBox = document.getElementById('ai-response-box');
   const aiLoading = document.getElementById('ai-loading');
   const imgPreview = document.getElementById('ai-img-preview');
+  const aiImgWrapper = document.getElementById('ai-img-wrapper');
+  const btnRemoveAiImg = document.getElementById('btn-remove-ai-img');
+  const btnClearAI = document.getElementById('btn-clear-ai');
+  const btnClearResults = document.getElementById('btn-clear-ai-results');
 
   let currentImageBase64 = null;
 
@@ -873,10 +881,27 @@ document.addEventListener('DOMContentLoaded', () => {
           currentImageBase64 = fullDataUrl.split(',')[1];
           if (imgPreview) {
             imgPreview.src = fullDataUrl;
+          }
+          if (aiImgWrapper) {
+            aiImgWrapper.classList.remove('hidden');
+          } else if (imgPreview) {
             imgPreview.classList.remove('hidden');
           }
         };
         reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  if (btnRemoveAiImg) {
+    btnRemoveAiImg.addEventListener('click', () => {
+      currentImageBase64 = null;
+      if (aiFileInput) aiFileInput.value = '';
+      if (imgPreview) imgPreview.src = '';
+      if (aiImgWrapper) {
+        aiImgWrapper.classList.add('hidden');
+      } else if (imgPreview) {
+        imgPreview.classList.add('hidden');
       }
     });
   }
@@ -1192,6 +1217,67 @@ document.addEventListener('DOMContentLoaded', () => {
     return formattedHtml;
   }
 
+  // Função para apagar/limpar a interação e os resultados da IA
+  function clearAIInteraction() {
+    // 1. Limpar prompt de texto
+    if (aiTextPrompt) aiTextPrompt.value = '';
+
+    // 2. Limpar fotografia carregada
+    currentImageBase64 = null;
+    if (aiFileInput) aiFileInput.value = '';
+    if (imgPreview) imgPreview.src = '';
+    if (aiImgWrapper) {
+      aiImgWrapper.classList.add('hidden');
+    } else if (imgPreview) {
+      imgPreview.classList.add('hidden');
+    }
+
+    // 3. Parar gravação de voz se estiver ativa
+    const btnStopVoice = document.getElementById('btn-stop-voice');
+    const voiceIndicator = document.getElementById('voice-recording-indicator');
+    if (btnStopVoice && voiceIndicator && !voiceIndicator.classList.contains('hidden')) {
+      btnStopVoice.click();
+    }
+
+    // 4. Cancelar temporizador de follow-up se estiver a correr
+    if (followupTimerInterval) {
+      clearInterval(followupTimerInterval);
+      followupTimerInterval = null;
+    }
+
+    // 5. Ocultar estado de loading
+    if (aiLoading) aiLoading.classList.add('hidden');
+
+    // 6. Restaurar botão de análise
+    if (btnAskAI) {
+      btnAskAI.disabled = false;
+      btnAskAI.classList.remove('opacity-50', 'pointer-events-none');
+      btnAskAI.innerHTML = '<span>🔍</span> <span>Analisar com Diretrizes</span>';
+    }
+
+    // 7. Resetar caixa de resposta para o estado inicial
+    if (aiResponseBox) {
+      aiResponseBox.innerHTML = '<span class="text-slate-500 italic">A análise segura da IA e os passos imediatos serão apresentados aqui.</span>';
+    }
+
+    // 8. Ocultar botão secundário de limpar resultados e caixas de partilha
+    if (btnClearResults) btnClearResults.classList.add('hidden');
+
+    const aiShareBox = document.getElementById('ai-share-box');
+    if (aiShareBox) aiShareBox.classList.add('hidden');
+
+    const modalShareIce = document.getElementById('modal-share-ice');
+    if (modalShareIce) modalShareIce.classList.add('hidden');
+  }
+
+  if (btnClearAI) {
+    btnClearAI.addEventListener('click', clearAIInteraction);
+  }
+
+  if (btnClearResults) {
+    btnClearResults.addEventListener('click', clearAIInteraction);
+  }
+
   if (btnAskAI) {
     btnAskAI.addEventListener('click', async () => {
       const text = aiTextPrompt.value.trim();
@@ -1209,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnAskAI) {
         btnAskAI.disabled = true;
         btnAskAI.classList.add('opacity-50', 'pointer-events-none');
-        btnAskAI.textContent = '⏳ A contactar triagem médica...';
+        btnAskAI.innerHTML = '<span>⏳</span> <span>A contactar triagem...</span>';
       }
       if (aiResponseBox) {
         aiResponseBox.innerHTML = '<span class="text-yellow-400/80 italic animate-pulse">A analisar com rapidez máxima...</span>';
@@ -1226,6 +1312,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const aiShareBox = document.getElementById('ai-share-box');
           if (aiShareBox) aiShareBox.classList.remove('hidden');
 
+          if (btnClearResults) btnClearResults.classList.remove('hidden');
+
           // Inicializar listeners de afunilamento de triagem (chips atómicos e multi-seleção de sintomas)
           initTriageDespisteListeners();
 
@@ -1235,13 +1323,14 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         if (aiResponseBox) {
           aiResponseBox.innerHTML = `<span class="text-red-400 font-bold">Erro: ${err.message}. Em dúvida, ligue 112 imediatamente.</span>`;
+          if (btnClearResults) btnClearResults.classList.remove('hidden');
         }
       } finally {
         if (aiLoading) aiLoading.classList.add('hidden');
         if (btnAskAI) {
           btnAskAI.disabled = false;
           btnAskAI.classList.remove('opacity-50', 'pointer-events-none');
-          btnAskAI.textContent = '🔍 Analisar com Diretrizes Médicas';
+          btnAskAI.innerHTML = '<span>🔍</span> <span>Analisar com Diretrizes</span>';
         }
       }
     });
@@ -3205,6 +3294,19 @@ document.addEventListener('DOMContentLoaded', () => {
       resetBtn.addEventListener('click', () => {
         searchInput.value = '';
         runSearch('');
+      });
+    }
+
+    const btnCollapseAll = document.getElementById('btn-collapse-all-chapters');
+    const btnExpandAll = document.getElementById('btn-expand-all-chapters');
+    if (btnCollapseAll) {
+      btnCollapseAll.addEventListener('click', () => {
+        chapters.forEach(ch => ch.classList.remove('open'));
+      });
+    }
+    if (btnExpandAll) {
+      btnExpandAll.addEventListener('click', () => {
+        chapters.forEach(ch => ch.classList.add('open'));
       });
     }
   }

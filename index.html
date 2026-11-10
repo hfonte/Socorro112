@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=51">
+  <link rel="stylesheet" href="./css/styles.css?v=52">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE TAG / ANALYTICS (G-6702XQNFX2) -->
@@ -1265,7 +1265,10 @@
         <div class="card">
           <label class="block text-xs font-bold text-slate-300 mb-2">1. Fotografia da Lesão ou Situação (Opcional):</label>
           <input type="file" id="ai-file-input" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-yellow-300 cursor-pointer">
-          <img id="ai-img-preview" class="hidden w-full max-h-48 object-cover rounded-xl mt-3 border border-slate-700" alt="Pré-visualização">
+          <div id="ai-img-wrapper" class="relative hidden mt-3">
+            <img id="ai-img-preview" class="w-full max-h-48 object-cover rounded-xl border border-slate-700" alt="Pré-visualização">
+            <button type="button" id="btn-remove-ai-img" class="absolute top-2 right-2 bg-slate-900/90 hover:bg-red-900 text-white rounded-full px-2 py-0.5 text-xs font-bold shadow-md border border-slate-700 transition cursor-pointer" title="Remover fotografia">✕</button>
+          </div>
 
           <div class="flex items-center justify-between mt-4 mb-2">
             <label class="block text-xs font-bold text-slate-300">2. Descreva o que está a acontecer:</label>
@@ -1283,13 +1286,26 @@
           </div>
           <textarea id="ai-text-prompt" rows="3" placeholder="Ex.: Queimadura com óleo quente no antebraço, tem bolha transparente com líquido... o que devo fazer?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-xs"></textarea>
 
-          <button type="button" id="btn-ask-ai" class="action bg-yellow-400 text-slate-950 font-black text-sm w-full mt-3 py-3">
-            🔍 Analisar com Diretrizes Médicas
-          </button>
+          <div class="grid grid-cols-4 gap-2 mt-3">
+            <button type="button" id="btn-ask-ai" class="col-span-3 action bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-sm py-3 transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md">
+              <span>🔍</span> <span>Analisar com Diretrizes</span>
+            </button>
+            <button type="button" id="btn-clear-ai" class="col-span-1 py-3 bg-slate-800 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-slate-700 hover:border-red-500/60 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 transition cursor-pointer" title="Apagar interação e recomendações">
+              <span class="text-base">🗑️</span>
+              <span class="text-[10px]">Apagar</span>
+            </button>
+          </div>
         </div>
 
         <div id="ai-loading" class="hidden card text-center py-6 text-sm text-yellow-300 flex items-center justify-center gap-2">
           <span class="animate-spin text-xl">⏳</span> A analisar segundo os manuais do INEM...
+        </div>
+
+        <div class="flex items-center justify-between mt-3 mb-1 px-1">
+          <span class="text-xs font-bold text-slate-300">Recomendações e Triagem:</span>
+          <button type="button" id="btn-clear-ai-results" class="hidden text-[11px] text-slate-400 hover:text-red-400 flex items-center gap-1 transition cursor-pointer" title="Limpar resultados da IA">
+            <span>🗑️</span> <span>Limpar Resultados</span>
+          </button>
         </div>
 
         <div id="ai-response-box" class="card text-xs leading-relaxed text-slate-200">
@@ -1500,10 +1516,18 @@
             <span id="learning-search-count">0 capítulos encontrados</span>
             <button type="button" id="btn-reset-search-filter" class="text-slate-400 hover:text-white underline text-[10px] cursor-pointer">Ver todos os capítulos</button>
           </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-2.5 px-1">
+            <span>📚 13 Módulos de Formação Oficial</span>
+            <div class="flex items-center gap-2">
+              <button type="button" id="btn-collapse-all-chapters" class="hover:text-purple-300 text-[10px] underline cursor-pointer">Recolher todos</button>
+              <span class="text-slate-600">&bull;</span>
+              <button type="button" id="btn-expand-all-chapters" class="hover:text-purple-300 text-[10px] underline cursor-pointer">Expandir todos</button>
+            </div>
+          </div>
         </div>
 
         <!-- CAPÍTULO 1: O SIEM E O PROTOCOLO PAS -->
-        <div class="chapter-accordion open">
+        <div class="chapter-accordion">
           <button type="button" class="accordion-header">
             <span>1. O SIEM e o Protocolo PAS</span>
             <span class="accordion-chevron">▼</span>
@@ -2299,7 +2323,7 @@
         </div>
 
         <!-- CAPÍTULO 11: QUIZ DINÂMICO DE AUTOAVALIAÇÃO -->
-        <div class="chapter-accordion open">
+        <div class="chapter-accordion">
           <button type="button" class="accordion-header">
             <span>11. Quiz Dinâmico de Autoavaliação</span>
             <span class="accordion-chevron">▼</span>
@@ -2345,7 +2369,7 @@
         </div>
 
         <!-- CAPÍTULO 12: SIMULADOR INTERATIVO DE CASOS CLÍNICOS (TREINO PRÁTICO) -->
-        <div id="chapter-simulator" class="chapter-accordion open">
+        <div id="chapter-simulator" class="chapter-accordion">
           <button type="button" class="accordion-header">
             <span>🎮 12. Simulador Interativo de Casos Clínicos (Modo Treino)</span>
             <span class="accordion-chevron">▼</span>
@@ -2402,7 +2426,7 @@
         </div>
 
         <!-- CAPÍTULO 13: CHECKLIST DA CAIXA DE PRIMEIROS SOCORROS POR LOCAL -->
-        <div id="chapter-kit-checklist" class="chapter-accordion open">
+        <div id="chapter-kit-checklist" class="chapter-accordion">
           <button type="button" class="accordion-header">
             <span>📦 13. Caixa de Primeiros Socorros por Local (Checklist Interativo)</span>
             <span class="accordion-chevron">▼</span>
@@ -2943,11 +2967,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=51"></script>
-  <script src="./js/geo.js?v=51"></script>
-  <script src="./js/knowledge_base.js?v=51"></script>
-  <script src="./js/rag.js?v=51"></script>
-  <script src="./js/ai.js?v=51"></script>
-  <script src="./js/app.js?v=51"></script>
+  <script src="./js/audio.js?v=52"></script>
+  <script src="./js/geo.js?v=52"></script>
+  <script src="./js/knowledge_base.js?v=52"></script>
+  <script src="./js/rag.js?v=52"></script>
+  <script src="./js/ai.js?v=52"></script>
+  <script src="./js/app.js?v=52"></script>
 </body>
 </html>
