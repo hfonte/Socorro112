@@ -238,10 +238,45 @@ const GeoManager = {
     if (onUpdateCallback) onUpdateCallback(this.currentLocation);
   },
 
-  getCoduSpeechScript(incidentType) {
+  getCoduSpeechScript(incidentKey = 'geral') {
     const loc = this.currentLocation;
-    const ref = loc.landmark ? ` Ponto de referência: ${loc.landmark}.` : '';
-    return `«Estou em ${loc.address}.${ref} As coordenadas são ${loc.lat || '--'}, ${loc.lon || '--'}. A ocorrência é: ${incidentType}.»`;
+    const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado')) 
+      ? loc.address 
+      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || 'na minha localização atual') : 'na minha localização atual');
+    const ref = (loc.landmark && !loc.landmark.includes('A calcular')) 
+      ? `, junto a ${loc.landmark.replace(/^Junto a /i, '')}` 
+      : '';
+    const gps = (loc.lat && loc.lon) ? ` (coordenadas GPS: ${loc.lat}, ${loc.lon})` : '';
+
+    const incidentMap = {
+      geral: {
+        text: 'uma emergência médica com uma vítima que necessita de assistência imediata',
+        action: 'Já garanti a segurança e iniciei os primeiros socorros. Peço o vosso envio urgente de ajuda.'
+      },
+      inconsciente: {
+        text: 'uma vítima inconsciente e sem resposta',
+        action: 'Estou a verificar a respiração e preparado para iniciar manobras de reanimação (SBV). Peço envio urgente de meios.'
+      },
+      engasgamento: {
+        text: 'uma vítima em engasgamento grave / asfixia total, incapaz de tossir ou respirar',
+        action: 'Iniciei a sequência de 5 pancadas interescapulares e 5 compressões abdominais. Peço apoio urgente.'
+      },
+      hemorragia: {
+        text: 'uma vítima com hemorragia grave ativa e abundante',
+        action: 'Apliquei compressão direta firme no local do sangramento com panos limpos. Peço envio urgente de socorro.'
+      },
+      queda: {
+        text: 'uma vítima que sofreu uma queda grave / traumatismo, com fortes dores',
+        action: 'A vítima encontra-se consciente e estabilizada no chão, sem mobilização. Peço apoio urgente.'
+      },
+      respiratorio: {
+        text: 'uma vítima com falta de ar aguda e dificuldade respiratória severa',
+        action: 'Posicionei a vítima sentada ereta com roupas desapertadas para facilitar a ventilação. Peço envio de meios.'
+      }
+    };
+
+    const inc = incidentMap[incidentKey] || incidentMap.geral;
+    return `«Ligo de emergência porque estou em ${address}${ref}${gps}. Tenho aqui ${inc.text}. ${inc.action}»`;
   }
 };
 

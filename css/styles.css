@@ -812,7 +812,6 @@ body {
   .mode-switch-bar,
   .content-body,
   .no-print,
-  #modal-share-ice,
   #app-legal-disclaimer {
     display: none !important;
   }

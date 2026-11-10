@@ -28,11 +28,35 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGeoUI(loc);
   });
 
+  let currentCabulaIncident = 'geral';
+
+  function updateCabulaScript(incidentKey = currentCabulaIncident) {
+    currentCabulaIncident = incidentKey;
+    const script = GeoManager.getCoduSpeechScript(incidentKey);
+    document.querySelectorAll('.geo-codu-script').forEach(el => {
+      el.textContent = script;
+    });
+  }
+
+  function setCabulaIncident(incidentKey) {
+    currentCabulaIncident = incidentKey;
+    document.querySelectorAll('.btn-cabula-chip').forEach(b => {
+      if (b.dataset.incident === incidentKey) {
+        b.classList.add('active', 'bg-amber-500', 'text-slate-950', 'font-bold');
+        b.classList.remove('bg-slate-800', 'text-slate-300');
+      } else {
+        b.classList.remove('active', 'bg-amber-500', 'text-slate-950', 'font-bold');
+        b.classList.add('bg-slate-800', 'text-slate-300');
+      }
+    });
+    updateCabulaScript(incidentKey);
+  }
+
   function updateGeoUI(loc) {
     document.querySelectorAll('.geo-address-display').forEach(el => el.textContent = loc.address);
     document.querySelectorAll('.geo-coords-display').forEach(el => el.textContent = `${loc.lat || '--'}, ${loc.lon || '--'}`);
     document.querySelectorAll('.geo-landmark-display').forEach(el => el.textContent = loc.landmark);
-    document.querySelectorAll('.geo-codu-script').forEach(el => el.textContent = GeoManager.getCoduSpeechScript('Emergência Médica / Traumatismo'));
+    updateCabulaScript();
 
     // Atualizar links para Google Maps centrado nas coordenadas
     if (loc.lat && loc.lon) {
@@ -56,6 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.target === screenId);
     });
+
+    if (screenId === 'screen-sbv') setCabulaIncident('inconsciente');
+    else if (screenId === 'screen-ova') setCabulaIncident('engasgamento');
+    else if (screenId === 'screen-trauma') setCabulaIncident('hemorragia');
 
     // Se estiver num ecrã crítico de socorro, manter o ecrã ativo sem desligar
     const emergencyScreens = ['screen-emergency', 'screen-sbv', 'screen-ova', 'screen-trauma', 'screen-pediatria'];
@@ -1558,210 +1586,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ========================================================
-  // MÓDULO: FICHA MÉDICA ICE & PARTILHA COM FAMILIAR
-  // ========================================================
-  function getMedicalId() {
-    try {
-      return JSON.parse(localStorage.getItem('user_medical_id') || '{}');
-    } catch (e) {
-      return {};
-    }
-  }
-
-  function saveMedicalId(data) {
-    localStorage.setItem('user_medical_id', JSON.stringify(data));
-    updateMedicalIdUI();
-  }
-
-  function updateMedicalIdUI() {
-    const data = getMedicalId();
-    const summaryCard = document.getElementById('ice-summary-card');
-    const headerStatus = document.getElementById('header-ice-status');
-    const aiShareName = document.getElementById('ai-share-contact-name');
-
-    if (data && (data.name || data.contactPhone)) {
-      if (summaryCard) summaryCard.classList.remove('hidden');
-      if (headerStatus) headerStatus.textContent = data.contactName ? `${data.contactName}` : 'Configurado';
-      if (aiShareName) aiShareName.textContent = data.contactName ? data.contactName : (data.contactPhone || 'Definido');
-
-      const elName = document.getElementById('ice-summary-name');
-      const elBlood = document.getElementById('ice-summary-blood');
-      const elAllergies = document.getElementById('ice-summary-allergies');
-      const elConditions = document.getElementById('ice-summary-conditions');
-      const elMeds = document.getElementById('ice-summary-meds');
-      const elContact = document.getElementById('ice-summary-contact');
-
-      if (elName) elName.textContent = data.name ? `${data.name} ${data.age ? '(' + data.age + ')' : ''}` : 'Vítima Registada';
-      if (elBlood) elBlood.textContent = data.blood || 'Desconhecido';
-      if (elAllergies) elAllergies.textContent = data.allergies || 'Nenhuma declarada';
-      if (elConditions) elConditions.textContent = data.conditions || 'Nenhum declarado';
-      if (elMeds) elMeds.textContent = data.medication || 'Nenhuma declarada';
-      if (elContact) elContact.textContent = data.contactName ? `${data.contactName} (${data.contactPhone})` : (data.contactPhone || 'Não configurado');
-
-      const inName = document.getElementById('input-ice-name');
-      const inAge = document.getElementById('input-ice-age');
-      const selBlood = document.getElementById('select-ice-blood');
-      const inAllergies = document.getElementById('input-ice-allergies');
-      const inConditions = document.getElementById('input-ice-conditions');
-      const inMeds = document.getElementById('input-ice-meds');
-      const inContactName = document.getElementById('input-ice-contact-name');
-      const inContactPhone = document.getElementById('input-ice-contact-phone');
-
-      if (inName && !inName.value) inName.value = data.name || '';
-      if (inAge && !inAge.value) inAge.value = data.age || '';
-      if (selBlood && data.blood) selBlood.value = data.blood;
-      if (inAllergies && !inAllergies.value) inAllergies.value = data.allergies || '';
-      if (inConditions && !inConditions.value) inConditions.value = data.conditions || '';
-      if (inMeds && !inMeds.value) inMeds.value = data.medication || '';
-      if (inContactName && !inContactName.value) inContactName.value = data.contactName || '';
-      if (inContactPhone && !inContactPhone.value) inContactPhone.value = data.contactPhone || '';
-    } else {
-      if (summaryCard) summaryCard.classList.add('hidden');
-      if (headerStatus) headerStatus.textContent = 'Alergias & Familiar';
-      if (aiShareName) aiShareName.textContent = 'Não configurado';
-    }
-  }
-
-  const formMedicalId = document.getElementById('form-medical-id');
-  if (formMedicalId) {
-    formMedicalId.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const data = {
-        name: document.getElementById('input-ice-name')?.value.trim() || '',
-        age: document.getElementById('input-ice-age')?.value.trim() || '',
-        blood: document.getElementById('select-ice-blood')?.value || 'Desconhecido',
-        allergies: document.getElementById('input-ice-allergies')?.value.trim() || '',
-        conditions: document.getElementById('input-ice-conditions')?.value.trim() || '',
-        medication: document.getElementById('input-ice-meds')?.value.trim() || '',
-        contactName: document.getElementById('input-ice-contact-name')?.value.trim() || '',
-        contactPhone: document.getElementById('input-ice-contact-phone')?.value.trim() || ''
-      };
-      saveMedicalId(data);
-      alert('Ficha Médica ICE guardada com sucesso no telemóvel!');
-      navigateTo('screen-emergency');
-    });
-  }
-
-  updateMedicalIdUI();
-
-  // Partilha de descobertas clínicas com Familiar (ICE) com GPS, Google Maps e Waze
-  function shareClinicalUpdateWithICE(mode = 'info') {
-    const ice = getMedicalId();
-    if (!ice.contactPhone) {
-      alert('Para partilhar com o seu familiar, configure primeiro o contacto de emergência na Ficha Médica ICE.');
-      navigateTo('screen-medical-id');
-      return;
-    }
-
-    const aiText = document.getElementById('ai-response-box')?.innerText || '';
-    let diagSummary = 'Triagem clínica efetuada.';
-    const diagMatch = aiText.match(/DIAGNÓSTICO E GRAVIDADE:?([^\n\r]+)/i);
-    if (diagMatch && diagMatch[1]) {
-      diagSummary = diagMatch[1].replace(/\[Fonte:[^\]]+\]/gi, '').trim();
-    }
-
-    // Obter localização instantaneamente sem bloqueio assíncrono ou rede
-    const loc = GeoManager.currentLocation;
-    const lat = loc.lat || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lat') : null);
-    const lon = loc.lon || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lon') : null);
-    const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado'))
-      ? loc.address
-      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || '') : '');
-
-    let locLine = '';
-    const refClean = loc.landmark && !loc.landmark.includes('A calcular') ? ` (Ref: ${loc.landmark})` : '';
-    if (lat && lon) {
-      const latShort = Number(lat).toFixed(4);
-      const lonShort = Number(lon).toFixed(4);
-      const mapPinUrl = `https://maps.google.com/?q=${latShort},${lonShort}`;
-      const addressShort = address ? `\n📍 Local: ${address}${refClean}` : '';
-      locLine = `${addressShort}\n🗺️ Ver no Mapa: ${mapPinUrl}`;
-    } else if (address) {
-      locLine = `\n📍 Local: ${address}${refClean}`;
-    }
-
-    const patientName = ice.name || 'Eu';
-    const contactName = ice.contactName || 'Familiar';
-    let messageBody = '';
-
-    if (mode === 'urgent') {
-      messageBody = `🚨 ALERTA DE EMERGÊNCIA (Cuidar em Emergência): Situação urgente (${patientName}).\n- Situação: ${diagSummary}${locLine}\n- 112 solicitado/em curso. Por favor vem ter comigo.`;
-    } else {
-      messageBody = `Olá ${contactName}, ponto de situação via Cuidar em Emergência:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
-    }
-
-    const rawPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
-    const cleanDigits = rawPhone.replace(/\+/g, '');
-    let waPhone = cleanDigits;
-    if (cleanDigits.length === 9 && cleanDigits.startsWith('9')) {
-      waPhone = '351' + cleanDigits;
-    }
-
-    const encoded = encodeURIComponent(messageBody);
-
-    // Formato universal iOS vs Android
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const smsSeparator = isIOS ? '&' : '?';
-    const smsUrl = `sms:${rawPhone}${smsSeparator}body=${encoded}`;
-    const waUrl = `https://wa.me/${waPhone}?text=${encoded}`;
-
-    // Atualizar elementos do modal de envio
-    const modal = document.getElementById('modal-share-ice');
-    const modalContact = document.getElementById('share-modal-contact');
-    const modalPreview = document.getElementById('share-modal-preview');
-    const linkSms = document.getElementById('share-modal-sms-link');
-    const linkWa = document.getElementById('share-modal-wa-link');
-
-    if (modalContact) modalContact.textContent = ice.contactName ? `${ice.contactName} (${rawPhone})` : rawPhone;
-    if (modalPreview) modalPreview.textContent = messageBody;
-    if (linkSms) linkSms.href = smsUrl;
-    if (linkWa) linkWa.href = waUrl;
-
-    if (modal) {
-      modal.classList.remove('hidden');
-    }
-
-    // Se for smartphone / tátil, abrir logo o intent de SMS
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      window.location.href = smsUrl;
-    }
-  }
-
-  const btnCloseShareModal = document.getElementById('btn-close-share-modal');
-  if (btnCloseShareModal) {
-    btnCloseShareModal.addEventListener('click', () => {
-      document.getElementById('modal-share-ice')?.classList.add('hidden');
-    });
-  }
-
-  const btnCopyShareMsg = document.getElementById('btn-copy-share-msg');
-  if (btnCopyShareMsg) {
-    btnCopyShareMsg.addEventListener('click', async () => {
-      const textToCopy = document.getElementById('share-modal-preview')?.textContent || '';
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-        const copyLabel = document.getElementById('btn-copy-label');
-        if (copyLabel) {
-          copyLabel.textContent = 'Mensagem Copiada! ✅';
-          setTimeout(() => { copyLabel.textContent = 'Copiar Mensagem'; }, 2500);
-        }
-      } catch (_) {
-        alert('Mensagem pronta a colar na sua aplicação de mensagens.');
-      }
-    });
-  }
-
-  const btnShareInfo = document.getElementById('btn-share-info');
-  const btnShareUrgent = document.getElementById('btn-share-urgent');
-
-  if (btnShareInfo) {
-    btnShareInfo.addEventListener('click', () => shareClinicalUpdateWithICE('info'));
-  }
-  if (btnShareUrgent) {
-    btnShareUrgent.addEventListener('click', () => shareClinicalUpdateWithICE('urgent'));
-  }
 
   // SELETOR INTERATIVO DE IDADES PEDIÁTRICAS
   const pedChips = document.querySelectorAll('.pediatric-chip');
@@ -2116,286 +1940,45 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmedSymptoms: [],
     cprCyclesCompleted: 0
   };
-
-  // Intercetar todos os cliques em ligar 112 na app para iniciar o guião SBAR
-  document.querySelectorAll('a[href="tel:112"]').forEach(link => {
-    link.addEventListener('click', () => {
-      if (!emergencySession.alertTimestamp) {
-        emergencySession.alertTimestamp = new Date();
-      }
-      openSbarModal('call');
+  // ========================================================
+  // CÁBULA DE RELATO AO 112 (MÉTODO SBAR SUBTIL EM TEXTO CORRIDO)
+  // ========================================================
+  function initCabulaSbar() {
+    document.querySelectorAll('.btn-cabula-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const incident = btn.dataset.incident || 'geral';
+        setCabulaIncident(incident);
+      });
     });
-  });
 
-  const modalSbar = document.getElementById('modal-sbar-handover');
-  const btnOpenSbar = document.getElementById('btn-open-sbar');
-  const btnCloseSbarModal = document.getElementById('btn-close-sbar-modal');
-  const btnDismissSbar = document.getElementById('btn-dismiss-sbar');
-  const tabBtnSbarCall = document.getElementById('tab-btn-sbar-call');
-  const tabBtnSbarArrival = document.getElementById('tab-btn-sbar-arrival');
-  const sbarCallPanel = document.getElementById('sbar-call-panel');
-  const sbarArrivalPanel = document.getElementById('sbar-arrival-panel');
-
-  const sbarLocAddress = document.getElementById('sbar-loc-address');
-  const sbarLocRef = document.getElementById('sbar-loc-ref');
-  const sbarLocCoords = document.getElementById('sbar-loc-coords');
-  const sbarPatientInfo = document.getElementById('sbar-patient-info');
-  const sbarPatientIce = document.getElementById('sbar-patient-ice');
-  const sbarTimeOnset = document.getElementById('sbar-time-onset');
-  const sbarStatusConsciousness = document.getElementById('sbar-status-consciousness');
-  const sbarStatusBreathing = document.getElementById('sbar-status-breathing');
-  const sbarStatusSymptoms = document.getElementById('sbar-status-symptoms');
-  const sbarActionsInProgress = document.getElementById('sbar-actions-in-progress');
-
-  const btnMarkAmbulanceArrival = document.getElementById('btn-mark-ambulance-arrival');
-  const ambulanceArrivalTimestampBox = document.getElementById('ambulance-arrival-timestamp-box');
-  const handoverTotalElapsed = document.getElementById('handover-total-elapsed');
-  const handoverReportContent = document.getElementById('handover-report-content');
-  const btnCopyHandover = document.getElementById('btn-copy-handover');
-  const btnShareHandover = document.getElementById('btn-share-handover');
-
-  function openSbarModal(initialTab = 'call') {
-    if (!modalSbar) return;
-
-    // Atualizar dados de Localização (GPS + Ponto de Referência)
-    const loc = GeoManager.currentLocation;
-    if (sbarLocAddress) {
-      sbarLocAddress.textContent = (loc.address && !loc.address.includes('A obter')) ? loc.address : 'A obter morada exata via GPS...';
-    }
-    if (sbarLocRef) {
-      sbarLocRef.textContent = `Ponto de Referência / Entidade: ${loc.landmark || 'A detetar estabelecimentos próximos...'}`;
-    }
-    if (sbarLocCoords) {
-      sbarLocCoords.textContent = (loc.lat && loc.lng) ? `Coordenadas WGS84: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)} (precisão: ${loc.accuracy ? Math.round(loc.accuracy) + 'm' : 'alta'})` : '';
-    }
-
-    // Carregar dados da Ficha Médica ICE
-    try {
-      const iceData = JSON.parse(localStorage.getItem('user_medical_id') || '{}');
-      if (sbarPatientInfo) {
-        sbarPatientInfo.textContent = iceData.name ? `Vítima: ${iceData.name} (${iceData.blood || 'Tipo sanguíneo não indicado'})` : 'Vítima: Idade/Sexo a apurar no local.';
-      }
-      if (sbarPatientIce) {
-        const cond = iceData.conditions ? `Doenças: ${iceData.conditions}` : 'Sem doenças prévias registadas';
-        const alg = iceData.allergies ? ` • Alergias: ${iceData.allergies}` : '';
-        const med = iceData.medication ? ` • Medicação: ${iceData.medication}` : '';
-        const fam = iceData.contact_name ? ` • Contacto ICE: ${iceData.contact_name} (${iceData.contact_phone || ''})` : '';
-        sbarPatientIce.textContent = `${cond}${alg}${med}${fam}`;
-      }
-    } catch (e) {}
-
-    // Cronologia de início dos sintomas
-    if (sbarTimeOnset) {
-      if (emergencySession.alertTimestamp) {
-        const timeStr = emergencySession.alertTimestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-        sbarTimeOnset.textContent = `Alerta 112 registado às ${timeStr}.`;
-      } else {
-        sbarTimeOnset.textContent = 'Alerta imediato em curso.';
-      }
-    }
-
-    // Estado da Vítima com base no ecrã ativo
-    const activeScreen = document.querySelector('.screen-view.active')?.id || '';
-    if (activeScreen === 'screen-sbv') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Inconsciente (não responde ao estímulo)';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Ausente ou respiração agónica (Gasping)';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Paragem cardiorrespiratória (PCR) confirmada.';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Iniciei compressões torácicas no centro do peito com a aplicação. Solicito envio de socorro com DAE e sigo as vossas instruções.»';
-    } else if (activeScreen === 'screen-ova') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente (não consegue falar nem tossir)';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Asfixia súbita por corpo estranho (obstrução grave)';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Sinais de asfixia grave (mãos ao pescoço).';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«A executar manobras de desobstrução (pancadas nas costas e compressões de Heimlich). Solicito envio urgente de socorro.»';
-    } else if (activeScreen === 'screen-stroke') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Consciente / Confuso';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Respiração presente e regular';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Suspeita de AVC (alteração na Face, Força ou Fala).';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Sinais de alerta de AVC identificados. Vítima calma e em repouso. Solicito envio de socorro para ativação da Via Verde.»';
-    } else if (activeScreen === 'screen-pediatria') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Criança / Lactente prostrado ou sonolento';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Dificuldade respiratória aguda / Tiragem';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Avaliação pelo Triângulo Pediátrico alterada.';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Emergência pediátrica no local. Solicito auxílio médico urgente e aguardo instruções telefónicas do CODU.»';
-    } else if (activeScreen === 'screen-trauma') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Vítima consciente / em choque';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Respiração presente';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Lesão traumática / hemorragia visível.';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«A efetuar compressão direta no local e a prevenir choque térmico. Solicito envio de socorro.»';
-    } else if (activeScreen === 'screen-ai') {
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'Avaliada na Triagem Inteligente';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'Avaliada na Triagem Inteligente';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = emergencySession.confirmedSymptoms.length > 0 ? emergencySession.confirmedSymptoms.join(', ') : 'Sintomas relatados na triagem da app.';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Solicito apoio médico urgente no local. Encontro-me junto da vítima e sigo as orientações do operador 112/CODU.»';
-    } else {
-      // Estado Inicial / Neutro (abriu o SBAR no ecrã inicial ou sem protocolo selecionado)
-      if (sbarStatusConsciousness) sbarStatusConsciousness.textContent = 'A verificar no local (Responde / Não responde)';
-      if (sbarStatusBreathing) sbarStatusBreathing.textContent = 'A verificar no local (Normal / Dificuldade / Ausente)';
-      if (sbarStatusSymptoms) sbarStatusSymptoms.textContent = 'Descrever queixas e sintomas ao operador do 112.';
-      if (sbarActionsInProgress) sbarActionsInProgress.textContent = '«Solicito apoio médico urgente no local. Encontro-me junto da vítima e aguardo as orientações do operador 112/CODU.»';
-    }
-
-    // Alternar para a aba correta
-    switchSbarTab(initialTab);
-    modalSbar.classList.remove('hidden');
-  }
-
-  function closeSbarModal() {
-    if (modalSbar) modalSbar.classList.add('hidden');
-  }
-
-  function switchSbarTab(tab) {
-    if (tab === 'arrival') {
-      if (tabBtnSbarCall) {
-        tabBtnSbarCall.classList.remove('border-amber-500', 'text-amber-300');
-        tabBtnSbarCall.classList.add('border-transparent', 'text-slate-400');
-      }
-      if (tabBtnSbarArrival) {
-        tabBtnSbarArrival.classList.remove('border-transparent', 'text-slate-400');
-        tabBtnSbarArrival.classList.add('border-emerald-500', 'text-emerald-300');
-      }
-      if (sbarCallPanel) sbarCallPanel.classList.add('hidden');
-      if (sbarArrivalPanel) sbarArrivalPanel.classList.remove('hidden');
-      renderHandoverReport();
-    } else {
-      if (tabBtnSbarArrival) {
-        tabBtnSbarArrival.classList.remove('border-emerald-500', 'text-emerald-300');
-        tabBtnSbarArrival.classList.add('border-transparent', 'text-slate-400');
-      }
-      if (tabBtnSbarCall) {
-        tabBtnSbarCall.classList.remove('border-transparent', 'text-slate-400');
-        tabBtnSbarCall.classList.add('border-amber-500', 'text-amber-300');
-      }
-      if (sbarArrivalPanel) sbarArrivalPanel.classList.add('hidden');
-      if (sbarCallPanel) sbarCallPanel.classList.remove('hidden');
-    }
-  }
-
-  function generateHandoverReportText() {
-    const loc = GeoManager.currentLocation;
-    const now = emergencySession.ambulanceArrivalTimestamp || new Date();
-    const alertTime = emergencySession.alertTimestamp || now;
-    const diffMs = Math.max(0, now - alertTime);
-    const diffMin = Math.floor(diffMs / 60000);
-    const diffSec = Math.floor((diffMs % 60000) / 1000);
-    const timeFormatted = `${diffMin} min e ${diffSec} seg`;
-
-    let iceInfo = 'Sem ficha ICE registada.';
-    try {
-      const ice = JSON.parse(localStorage.getItem('user_medical_id') || '{}');
-      if (ice.name || ice.conditions || ice.allergies || ice.medication) {
-        iceInfo = `Nome: ${ice.name || 'Próprio'}\n- Sangue: ${ice.blood || 'Não especificado'}\n- Antecedentes: ${ice.conditions || 'Nenhum'}\n- Alergias: ${ice.allergies || 'Nenhuma'}\n- Medicação: ${ice.medication || 'Nenhuma'}\n- Contacto ICE: ${ice.contact_name || ''} (${ice.contact_phone || ''})`;
-      }
-    } catch (e) {}
-
-    const address = (loc.address && !loc.address.includes('A obter')) ? loc.address : 'Morada GPS registada na app';
-    const landmark = loc.landmark || 'Estabelecimento local próximo';
-    const coords = (loc.lat && loc.lng) ? `${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}` : 'N/D';
-
-    return `📋 RELATÓRIO SBAR DE PASSAGEM DE TESTEMUNHO
-Assunto: Chegada dos Meios de Socorro (Bombeiros / INEM / CVP)
-Hora do Alerta 112: ${alertTime.toLocaleTimeString('pt-PT')}
-Hora de Chegada dos Meios: ${now.toLocaleTimeString('pt-PT')}
-Tempo de Assistência Comunitária Decorrido: ${timeFormatted}
-
-==================================================
-1. SITUAÇÃO (S):
-- Morada: ${address}
-- Ponto de Referência: ${landmark}
-- Coordenadas: ${coords}
-
-==================================================
-2. BREVE HISTORIAL & FICHA ICE (B):
-- ${iceInfo}
-
-==================================================
-3. AVALIAÇÃO DO ESTADO DA VÍTIMA (A):
-- Consciência: ${sbarStatusConsciousness?.textContent || 'Apurada no local'}
-- Respiração: ${sbarStatusBreathing?.textContent || 'Apurada no local'}
-- Sintomas e Queixas: Avaliados de acordo com os algoritmos de triagem oficiais ERC 2025.
-
-==================================================
-4. PEDIDO DE SOCORRO & CUIDADOS PRESTADOS (R):
-- Cuidados no Local: ${sbarActionsInProgress?.textContent || 'Primeiros socorros prestados sob orientação da aplicação.'}
-- Interação com CODU: Orientações telefónicas cumpridas continuamente até à chegada da equipa de socorro (Bombeiros / INEM / CVP).
-
-Thinked by Hugo Fonte • Cuidar em Emergência`;
-  }
-
-  function renderHandoverReport() {
-    if (!handoverReportContent) return;
-    const now = emergencySession.ambulanceArrivalTimestamp || new Date();
-    const alertTime = emergencySession.alertTimestamp || now;
-    const diffMs = Math.max(0, now - alertTime);
-    const diffMin = Math.floor(diffMs / 60000);
-    const diffSec = Math.floor((diffMs % 60000) / 1000);
-
-    if (handoverTotalElapsed) {
-      handoverTotalElapsed.textContent = `Tempo: ${diffMin}m ${diffSec}s`;
-    }
-
-    const reportRaw = generateHandoverReportText();
-    handoverReportContent.innerHTML = reportRaw
-      .split('\n\n')
-      .map(par => `<div class="p-2 bg-slate-900/90 rounded-lg border border-slate-800">${par.replace(/\n/g, '<br>')}</div>`)
-      .join('');
-  }
-
-  if (btnOpenSbar) btnOpenSbar.addEventListener('click', () => openSbarModal('call'));
-  if (btnCloseSbarModal) btnCloseSbarModal.addEventListener('click', closeSbarModal);
-  if (btnDismissSbar) btnDismissSbar.addEventListener('click', closeSbarModal);
-  if (tabBtnSbarCall) tabBtnSbarCall.addEventListener('click', () => switchSbarTab('call'));
-  if (tabBtnSbarArrival) tabBtnSbarArrival.addEventListener('click', () => switchSbarTab('arrival'));
-
-  if (modalSbar) {
-    modalSbar.addEventListener('click', (e) => {
-      if (e.target === modalSbar) closeSbarModal();
-    });
-  }
-
-  if (btnMarkAmbulanceArrival) {
-    btnMarkAmbulanceArrival.addEventListener('click', () => {
-      emergencySession.ambulanceArrivalTimestamp = new Date();
-      if (ambulanceArrivalTimestampBox) {
-        ambulanceArrivalTimestampBox.classList.remove('hidden');
-        ambulanceArrivalTimestampBox.innerHTML = `✅ <strong>Chegada registada às ${emergencySession.ambulanceArrivalTimestamp.toLocaleTimeString('pt-PT')}</strong>. O relatório abaixo foi consolidado com o tempo total de assistência.`;
-      }
-      btnMarkAmbulanceArrival.disabled = true;
-      btnMarkAmbulanceArrival.classList.add('opacity-60', 'pointer-events-none');
-      btnMarkAmbulanceArrival.textContent = '✓ Chegada dos Meios Registada';
-      renderHandoverReport();
-    });
-  }
-
-  if (btnCopyHandover) {
-    btnCopyHandover.addEventListener('click', async () => {
-      const text = generateHandoverReportText();
-      try {
-        await navigator.clipboard.writeText(text);
-        btnCopyHandover.innerHTML = '<span>✅</span> Copiado!';
-        setTimeout(() => {
-          btnCopyHandover.innerHTML = '<span>📋</span> Copiar Relatório';
-        }, 2500);
-      } catch (err) {
-        alert('Não foi possível copiar automaticamente. Selecione e copie o texto no ecrã.');
-      }
-    });
-  }
-
-  if (btnShareHandover) {
-    btnShareHandover.addEventListener('click', async () => {
-      const text = generateHandoverReportText();
-      if (navigator.share) {
+    const btnCopyCabula = document.getElementById('btn-copy-cabula');
+    const copyStatus = document.getElementById('copy-cabula-status');
+    if (btnCopyCabula) {
+      btnCopyCabula.addEventListener('click', async () => {
+        const textToCopy = document.getElementById('geo-sbar-script')?.textContent?.trim() || '';
+        if (!textToCopy) return;
         try {
-          await navigator.share({
-            title: 'Relatório SBAR • Cuidar em Emergência',
-            text: text
-          });
-        } catch (e) {}
-      } else {
-        const url = `whatsapp://send?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
-      }
+          await navigator.clipboard.writeText(textToCopy);
+          if (copyStatus) {
+            copyStatus.classList.remove('hidden');
+            setTimeout(() => copyStatus.classList.add('hidden'), 2200);
+          }
+        } catch (_) {
+          // Fallback se clipboard estiver bloqueado
+        }
+      });
+    }
+
+    // Registar carimbo temporal de alerta ao ligar 112
+    document.querySelectorAll('a[href="tel:112"]').forEach(link => {
+      link.addEventListener('click', () => {
+        if (!emergencySession.alertTimestamp) {
+          emergencySession.alertTimestamp = new Date();
+        }
+      });
     });
+
+    setCabulaIncident('geral');
   }
 
   // ========================================================
@@ -3698,6 +3281,7 @@ Thinked by Hugo Fonte • Cuidar em Emergência`;
   }
 
   // Inicializar novos módulos
+  initCabulaSbar();
   initHandsFreeVoice();
   initClinicalSimulator();
   initFirstAidKitChecklist();
