@@ -85,6 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (screenId === 'screen-ova') setCabulaIncident('engasgamento');
     else if (screenId === 'screen-trauma') setCabulaIncident('hemorragia');
 
+    // Registo de ecrã no Google Analytics
+    if (typeof gtag === 'function') {
+      try {
+        gtag('event', 'screen_view', {
+          app_name: 'CuidarEmEmergencia',
+          screen_name: screenId
+        });
+      } catch (_) {}
+    }
+
     // Se estiver num ecrã crítico de socorro, manter o ecrã ativo sem desligar
     const emergencyScreens = ['screen-emergency', 'screen-sbv', 'screen-ova', 'screen-trauma', 'screen-pediatria'];
     if (emergencyScreens.includes(screenId)) {
