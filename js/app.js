@@ -1586,6 +1586,217 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ========================================================
+  // MÓDULO: FICHA CLÍNICA & CONTACTOS DE EMERGÊNCIA (ICE)
+  // ========================================================
+  function getMedicalId() {
+    try {
+      return JSON.parse(localStorage.getItem('user_medical_id') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveMedicalId(data) {
+    try {
+      localStorage.setItem('user_medical_id', JSON.stringify(data));
+    } catch (_) {}
+    updateMedicalIdUI();
+  }
+
+  function updateMedicalIdUI() {
+    const data = getMedicalId();
+    const summaryCard = document.getElementById('ice-summary-card');
+    const headerStatus = document.getElementById('header-ice-status');
+    const aiShareName = document.getElementById('ai-share-contact-name');
+
+    if (data && (data.name || data.contactPhone)) {
+      if (summaryCard) summaryCard.classList.remove('hidden');
+      if (headerStatus) headerStatus.textContent = data.contactName ? `${data.contactName}` : 'Configurado';
+      if (aiShareName) aiShareName.textContent = data.contactName ? data.contactName : (data.contactPhone || 'Definido');
+
+      const elName = document.getElementById('ice-summary-name');
+      const elBlood = document.getElementById('ice-summary-blood');
+      const elAllergies = document.getElementById('ice-summary-allergies');
+      const elConditions = document.getElementById('ice-summary-conditions');
+      const elMeds = document.getElementById('ice-summary-meds');
+      const elContact = document.getElementById('ice-summary-contact');
+
+      if (elName) elName.textContent = data.name ? `${data.name} ${data.age ? '(' + data.age + ')' : ''}` : 'Pessoa / Familiar Registado';
+      if (elBlood) elBlood.textContent = data.blood || 'Desconhecido';
+      if (elAllergies) elAllergies.textContent = data.allergies || 'Nenhuma declarada';
+      if (elConditions) elConditions.textContent = data.conditions || 'Nenhum declarado';
+      if (elMeds) elMeds.textContent = data.medication || 'Nenhuma declarada';
+      if (elContact) elContact.textContent = data.contactName ? `${data.contactName} (${data.contactPhone})` : (data.contactPhone || 'Não configurado');
+
+      const inName = document.getElementById('input-ice-name');
+      const inAge = document.getElementById('input-ice-age');
+      const selBlood = document.getElementById('select-ice-blood');
+      const inAllergies = document.getElementById('input-ice-allergies');
+      const inConditions = document.getElementById('input-ice-conditions');
+      const inMeds = document.getElementById('input-ice-meds');
+      const inContactName = document.getElementById('input-ice-contact-name');
+      const inContactPhone = document.getElementById('input-ice-contact-phone');
+
+      if (inName && !inName.value) inName.value = data.name || '';
+      if (inAge && !inAge.value) inAge.value = data.age || '';
+      if (selBlood && data.blood) selBlood.value = data.blood;
+      if (inAllergies && !inAllergies.value) inAllergies.value = data.allergies || '';
+      if (inConditions && !inConditions.value) inConditions.value = data.conditions || '';
+      if (inMeds && !inMeds.value) inMeds.value = data.medication || '';
+      if (inContactName && !inContactName.value) inContactName.value = data.contactName || '';
+      if (inContactPhone && !inContactPhone.value) inContactPhone.value = data.contactPhone || '';
+    } else {
+      if (summaryCard) summaryCard.classList.add('hidden');
+      if (headerStatus) headerStatus.textContent = 'Alergias & Contactos';
+      if (aiShareName) aiShareName.textContent = 'Não configurado';
+    }
+  }
+
+  const formMedicalId = document.getElementById('form-medical-id');
+  if (formMedicalId) {
+    formMedicalId.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('input-ice-name')?.value.trim() || '',
+        age: document.getElementById('input-ice-age')?.value.trim() || '',
+        blood: document.getElementById('select-ice-blood')?.value || 'Desconhecido',
+        allergies: document.getElementById('input-ice-allergies')?.value.trim() || '',
+        conditions: document.getElementById('input-ice-conditions')?.value.trim() || '',
+        medication: document.getElementById('input-ice-meds')?.value.trim() || '',
+        contactName: document.getElementById('input-ice-contact-name')?.value.trim() || '',
+        contactPhone: document.getElementById('input-ice-contact-phone')?.value.trim() || ''
+      };
+      saveMedicalId(data);
+      alert('Ficha Clínica ICE guardada com sucesso no telemóvel!');
+      navigateTo('screen-emergency');
+    });
+  }
+
+  // Notificação e Partilha de Ponto de Situação com Familiar (ICE) por SMS e WhatsApp com GPS
+  function shareClinicalUpdateWithICE(mode = 'info') {
+    const ice = getMedicalId();
+    if (!ice.contactPhone) {
+      alert('Para alertar o seu contacto de emergência, preencha primeiro o número na Ficha Clínica ICE.');
+      navigateTo('screen-medical-id');
+      return;
+    }
+
+    const aiText = document.getElementById('ai-response-box')?.innerText || '';
+    let diagSummary = 'Ponto de situação clínica e primeiros socorros prestados.';
+    const diagMatch = aiText.match(/DIAGNÓSTICO E GRAVIDADE:?([^\n\r]+)/i);
+    if (diagMatch && diagMatch[1]) {
+      diagSummary = diagMatch[1].replace(/\[Fonte:[^\]]+\]/gi, '').trim();
+    }
+
+    // Obter localização instantaneamente
+    const loc = GeoManager.currentLocation;
+    const lat = loc.lat || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lat') : null);
+    const lon = loc.lon || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lon') : null);
+    const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado'))
+      ? loc.address
+      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || '') : '');
+
+    let locLine = '';
+    const refClean = loc.landmark && !loc.landmark.includes('A calcular') ? ` (Junto a ${loc.landmark.replace(/^Junto a /i, '')})` : '';
+    if (lat && lon) {
+      const latShort = Number(lat).toFixed(4);
+      const lonShort = Number(lon).toFixed(4);
+      const mapPinUrl = `https://maps.google.com/?q=${latShort},${lonShort}`;
+      const addressShort = address ? `\n📍 Local: ${address}${refClean}` : '';
+      locLine = `${addressShort}\n🗺️ Mapa: ${mapPinUrl}`;
+    } else if (address) {
+      locLine = `\n📍 Local: ${address}${refClean}`;
+    }
+
+    const patientName = ice.name || 'Eu';
+    const contactName = ice.contactName || 'Familiar';
+    let messageBody = '';
+
+    if (mode === 'urgent') {
+      messageBody = `🚨 ALERTA DE EMERGÊNCIA (Cuidar em Emergência): Situação urgente com ${patientName}.\n- Estado: ${diagSummary}${locLine}\n- Pedido 112 em curso. Por favor vem ter comigo ou liga-me.`;
+    } else if (mode === 'direct') {
+      messageBody = `🚨 PONTO DE SITUAÇÃO (Cuidar em Emergência): Mensagem de socorro para ${contactName}.\n- Situação com: ${patientName}${locLine}\nEncontro-me a prestar assistência. Por favor liga-me ou vem ter a esta localização.`;
+    } else {
+      messageBody = `Olá ${contactName}, ponto de situação via Cuidar em Emergência:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
+    }
+
+    const rawPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+    const cleanDigits = rawPhone.replace(/\+/g, '');
+    let waPhone = cleanDigits;
+    if (cleanDigits.length === 9 && cleanDigits.startsWith('9')) {
+      waPhone = '351' + cleanDigits;
+    }
+
+    const encoded = encodeURIComponent(messageBody);
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const smsSeparator = isIOS ? '&' : '?';
+    const smsUrl = `sms:${rawPhone}${smsSeparator}body=${encoded}`;
+    const waUrl = `https://wa.me/${waPhone}?text=${encoded}`;
+
+    // Atualizar elementos do modal de envio
+    const modal = document.getElementById('modal-share-ice');
+    const modalContact = document.getElementById('share-modal-contact');
+    const modalPreview = document.getElementById('share-modal-preview');
+    const linkSms = document.getElementById('share-modal-sms-link');
+    const linkWa = document.getElementById('share-modal-wa-link');
+
+    if (modalContact) modalContact.textContent = ice.contactName ? `${ice.contactName} (${rawPhone})` : rawPhone;
+    if (modalPreview) modalPreview.textContent = messageBody;
+    if (linkSms) linkSms.href = smsUrl;
+    if (linkWa) linkWa.href = waUrl;
+
+    if (modal) {
+      modal.classList.remove('hidden');
+    }
+
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = smsUrl;
+    }
+  }
+
+  const btnCloseShareModal = document.getElementById('btn-close-share-modal');
+  if (btnCloseShareModal) {
+    btnCloseShareModal.addEventListener('click', () => {
+      document.getElementById('modal-share-ice')?.classList.add('hidden');
+    });
+  }
+
+  const btnCopyShareMsg = document.getElementById('btn-copy-share-msg');
+  if (btnCopyShareMsg) {
+    btnCopyShareMsg.addEventListener('click', async () => {
+      const textToCopy = document.getElementById('share-modal-preview')?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        const copyLabel = document.getElementById('btn-copy-label');
+        if (copyLabel) {
+          copyLabel.textContent = 'Mensagem Copiada! ✅';
+          setTimeout(() => { copyLabel.textContent = 'Copiar Mensagem'; }, 2500);
+        }
+      } catch (_) {
+        alert('Mensagem pronta a colar na sua aplicação de mensagens.');
+      }
+    });
+  }
+
+  const btnShareInfo = document.getElementById('btn-share-info');
+  const btnShareUrgent = document.getElementById('btn-share-urgent');
+  const btnIceNotifyDirect = document.getElementById('btn-ice-notify-direct');
+
+  if (btnShareInfo) {
+    btnShareInfo.addEventListener('click', () => shareClinicalUpdateWithICE('info'));
+  }
+  if (btnShareUrgent) {
+    btnShareUrgent.addEventListener('click', () => shareClinicalUpdateWithICE('urgent'));
+  }
+  if (btnIceNotifyDirect) {
+    btnIceNotifyDirect.addEventListener('click', () => shareClinicalUpdateWithICE('direct'));
+  }
+
+  updateMedicalIdUI();
+
 
   // SELETOR INTERATIVO DE IDADES PEDIÁTRICAS
   const pedChips = document.querySelectorAll('.pediatric-chip');

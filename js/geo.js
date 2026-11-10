@@ -238,45 +238,53 @@ const GeoManager = {
     if (onUpdateCallback) onUpdateCallback(this.currentLocation);
   },
 
+  getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) return 'Bom dia';
+    if (hour >= 12 && hour < 20) return 'Boa tarde';
+    return 'Boa noite';
+  },
+
   getCoduSpeechScript(incidentKey = 'geral') {
     const loc = this.currentLocation;
+    const greeting = this.getGreeting();
     const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado')) 
       ? loc.address 
-      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || 'na minha localização atual') : 'na minha localização atual');
+      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || 'a minha localização atual') : 'a minha localização atual');
     const ref = (loc.landmark && !loc.landmark.includes('A calcular')) 
-      ? `, junto a ${loc.landmark.replace(/^Junto a /i, '')}` 
+      ? `, junto a ${loc.landmark.replace(/^(junto [aàá]o?s?|perto d[eao]s?|ao lado d[eao]s?)\s*/i, '')}` 
       : '';
-    const gps = (loc.lat && loc.lon) ? ` (coordenadas GPS: ${loc.lat}, ${loc.lon})` : '';
+    const gps = (loc.lat && loc.lon) ? ` (GPS: ${loc.lat}, ${loc.lon})` : '';
 
     const incidentMap = {
       geral: {
-        text: 'uma emergência médica com uma vítima que necessita de assistência imediata',
-        action: 'Já garanti a segurança e iniciei os primeiros socorros. Peço o vosso envio urgente de ajuda.'
+        text: 'uma pessoa a necessitar de assistência médica urgente',
+        action: 'Já garanti a segurança e iniciei os primeiros socorros. Peço o envio urgente de uma ambulância.'
       },
       inconsciente: {
-        text: 'uma vítima inconsciente e sem resposta',
-        action: 'Estou a verificar a respiração e preparado para iniciar manobras de reanimação (SBV). Peço envio urgente de meios.'
+        text: 'uma pessoa inconsciente que não responde aos estímulos',
+        action: 'Estou a verificar a respiração e preparado para iniciar manobras de reanimação (SBV / compressões). Peço envio urgente de meios com DAE.'
       },
       engasgamento: {
-        text: 'uma vítima em engasgamento grave / asfixia total, incapaz de tossir ou respirar',
-        action: 'Iniciei a sequência de 5 pancadas interescapulares e 5 compressões abdominais. Peço apoio urgente.'
+        text: 'uma pessoa em engasgamento grave / asfixia total, incapaz de tossir ou falar',
+        action: 'Iniciei a sequência de 5 pancadas nas costas e 5 compressões abdominais de Heimlich. Peço apoio urgente.'
       },
       hemorragia: {
-        text: 'uma vítima com hemorragia grave ativa e abundante',
-        action: 'Apliquei compressão direta firme no local do sangramento com panos limpos. Peço envio urgente de socorro.'
+        text: 'uma pessoa com hemorragia grave e abundante',
+        action: 'Estou a efetuar compressão direta firme no local do sangramento com panos limpos. Peço envio urgente de socorro.'
       },
       queda: {
-        text: 'uma vítima que sofreu uma queda grave / traumatismo, com fortes dores',
-        action: 'A vítima encontra-se consciente e estabilizada no chão, sem mobilização. Peço apoio urgente.'
+        text: 'uma pessoa que sofreu uma queda grave / traumatismo e não se consegue levantar',
+        action: 'A vítima encontra-se consciente e mantida imóvel no chão sem qualquer mobilização. Peço apoio urgente.'
       },
       respiratorio: {
-        text: 'uma vítima com falta de ar aguda e dificuldade respiratória severa',
-        action: 'Posicionei a vítima sentada ereta com roupas desapertadas para facilitar a ventilação. Peço envio de meios.'
+        text: 'uma pessoa com grande falta de ar e dificuldade em respirar',
+        action: 'Posicionei a vítima sentada ereta com roupas desapertadas para ajudar a ventilação. Peço envio de socorro.'
       }
     };
 
     const inc = incidentMap[incidentKey] || incidentMap.geral;
-    return `«Ligo de emergência porque estou em ${address}${ref}${gps}. Tenho aqui ${inc.text}. ${inc.action}»`;
+    return `«${greeting}, preciso de ajuda para ${address}${ref}${gps}. Tenho aqui ${inc.text}. ${inc.action}»`;
   }
 };
 
