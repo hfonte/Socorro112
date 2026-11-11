@@ -1,23 +1,23 @@
-const CACHE_NAME = 'cuidar-emergencia-v55';
+const CACHE_NAME = 'cuidar-emergencia-v56';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json',
-  './css/styles.css',
-  './js/i18n_dict.js',
-  './js/i18n.js',
-  './js/app.js',
-  './js/audio.js',
-  './js/geo.js',
-  './js/knowledge_base.js',
-  './js/rag.js',
-  './js/ai.js',
+  './manifest.json?v=56',
+  './css/styles.css?v=56',
+  './js/i18n_dict.js?v=56',
+  './js/i18n.js?v=56',
+  './js/app.js?v=56',
+  './js/audio.js?v=56',
+  './js/geo.js?v=56',
+  './js/knowledge_base.js?v=56',
+  './js/rag.js?v=56',
+  './js/ai.js?v=56',
   './assets/docs/Ficha_Medica_Individual_ERPI.docx',
   './assets/docs/Plano_Individual_Saude_Creche.docx',
-  './assets/images/icon-192.png',
-  './assets/images/icon-512.png',
-  './assets/images/icon-192-maskable.png',
-  './assets/images/icon-512-maskable.png',
+  './assets/images/icon-192.png?v=56',
+  './assets/images/icon-512.png?v=56',
+  './assets/images/icon-192-maskable.png?v=56',
+  './assets/images/icon-512-maskable.png?v=56',
   './assets/images/estrela_da_vida.jpg',
   './assets/images/cadeia_sobrevivencia.png',
   './assets/images/sbv_consciencia.png',
@@ -80,8 +80,13 @@ self.addEventListener('fetch', (event) => {
   const reqUrl = new URL(event.request.url);
   if (reqUrl.origin !== self.location.origin && reqUrl.hostname !== 'cdn.tailwindcss.com') return;
 
-  // Para scripts JS locais e navegação principal: Network-First com fallback para cache
-  if ((reqUrl.origin === self.location.origin && reqUrl.pathname.endsWith('.js')) || event.request.mode === 'navigate') {
+  // Para scripts JS locais, CSS, manifest.json e navegação principal: Network-First com fallback para cache
+  const isNetworkFirst =
+    (reqUrl.origin === self.location.origin &&
+      (reqUrl.pathname.endsWith('.js') || reqUrl.pathname.endsWith('.css') || reqUrl.pathname.endsWith('/manifest.json'))) ||
+    event.request.mode === 'navigate';
+
+  if (isNetworkFirst) {
     event.respondWith(
       fetch(event.request)
         .then((networkResponse) => {
@@ -91,21 +96,27 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request, { ignoreSearch: true }).then((cached) => cached || caches.match('./index.html')))
+        .catch(() =>
+          caches.match(event.request)
+            .then((exact) => exact || caches.match(event.request, { ignoreSearch: true }))
+            .then((cached) => cached || caches.match('./index.html'))
+        )
     );
     return;
   }
 
-  // Para imagens, Tailwind CDN e restantes ficheiros estáticos: Cache-First
+  // Para imagens, Tailwind CDN e restantes ficheiros estáticos: Cache-First (correspondência exata com ?v= primeiro)
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request).then((networkResponse) => {
-        if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return networkResponse;
-      }).catch(() => caches.match('./index.html'));
-    })
+    caches.match(event.request)
+      .then((exact) => exact || caches.match(event.request, { ignoreSearch: true }))
+      .then((cachedResponse) => {
+        return cachedResponse || fetch(event.request).then((networkResponse) => {
+          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        }).catch(() => caches.match('./index.html'));
+      })
   );
 });

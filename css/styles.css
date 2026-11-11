@@ -57,17 +57,40 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 900;
-  font-size: clamp(12px, 3.6vw, 15px);
+  gap: 9px;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .brand-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.12;
+  min-width: 0;
+}
+
+.brand-title {
+  font-weight: 900;
+  font-size: clamp(12px, 3.5vw, 15px);
+  letter-spacing: -0.01em;
+  color: #f8fafc;
+}
+
+.brand-subtitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #38bdf8;
+  margin-top: 1px;
 }
 
 .btn-header-112 {

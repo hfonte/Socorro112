@@ -1,7 +1,9 @@
 // LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch((err) => {
+    navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' }).then((reg) => {
+      reg.update().catch(() => {});
+    }).catch((err) => {
       console.warn('Falha ao registar Service Worker:', err);
     });
   }
@@ -2070,27 +2072,27 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       try {
-        const cacheName = 'cuidar-emergencia-v55';
+        const cacheName = 'cuidar-emergencia-v56';
         const cache = await caches.open(cacheName);
         
         const urlsToCache = [
           './',
           './index.html',
-          './manifest.json',
-          './css/styles.css?v=55',
-          './js/i18n_dict.js?v=55',
-          './js/i18n.js?v=55',
-          './js/app.js?v=55',
-          './js/audio.js?v=55',
-          './js/geo.js?v=55',
-          './js/knowledge_base.js?v=55',
-          './js/rag.js?v=55',
-          './js/ai.js?v=55',
+          './manifest.json?v=56',
+          './css/styles.css?v=56',
+          './js/i18n_dict.js?v=56',
+          './js/i18n.js?v=56',
+          './js/app.js?v=56',
+          './js/audio.js?v=56',
+          './js/geo.js?v=56',
+          './js/knowledge_base.js?v=56',
+          './js/rag.js?v=56',
+          './js/ai.js?v=56',
           'https://cdn.tailwindcss.com/3.4.17',
-          './assets/images/icon-192.png',
-          './assets/images/icon-512.png',
-          './assets/images/icon-192-maskable.png',
-          './assets/images/icon-512-maskable.png',
+          './assets/images/icon-192.png?v=56',
+          './assets/images/icon-512.png?v=56',
+          './assets/images/icon-192-maskable.png?v=56',
+          './assets/images/icon-512-maskable.png?v=56',
           './assets/images/estrela_da_vida.jpg',
           './assets/images/cadeia_sobrevivencia.png',
           './assets/images/sbv_consciencia.png',
@@ -2121,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 successCount++;
               }
             } else {
-              await cache.add(url);
+              await cache.add(new Request(url, { cache: 'reload' }));
               successCount++;
             }
           } catch (err) {
