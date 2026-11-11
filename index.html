@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=53">
+  <link rel="stylesheet" href="./css/styles.css?v=54">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE TAG / ANALYTICS (G-6702XQNFX2) -->
@@ -36,8 +36,8 @@
         <span>CUIDAR EM EMERGÊNCIA</span>
       </div>
       <div class="flex items-center gap-1.5">
-        <button type="button" id="btn-toggle-lang" class="text-[11px] font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition shadow-sm" title="English / Tradução">
-          <span>🌐</span><span>EN</span>
+        <button type="button" id="btn-toggle-lang" translate="no" class="text-[11px] font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition shadow-sm" title="Translate app to English (EN)" aria-label="Switch language to English">
+          <span aria-hidden="true">🌐</span><span class="lang-btn-label">EN</span>
         </button>
         <a href="tel:112" class="btn-header-112" translate="no">
           <span>📞 112</span>
@@ -2769,80 +2769,6 @@
       </div>
     </div>
 
-    <!-- MODAL DE EMERGÊNCIA EM INGLÊS (ENGLISH QUICK GUIDE & TOURIST SBAR) -->
-    <div id="modal-english-guide" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl text-slate-200">
-        
-        <div class="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-950 flex-shrink-0">
-          <div class="flex items-center gap-2">
-            <span class="text-xl">🇬🇧</span>
-            <div>
-              <h3 class="font-black text-sm text-white">Emergency Guide &bull; English / Tourists</h3>
-              <span class="text-[10px] text-sky-400 font-semibold">Immediate Assistance in Portugal</span>
-            </div>
-          </div>
-          <button type="button" id="btn-close-english-modal" class="text-slate-400 hover:text-white text-2xl font-bold px-2 py-0.5 leading-none cursor-pointer">&times;</button>
-        </div>
-
-        <div class="p-4 overflow-y-auto flex-1 space-y-3.5 text-xs">
-          
-          <!-- TOURIST 112 DISPATCH CARD -->
-          <div class="p-3 bg-red-950/60 border border-red-500 rounded-xl space-y-1.5">
-            <strong class="text-xs text-red-200 uppercase tracking-wider block font-bold flex items-center gap-1.5">
-              <span>🚨</span> Card to Show or Read to Emergency Services (112):
-            </strong>
-            <div class="p-2.5 bg-black/60 rounded-lg text-white font-mono text-xs leading-relaxed" id="en-dispatch-card">
-              «EMERGENCY IN PORTUGAL: I need an ambulance at: <span id="en-loc-address">[Detecting location...]</span>. Landmark: <span id="en-loc-ref">[Detecting landmark...]</span>. Victim is unconscious / in acute distress. Please send help immediately.»
-            </div>
-            <a href="tel:112" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-black text-center text-xs rounded-xl flex items-center justify-center gap-2 mt-2" translate="no">
-              <span>📞</span> CALL 112 (FREE EMERGENCY NUMBER IN PORTUGAL)
-            </a>
-          </div>
-
-          <!-- ESSENTIAL ALGORITHMS SUMMARY -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-yellow-300 uppercase tracking-wider">Life-Saving Steps (ERC 2025):</h4>
-            
-            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
-              <strong class="text-sky-300 block mb-0.5">🫀 Adult CPR (Cardiac Arrest):</strong>
-              <p class="text-slate-300">If victim is unresponsive and not breathing normally: Call 112. Place hands in center of chest. Push hard and fast at <strong>100-120 bpm (5-6 cm deep)</strong>, 30 compressions followed by 2 rescue breaths (30:2) or continuous compressions.</p>
-            </div>
-
-            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
-              <strong class="text-sky-300 block mb-0.5">🗣️ Severe Choking (Adult):</strong>
-              <p class="text-slate-300">Lean person forward. Give up to <strong>5 sharp back blows</strong> between shoulder blades. If unrelieved, give up to <strong>5 abdominal thrusts (Heimlich maneuver)</strong>.</p>
-            </div>
-
-            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
-              <strong class="text-sky-300 block mb-0.5">👶 Infant Choking (&lt;1 year old):</strong>
-              <p class="text-slate-300"><u>NEVER perform Heimlich on babies!</u> Lay infant facedown along your forearm with head lower than chest. Give 5 back blows, then turn face-up and deliver 5 chest thrusts with 2 fingers.</p>
-            </div>
-
-            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
-              <strong class="text-sky-300 block mb-0.5">🧠 Stroke (FAST Test):</strong>
-              <p class="text-slate-300"><strong>F</strong>ace drooping, <strong>A</strong>rm weakness, <strong>S</strong>peech difficulty &rarr; <strong>T</strong>ime to call 112 immediately. Note the exact time symptoms started.</p>
-            </div>
-          </div>
-
-          <!-- BROWSER TRANSLATION TIP -->
-          <div class="p-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-slate-300 text-[11px] flex items-start gap-2">
-            <span class="text-base">🌐</span>
-            <div>
-              <strong class="text-white block font-semibold">Automatic Browser Translation:</strong>
-              This app is fully compatible with Google Chrome and Safari auto-translation. Use your browser's "Translate Page" option to view all manuals in your native language.
-            </div>
-          </div>
-
-        </div>
-
-        <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 flex-shrink-0">
-          <span>European Resuscitation Council (ERC 2025)</span>
-          <button type="button" id="btn-dismiss-english" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-700 cursor-pointer">Close</button>
-        </div>
-
-      </div>
-    </div>
-
     <!-- MODAL DE TERMOS LEGAIS, ISENÇÃO DE RESPONSABILIDADE & RGPD -->
     <div id="modal-legal-terms" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
       <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-fade-in text-slate-200">
@@ -3031,11 +2957,13 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=53"></script>
-  <script src="./js/geo.js?v=53"></script>
-  <script src="./js/knowledge_base.js?v=53"></script>
-  <script src="./js/rag.js?v=53"></script>
-  <script src="./js/ai.js?v=53"></script>
-  <script src="./js/app.js?v=53"></script>
+  <script src="./js/i18n_dict.js?v=54"></script>
+  <script src="./js/i18n.js?v=54"></script>
+  <script src="./js/audio.js?v=54"></script>
+  <script src="./js/geo.js?v=54"></script>
+  <script src="./js/knowledge_base.js?v=54"></script>
+  <script src="./js/rag.js?v=54"></script>
+  <script src="./js/ai.js?v=54"></script>
+  <script src="./js/app.js?v=54"></script>
 </body>
 </html>

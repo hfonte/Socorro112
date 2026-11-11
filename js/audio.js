@@ -34,7 +34,8 @@ const WakeLockManager = {
     document.querySelectorAll('.wake-lock-indicator').forEach(el => {
       if (active) {
         el.classList.remove('hidden');
-        el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1"></span> Ecrã Sempre Ativo';
+        const label = (typeof window.t === 'function') ? window.t('Ecrã Sempre Ativo', 'Screen Always Active') : 'Ecrã Sempre Ativo';
+        el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1"></span> ${label}`;
         el.classList.add('text-emerald-400');
         el.classList.remove('text-slate-500');
       } else {
@@ -283,7 +284,7 @@ const AudioManager = {
         window.speechSynthesis.resume();
       }
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'pt-PT';
+      utterance.lang = (typeof window !== 'undefined' && window.AppLang === 'en') ? 'en-GB' : 'pt-PT';
       utterance.rate = 1.05;
       utterance.onerror = () => {
         // Fallback silencioso para garantir que não bloqueia o fluxo em Safari / iOS

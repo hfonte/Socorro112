@@ -1,11 +1,13 @@
 // MOTOR DE GEOLOCALIZAÇÃO E APOIO DE COMUNICAÇÃO CODU (112)
+const _gt = (pt, en) => (typeof window.t === 'function' ? window.t(pt, en) : pt);
+
 const GeoManager = {
   currentLocation: {
     lat: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_lat')) || null,
     lon: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_lon')) || null,
     accuracy: null,
-    address: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_address')) || 'A obter localização...',
-    landmark: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_landmark')) || 'A calcular referências...',
+    address: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_address')) || _gt('A obter localização...', 'Getting location...'),
+    landmark: (typeof localStorage !== 'undefined' && localStorage.getItem('cached_gps_landmark')) || _gt('A calcular referências...', 'Calculating landmarks...'),
     nearbyPOIs: []
   },
 
@@ -52,7 +54,7 @@ const GeoManager = {
     }
 
     if (placeName) {
-      return `Junto a ${placeName}`;
+      return _gt(`Junto a ${placeName}`, `Next to ${placeName}`);
     }
 
     // 3. Pesquisa secundária ultrarrápida por empresas/estabelecimentos vizinhos (raio ~400m)
@@ -87,7 +89,7 @@ const GeoManager = {
             }));
             const topPoi = pois[0];
             const zoneInfo = addr.neighbourhood || addr.suburb ? ` (${addr.neighbourhood || addr.suburb})` : '';
-            return `Perto de ${topPoi.name}${zoneInfo}`;
+            return _gt(`Perto de ${topPoi.name}${zoneInfo}`, `Near ${topPoi.name}${zoneInfo}`);
           }
         }
       } catch (_) {}
@@ -96,10 +98,10 @@ const GeoManager = {
     // 4. Se for uma zona ampla (bairro/subúrbio), identifica-a como tal
     if (addr.neighbourhood || addr.suburb) {
       const zoneName = addr.neighbourhood || addr.suburb;
-      return `Zona de ${zoneName}`;
+      return _gt(`Zona de ${zoneName}`, `Area of ${zoneName}`);
     }
 
-    return 'Junto ao centro da localidade';
+    return _gt('Junto ao centro da localidade', 'Near the town center');
   },
 
   async getLocationAsync() {
@@ -122,15 +124,15 @@ const GeoManager = {
             if (res.ok) {
               const data = await res.json();
               const addr = data.address || {};
-              const road = addr.road || addr.pedestrian || addr.street || 'Rua sem nome';
-              const num = addr.house_number ? `, Nº ${addr.house_number}` : '';
+              const road = addr.road || addr.pedestrian || addr.street || _gt('Rua sem nome', 'Unnamed road');
+              const num = addr.house_number ? `, ${_gt('Nº', '#')} ${addr.house_number}` : '';
               const locality = addr.city || addr.town || addr.village || addr.municipality || '';
               const district = addr.county || addr.state_district || '';
               this.currentLocation.address = `${road}${num} - ${locality} (${district})`;
               this.currentLocation.landmark = await this.resolveBestLandmark(data, this.currentLocation.lat, this.currentLocation.lon);
             }
           } catch (_) {
-            this.currentLocation.address = `Coordenadas: ${this.currentLocation.lat}, ${this.currentLocation.lon}`;
+            this.currentLocation.address = `${_gt('Coordenadas', 'Coordinates')}: ${this.currentLocation.lat}, ${this.currentLocation.lon}`;
           }
           resolve(this.currentLocation);
         },
@@ -142,8 +144,8 @@ const GeoManager = {
 
   init(onUpdateCallback) {
     if (!navigator.geolocation) {
-      this.currentLocation.address = 'GPS não suportado neste equipamento';
-      this.currentLocation.landmark = 'Indique referências visuais da rua ao 112';
+      this.currentLocation.address = _gt('GPS não suportado neste equipamento', 'GPS not supported on this device');
+      this.currentLocation.landmark = _gt('Indique referências visuais da rua ao 112', 'Give visual street landmarks to 112');
       if (onUpdateCallback) onUpdateCallback(this.currentLocation);
       return;
     }
@@ -151,14 +153,14 @@ const GeoManager = {
     let isResolved = false;
     // Watchdog de 5.5s para garantir que o utilizador nunca fica preso em "A obter..."
     const watchdogTimer = setTimeout(() => {
-      if (!isResolved && (!this.currentLocation.lat || this.currentLocation.address.includes('A obter'))) {
+      if (!isResolved && (!this.currentLocation.lat || this.currentLocation.address.includes('A obter') || this.currentLocation.address.includes('Getting location'))) {
         const cachedAddr = typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_address') : null;
         if (cachedAddr) {
-          this.currentLocation.address = `${cachedAddr} (Última conhecida)`;
-          this.currentLocation.landmark = 'Confirme referências visuais da rua com o operador do 112';
+          this.currentLocation.address = `${cachedAddr} (${_gt('Última conhecida', 'Last known')})`;
+          this.currentLocation.landmark = _gt('Confirme referências visuais da rua com o operador do 112', 'Confirm visual street landmarks with the 112 operator');
         } else {
-          this.currentLocation.address = 'Sinal GPS fraco ou em busca...';
-          this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112';
+          this.currentLocation.address = _gt('Sinal GPS fraco ou em busca...', 'Weak GPS signal or searching...');
+          this.currentLocation.landmark = _gt('Indique o nome da rua, cruzamentos ou edifícios próximos ao 112', 'Tell 112 the street name, intersections, or nearby buildings');
         }
         if (onUpdateCallback) onUpdateCallback(this.currentLocation);
       }
@@ -186,8 +188,8 @@ const GeoManager = {
           if (res.ok) {
             const data = await res.json();
             const addr = data.address || {};
-            const road = addr.road || addr.pedestrian || addr.street || 'Rua sem nome';
-            const num = addr.house_number ? `, Nº ${addr.house_number}` : '';
+            const road = addr.road || addr.pedestrian || addr.street || _gt('Rua sem nome', 'Unnamed road');
+            const num = addr.house_number ? `, ${_gt('Nº', '#')} ${addr.house_number}` : '';
             const locality = addr.city || addr.town || addr.village || addr.municipality || '';
             const district = addr.county || addr.state_district || '';
             
@@ -199,8 +201,8 @@ const GeoManager = {
             } catch (_) {}
           }
         } catch (_) {
-          this.currentLocation.address = `Coordenadas fixadas: ${lat}, ${lon}`;
-          this.currentLocation.landmark = 'Indique referências visuais da rua ao 112';
+          this.currentLocation.address = `${_gt('Coordenadas fixadas', 'Coordinates fixed')}: ${lat}, ${lon}`;
+          this.currentLocation.landmark = _gt('Indique referências visuais da rua ao 112', 'Give visual street landmarks to 112');
         }
 
         if (onUpdateCallback) onUpdateCallback(this.currentLocation);
@@ -210,11 +212,11 @@ const GeoManager = {
         clearTimeout(watchdogTimer);
         const cachedAddr = typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_address') : null;
         if (cachedAddr) {
-          this.currentLocation.address = `${cachedAddr} (Última conhecida)`;
-          this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112';
+          this.currentLocation.address = `${cachedAddr} (${_gt('Última conhecida', 'Last known')})`;
+          this.currentLocation.landmark = _gt('Indique o nome da rua, cruzamentos ou edifícios próximos ao 112', 'Tell 112 the street name, intersections, or nearby buildings');
         } else {
-          this.currentLocation.address = 'Sinal GPS fraco ou não autorizado';
-          this.currentLocation.landmark = 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112';
+          this.currentLocation.address = _gt('Sinal GPS fraco ou não autorizado', 'Weak or unauthorized GPS signal');
+          this.currentLocation.landmark = _gt('Indique o nome da rua, cruzamentos ou edifícios próximos ao 112', 'Tell 112 the street name, intersections, or nearby buildings');
         }
         if (onUpdateCallback) onUpdateCallback(this.currentLocation);
       },
@@ -228,7 +230,7 @@ const GeoManager = {
       lon: '-8.6111',
       accuracy: 5,
       address: 'Avenida dos Aliados, Nº 142 - Porto',
-      landmark: 'Em frente ao Café Central e Hotel Aliados',
+      landmark: _gt('Em frente ao Café Central e Hotel Aliados', 'Opposite Café Central and Hotel Aliados'),
       nearbyPOIs: [
         { name: 'Café Central', type: 'cafe' },
         { name: 'Hotel Aliados', type: 'hotel' },
@@ -240,23 +242,52 @@ const GeoManager = {
 
   getGreeting() {
     const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) return 'Bom dia';
-    if (hour >= 12 && hour < 20) return 'Boa tarde';
-    return 'Boa noite';
+    const isEn = typeof window !== 'undefined' && window.AppLang === 'en';
+    if (hour >= 6 && hour < 12) return isEn ? 'Good morning' : 'Bom dia';
+    if (hour >= 12 && hour < 20) return isEn ? 'Good afternoon' : 'Boa tarde';
+    return isEn ? 'Good evening' : 'Boa noite';
   },
 
   getCoduSpeechScript(incidentKey = 'geral') {
+    const isEn = typeof window !== 'undefined' && window.AppLang === 'en';
     const loc = this.currentLocation;
     const greeting = this.getGreeting();
-    const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado')) 
+    const rawAddr = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('Getting location') && !loc.address.includes('não suportado') && !loc.address.includes('not supported')) 
       ? loc.address 
-      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || 'a minha localização atual') : 'a minha localização atual');
-    const ref = (loc.landmark && !loc.landmark.includes('A calcular')) 
-      ? `, junto a ${loc.landmark.replace(/^(junto [aàá]o?s?|perto d[eao]s?|ao lado d[eao]s?)\s*/i, '')}` 
+      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || _gt('a minha localização atual', 'my current location')) : _gt('a minha localização atual', 'my current location'));
+    const address = isEn ? rawAddr.replace(/Rua sem nome/g, 'Unnamed road').replace(/, Nº /g, ', #') : rawAddr;
+    const refClean = (loc.landmark && !loc.landmark.includes('A calcular') && !loc.landmark.includes('Calculating'))
+      ? loc.landmark.replace(/^(junto [aàá]o?s?|perto d[eao]s?|ao lado d[eao]s?|next to|near|area of)\s*/i, '')
       : '';
+    const ref = refClean ? (isEn ? `, near ${refClean}` : `, junto a ${refClean}`) : '';
     const gps = (loc.lat && loc.lon) ? ` (GPS: ${loc.lat}, ${loc.lon})` : '';
 
-    const incidentMap = {
+    const incidentMap = isEn ? {
+      geral: {
+        text: 'a person requiring urgent medical assistance',
+        action: 'I have ensured scene safety and started first aid. Please dispatch an ambulance urgently.'
+      },
+      inconsciente: {
+        text: 'an unconscious person who is not responding',
+        action: 'I am checking breathing and ready to start CPR chest compressions. Please send emergency crews with an AED urgently.'
+      },
+      engasgamento: {
+        text: 'a person with severe choking / airway obstruction, unable to cough or speak',
+        action: 'I started the 5 back blows and 5 Heimlich abdominal thrusts sequence. Requesting urgent help.'
+      },
+      hemorragia: {
+        text: 'a person with severe, heavy bleeding',
+        action: 'I am applying firm direct pressure on the wound with clean cloths. Requesting urgent emergency help.'
+      },
+      queda: {
+        text: 'a person who had a serious fall / trauma and cannot get up',
+        action: 'The victim is conscious and kept completely still on the ground without moving. Requesting urgent help.'
+      },
+      respiratorio: {
+        text: 'a person with severe shortness of breath and difficulty breathing',
+        action: 'I positioned the victim sitting upright with loosened clothing to ease breathing. Requesting medical help.'
+      }
+    } : {
       geral: {
         text: 'uma pessoa a necessitar de assistência médica urgente',
         action: 'Já garanti a segurança e iniciei os primeiros socorros. Peço o envio urgente de uma ambulância.'
@@ -284,7 +315,9 @@ const GeoManager = {
     };
 
     const inc = incidentMap[incidentKey] || incidentMap.geral;
-    return `«${greeting}, preciso de ajuda para ${address}${ref}${gps}. Tenho aqui ${inc.text}. ${inc.action}»`;
+    return isEn
+      ? `"${greeting}, I need help at ${address}${ref}${gps}. I have ${inc.text}. ${inc.action}"`
+      : `«${greeting}, preciso de ajuda para ${address}${ref}${gps}. Tenho aqui ${inc.text}. ${inc.action}»`;
   }
 };
 

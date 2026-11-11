@@ -1,9 +1,11 @@
-const CACHE_NAME = 'cuidar-emergencia-v53';
+const CACHE_NAME = 'cuidar-emergencia-v54';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './css/styles.css',
+  './js/i18n_dict.js',
+  './js/i18n.js',
   './js/app.js',
   './js/audio.js',
   './js/geo.js',

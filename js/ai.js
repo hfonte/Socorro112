@@ -25,7 +25,7 @@ const AIManager = {
   // - Respostas a botões de afunilamento (Sim/Não) ou perguntas diretas -> Gemini Flash Lite (Ultrarrápido, poupa cota)
   determineRoutingStrategy(textPrompt = '', imageBase64 = null) {
     const isImage = !!imageBase64;
-    const isFollowUp = textPrompt.includes('[Despiste de Triagem:');
+    const isFollowUp = textPrompt.includes('[Despiste de Triagem:') || textPrompt.includes('[Triage Narrowing:');
     const isShortDirect = textPrompt.trim().length < 50;
 
     if (isFollowUp || (isShortDirect && !isImage)) {
@@ -143,7 +143,18 @@ REGRAS OBRIGATÓRIAS DE DESPISTE CLÍNICO:
 
 Apresenta no máximo 2 despistes (ex.: 1 Pergunta de Sintomas Discriminados e/ou 1 Pergunta Atómica Sim/Não).
 
-Responde estritamente em Português de Portugal (pt-PT).`;
+${(typeof window !== 'undefined' && window.AppLang === 'en')
+  ? `LANGUAGE REQUIREMENT (MANDATORY):
+Respond strictly in clear, concise ENGLISH (en-GB/en-US).
+Use these EXACT English section headers:
+1. 🩺 DIAGNOSIS & SEVERITY: Classify strictly as "🔴 CRITICAL EMERGENCY" or "🟡 MODERATE URGENCY" or "🟢 MINOR SITUATION"
+2. 🟢 IMMEDIATE ACTION (WHAT TO DO): 3 objective, practical steps
+3. ⛔ CRITICAL PROHIBITIONS (WHAT NEVER TO DO): key safety warnings
+4. 📞 RECOMMENDED REFERRAL: For Critical Emergency state "🚨 CALL 112 IMMEDIATELY (INEM)". For Moderate Urgency / Minor Situation state "📞 CONTACT SNS 24 LINE (808 24 24 24)". (If toxic ingestion, also mention CIAV 800 250 250).
+5. ❓ TRIAGE NARROWING (only if uncertain/moderate): Use strictly English Questions and Options:
+   - Binary: \`- Question: <single objective symptom question>? Options: [Yes | No]\`
+   - Multi-select: \`- Question: <question>? Options: [Symptom A | Symptom B | None of these]\``
+  : 'Responde estritamente em Português de Portugal (pt-PT).'}`;
 
     // 1. Pesquisa RAG na base de conhecimento oficial (Manual de Primeiros Socorros / TAS)
     const matchResult = typeof RagEngine !== 'undefined' ? RagEngine.search(textPrompt) : null;
@@ -156,7 +167,17 @@ Responde estritamente em Português de Portugal (pt-PT).`;
     try {
       const iceData = JSON.parse(localStorage.getItem('user_medical_id') || '{}');
       if (iceData.name || iceData.conditions || iceData.allergies || iceData.medication) {
-        finalSystemInstruction += `\n\n==================================================
+        const isEn = typeof window !== 'undefined' && window.AppLang === 'en';
+        finalSystemInstruction += isEn
+          ? `\n\n==================================================
+VICTIM MEDICAL PROFILE (Personal ICE Medical Card):
+- Victim: ${iceData.name || 'User'}
+- Blood Type: ${iceData.blood || 'Unknown'}
+- Chronic Conditions / History: ${iceData.conditions || 'None reported'}
+- Known Allergies: ${iceData.allergies || 'None'}
+- Regular Medication: ${iceData.medication || 'None'}
+RULE: Consider these real medical history details to personalize triage and spot specific risks (e.g. blood thinners increase bleeding risk, diabetes increases hypoglycemia risk).`
+          : `\n\n==================================================
 PERFIL MÉDICO DA VÍTIMA (Ficha Médica ICE Pessoal):
 - Vítima: ${iceData.name || 'Próprio utilizador'}
 - Grupo Sanguíneo: ${iceData.blood || 'Desconhecido'}
@@ -252,9 +273,15 @@ REGRA: Considera estes antecedentes médicos reais para personalizar o diagnóst
     // o motor RAG fornece o protocolo de primeiros socorros diretamente do manual localmente, sem deixar a vítima desamparada!
     if (typeof RagEngine !== 'undefined') {
       const fallbackClinicalText = RagEngine.generateOfflineProtocolResponse(matchResult?.entry);
-      return `⚠️ **[Modo de Contingência • Protocolo Direto do Manual]**\n*(Servidores da Google temporariamente congestionados. A apresentar diretrizes oficiais dos Manuais de Primeiros Socorros / TAS)*\n\n${fallbackClinicalText}`;
+      const isEn = typeof window !== 'undefined' && window.AppLang === 'en';
+      return isEn
+        ? `⚠️ **[Contingency Mode • Direct Manual Protocol]**\n*(Google servers temporarily busy. Showing official guidelines from the First Aid / EMT Manuals)*\n\n${fallbackClinicalText}`
+        : `⚠️ **[Modo de Contingência • Protocolo Direto do Manual]**\n*(Servidores da Google temporariamente congestionados. A apresentar diretrizes oficiais dos Manuais de Primeiros Socorros / TAS)*\n\n${fallbackClinicalText}`;
     }
 
-    throw lastError || new Error('Não foi possível obter resposta em tempo útil. Em dúvida, ligue 112 imediatamente.');
+    const fallbackErr = (typeof window.t === 'function')
+      ? window.t('Não foi possível obter resposta em tempo útil. Em dúvida, ligue 112 imediatamente.', 'Could not get a timely response. When in doubt, call 112 immediately.')
+      : 'Não foi possível obter resposta em tempo útil. Em dúvida, ligue 112 imediatamente.';
+    throw lastError || new Error(fallbackErr);
   }
 };

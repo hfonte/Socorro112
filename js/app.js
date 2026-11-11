@@ -52,10 +52,35 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCabulaScript(incidentKey);
   }
 
+  function normalizeGeoTextForLang(v) {
+    if (!v || typeof v !== 'string') return v;
+    if (window.AppLang === 'en') {
+      return typeof window.t === 'function' ? window.t(v) : v;
+    }
+    return v
+      .replace(/^Getting location\.\.\.$/, 'A obter localização...')
+      .replace(/^Calculating landmarks\.\.\.$/, 'A calcular referências...')
+      .replace(/^GPS not supported on this device$/, 'GPS não suportado neste equipamento')
+      .replace(/^Give visual street landmarks to 112$/, 'Indique referências visuais da rua ao 112')
+      .replace(/^Confirm visual street landmarks with the 112 operator$/, 'Confirme referências visuais da rua com o operador do 112')
+      .replace(/^Weak GPS signal or searching\.\.\.$/, 'Sinal GPS fraco ou em busca...')
+      .replace(/^Weak or unauthorized GPS signal$/, 'Sinal GPS fraco ou não autorizado')
+      .replace(/^Tell 112 the street name, intersections, or nearby buildings$/, 'Indique o nome da rua, cruzamentos ou edifícios próximos ao 112')
+      .replace(/^Near the town center$/, 'Junto ao centro da localidade')
+      .replace(/^Next to /, 'Junto a ')
+      .replace(/^Near /, 'Perto de ')
+      .replace(/^Area of /, 'Zona de ')
+      .replace(/^Coordinates fixed:/, 'Coordenadas fixadas:')
+      .replace(/^Coordinates:/, 'Coordenadas:')
+      .replace(/^Unnamed road/, 'Rua sem nome')
+      .replace(/\(Last known\)$/, '(Última conhecida)')
+      .replace(/Opposite Café Central and Hotel Aliados/, 'Em frente ao Café Central e Hotel Aliados');
+  }
+
   function updateGeoUI(loc) {
-    document.querySelectorAll('.geo-address-display').forEach(el => el.textContent = loc.address);
+    document.querySelectorAll('.geo-address-display').forEach(el => el.textContent = normalizeGeoTextForLang(loc.address));
     document.querySelectorAll('.geo-coords-display').forEach(el => el.textContent = `${loc.lat || '--'}, ${loc.lon || '--'}`);
-    document.querySelectorAll('.geo-landmark-display').forEach(el => el.textContent = loc.landmark);
+    document.querySelectorAll('.geo-landmark-display').forEach(el => el.textContent = normalizeGeoTextForLang(loc.landmark));
     updateCabulaScript();
 
     // Atualizar links para Google Maps centrado nas coordenadas
@@ -579,19 +604,19 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
       }
-      if (sbvCaptionStep4) sbvCaptionStep4.textContent = 'Compressão Pediátrica: 1 mão (criança) ou 2 dedos (bebé), 15:2';
-      AudioManager.speak('Modo pediátrico ativado. Inicie com cinco insuflações de resgate. Siga o rácio de quinze compressões para duas insuflações.');
+      if (sbvCaptionStep4) sbvCaptionStep4.textContent = window.t('Compressão Pediátrica: 1 mão (criança) ou 2 dedos (bebé), 15:2', 'Pediatric Compression: 1 hand (child) or 2 fingers (baby), 15:2');
+      AudioManager.speak(window.t('Modo pediátrico ativado. Inicie com cinco insuflações de resgate. Siga o rácio de quinze compressões para duas insuflações.', 'Pediatric mode activated. Begin with five rescue breaths. Follow a ratio of fifteen compressions to two breaths.'));
     } else {
       if (sbvInstructionBox) {
         sbvInstructionBox.innerHTML = `
           <div class="p-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 text-xs">
-            <span class="text-xs uppercase font-bold text-slate-400 block mb-1">PROTOCOLO ADULTO (ERC / INEM):</span>
-            <p class="large-instruction-text text-white mb-1">Compressões Torácicas Contínuas a 110 bpm</p>
-            <p class="text-slate-300">Profundidade de 5 a 6 cm no centro do esterno com descompressão torácica completa. Rácio de 30:2 ou compressões contínuas se leigo sem máscara.</p>
+            <span class="text-xs uppercase font-bold text-slate-400 block mb-1">${window.t('PROTOCOLO ADULTO (ERC / INEM):', 'ADULT PROTOCOL (ERC / INEM):')}</span>
+            <p class="large-instruction-text text-white mb-1">${window.t('Compressões Torácicas Contínuas a 110 bpm', 'Continuous Chest Compressions at 110 bpm')}</p>
+            <p class="text-slate-300">${window.t('Profundidade de 5 a 6 cm no centro do esterno com descompressão torácica completa. Rácio de 30:2 ou compressões contínuas se leigo sem máscara.', '5 to 6 cm depth at the center of the breastbone with full chest recoil. 30:2 ratio or continuous compressions if untrained without a mask.')}</p>
           </div>
         `;
       }
-      if (sbvCaptionStep4) sbvCaptionStep4.textContent = '4. Compressões no centro do peito: 5 a 6 cm de profundidade';
+      if (sbvCaptionStep4) sbvCaptionStep4.textContent = window.t('4. Compressões no centro do peito: 5 a 6 cm de profundidade', '4. Compressions in center of chest: 5 to 6 cm depth');
     }
   }
 
@@ -704,7 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (AppState.secondsElapsed > 0 && AppState.secondsElapsed % 120 === 0) {
           if (alertRotation) alertRotation.classList.remove('hidden');
-          AudioManager.speak('Dois minutos decorridos. Se tiver apoio, troque de reanimador agora sem interromper as compressões.');
+          AudioManager.speak(window.t('Dois minutos decorridos. Se tiver apoio, troque de reanimador agora sem interromper as compressões.', 'Two minutes elapsed. If another rescuer is present, switch compressors now without interrupting compressions.'));
         }
       }, 1000);
     }
@@ -764,8 +789,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!AppState.tourniquetStartTime) {
         AppState.tourniquetStartTime = new Date();
         const timeStr = AppState.tourniquetStartTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-        if (labelTourniquetApplied) labelTourniquetApplied.textContent = `Aplicado às: ${timeStr}`;
-        btnStartTourniquet.textContent = '⏹ Parar / Registar Hora Final';
+        if (labelTourniquetApplied) labelTourniquetApplied.textContent = window.t(`Aplicado às: ${timeStr}`, `Applied at: ${timeStr}`);
+        btnStartTourniquet.textContent = window.t('⏹ Parar / Registar Hora Final', '⏹ Stop / Record End Time');
         btnStartTourniquet.classList.replace('bg-amber-600', 'bg-red-700');
 
         let elapsedMinutes = 0;
@@ -773,15 +798,15 @@ document.addEventListener('DOMContentLoaded', () => {
           elapsedMinutes++;
           if (displayTourniquet) displayTourniquet.textContent = `${elapsedMinutes} min`;
           if (elapsedMinutes % 30 === 0) {
-            AudioManager.speak(`Atenção. O garrote está colocado há ${elapsedMinutes} minutos. Nunca alivie o garrote.`);
+            AudioManager.speak(window.t(`Atenção. O garrote está colocado há ${elapsedMinutes} minutos. Nunca alivie o garrote.`, `Warning. The tourniquet has been on for ${elapsedMinutes} minutes. Never loosen the tourniquet.`));
           }
         }, 60000);
 
-        AudioManager.speak('Garrote aplicado. Hora registada. Nunca alivie o garrote até à chegada do socorro.');
+        AudioManager.speak(window.t('Garrote aplicado. Hora registada. Nunca alivie o garrote até à chegada do socorro.', 'Tourniquet applied. Time recorded. Never loosen the tourniquet until emergency crews arrive.'));
       } else {
         clearInterval(AppState.tourniquetInterval);
         AppState.tourniquetStartTime = null;
-        btnStartTourniquet.textContent = '⏱ Registar Aplicação de Garrote';
+        btnStartTourniquet.textContent = window.t('⏱ Registar Aplicação de Garrote', '⏱ Record Tourniquet Application');
         btnStartTourniquet.classList.replace('bg-red-700', 'bg-amber-600');
       }
     });
@@ -794,7 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnStartBurn) {
     btnStartBurn.addEventListener('click', () => {
       if (!AppState.burnInterval) {
-        btnStartBurn.textContent = '⏹ Parar Arrefecimento';
+        btnStartBurn.textContent = window.t('⏹ Parar Arrefecimento', '⏹ Stop Cooling');
         AppState.burnInterval = setInterval(() => {
           AppState.burnTimerSeconds--;
           const mm = String(Math.floor(AppState.burnTimerSeconds / 60)).padStart(2, '0');
@@ -804,14 +829,14 @@ document.addEventListener('DOMContentLoaded', () => {
           if (AppState.burnTimerSeconds <= 0) {
             clearInterval(AppState.burnInterval);
             AppState.burnInterval = null;
-            AudioManager.speak('15 minutos concluídos. Cubra a queimadura com compressas esterilizadas húmidas e proteja contra a hipotermia.');
+            AudioManager.speak(window.t('15 minutos concluídos. Cubra a queimadura com compressas esterilizadas húmidas e proteja contra a hipotermia.', '15 minutes completed. Cover the burn with moist sterile gauze and protect against hypothermia.'));
           }
         }, 1000);
-        AudioManager.speak('Inicie o arrefecimento contínuo com água corrente tépida durante 15 minutos.');
+        AudioManager.speak(window.t('Inicie o arrefecimento contínuo com água corrente tépida durante 15 minutos.', 'Begin continuous cooling with cool running water for 15 minutes.'));
       } else {
         clearInterval(AppState.burnInterval);
         AppState.burnInterval = null;
-        btnStartBurn.textContent = '▶ Iniciar 15 Min de Água Corrente';
+        btnStartBurn.textContent = window.t('▶ Iniciar 15 Min de Água Corrente', '▶ Start 15 Min Running Water');
       }
     });
   }
@@ -826,8 +851,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStrokeNow.addEventListener('click', () => {
       AppState.strokeOnsetTime = new Date();
       const str = AppState.strokeOnsetTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-      if (labelStrokeTime) labelStrokeTime.textContent = `Início dos Sintomas: ${str} (Transmitir ao 112 para Via Verde)`;
-      AudioManager.speak(`Hora de início registada às ${str}. Ligue 112 de imediato e refira suspeita de AVC.`);
+      if (labelStrokeTime) labelStrokeTime.textContent = window.t(`Início dos Sintomas: ${str} (Transmitir ao 112 para Via Verde)`, `Symptom Onset: ${str} (Report to 112 for Fast-Track)`);
+      AudioManager.speak(window.t(`Hora de início registada às ${str}. Ligue 112 de imediato e refira suspeita de AVC.`, `Onset time recorded at ${str}. Call 112 immediately and report suspected stroke.`));
     });
   }
 
@@ -838,19 +863,19 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSeizure.addEventListener('click', () => {
       if (!AppState.seizureInterval) {
         AppState.seizureSeconds = 0;
-        btnSeizure.textContent = '⏹ Fim da Crise / Vítima Parou';
+        btnSeizure.textContent = window.t('⏹ Fim da Crise / Vítima Parou', '⏹ Seizure Ended / Stopped');
         AppState.seizureInterval = setInterval(() => {
           AppState.seizureSeconds++;
           const mm = String(Math.floor(AppState.seizureSeconds / 60)).padStart(2, '0');
           const ss = String(AppState.seizureSeconds % 60).padStart(2, '0');
           if (displaySeizure) displaySeizure.textContent = `${mm}:${ss}`;
         }, 1000);
-        AudioManager.speak('A cronometrar crise. Proteja a cabeça e nunca coloque nada na boca.');
+        AudioManager.speak(window.t('A cronometrar crise. Proteja a cabeça e nunca coloque nada na boca.', 'Timing seizure. Protect the head and never place anything in the mouth.'));
       } else {
         clearInterval(AppState.seizureInterval);
         AppState.seizureInterval = null;
-        btnSeizure.textContent = '▶ Iniciar Contagem da Crise';
-        AudioManager.speak('Crise terminada. Coloque a vítima em Posição Lateral de Segurança e mantenha a via aérea limpa.');
+        btnSeizure.textContent = window.t('▶ Iniciar Contagem da Crise', '▶ Start Seizure Timer');
+        AudioManager.speak(window.t('Crise terminada. Coloque a vítima em Posição Lateral de Segurança e mantenha a via aérea limpa.', 'Seizure ended. Place the victim in the Recovery Position and keep the airway clear.'));
       }
     });
   }
@@ -929,37 +954,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (clean.includes('Modo de Contingência')) {
+      if (clean.includes('Modo de Contingência') || clean.includes('Contingency Mode')) {
         formattedHtml += `<div class="p-2 mb-2 bg-amber-950/60 border border-amber-500 rounded-lg text-amber-300 text-xs font-semibold leading-relaxed">${clean.replace(/\*\*/g, '')}</div>`;
         return;
       }
 
-      if (/^[1-5]\.\s+.*(DESPISTE|AFUNILAMENTO)/i.test(clean)) {
+      if (/^[1-5]\.\s+.*(DESPISTE|AFUNILAMENTO|TRIAGE NARROWING|NARROWING)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
-        formattedHtml += `<div class="mt-3 mb-1 text-purple-400 font-black text-sm flex items-center gap-1.5 border-b border-purple-800/60 pb-1">❓ Afunilamento de Triagem (Sinais de Gravidade):</div>`;
+        formattedHtml += `<div class="mt-3 mb-1 text-purple-400 font-black text-sm flex items-center gap-1.5 border-b border-purple-800/60 pb-1">${window.t('❓ Afunilamento de Triagem (Sinais de Gravidade):', '❓ Triage Narrowing (Severity Signs):')}</div>`;
         return;
       }
 
-      if (/^[1-4]\.\s+.*DIAGNÓSTICO/i.test(clean)) {
+      if (/^[1-4]\.\s+.*(DIAGNÓSTICO|DIAGNOSIS)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
         formattedHtml += `<div class="mt-3 mb-1 text-sky-400 font-black text-sm flex items-center gap-1.5 border-b border-sky-800/60 pb-1">${clean}</div>`;
         return;
       }
-      if (/^[1-4]\.\s+.*AÇÃO IMEDIATA/i.test(clean)) {
+      if (/^[1-4]\.\s+.*(AÇÃO IMEDIATA|IMMEDIATE ACTION)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
         formattedHtml += `<div class="mt-3 mb-1 text-emerald-400 font-black text-sm flex items-center gap-1.5 border-b border-emerald-800/60 pb-1">${clean}</div>`;
         return;
       }
-      if (/^[1-4]\.\s+.*PROIBIÇÕES/i.test(clean)) {
+      if (/^[1-4]\.\s+.*(PROIBIÇÕES|PROHIBITIONS)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
         formattedHtml += `<div class="mt-3 mb-1 text-red-400 font-black text-sm flex items-center gap-1.5 border-b border-red-800/60 pb-1">${clean}</div>`;
         return;
       }
-      if (/^[1-4]\.\s+.*(CONDUTA|ENCAMINHAMENTO)/i.test(clean)) {
+      if (/^[1-4]\.\s+.*(CONDUTA|ENCAMINHAMENTO|RECOMMENDED REFERRAL|REFERRAL)/i.test(clean)) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
         clean = clean.replace(/\*\*/g, '');
         formattedHtml += `<div class="mt-3 mb-1 text-amber-400 font-black text-sm flex items-center gap-1.5 border-b border-amber-800/60 pb-1">${clean}</div>`;
@@ -968,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Afunilamento de Triagem: Perguntas Atómicas Sim/Não ou Múltipla Escolha Discriminada de Sintomas
       const cleanNoBold = clean.replace(/\*\*/g, '');
-      const hasOptions = /Opções:\s*\[(.*?)\]/i.test(cleanNoBold) || (/\[(.*?)\]/.test(cleanNoBold) && cleanNoBold.includes('|'));
+      const hasOptions = /(Opções|Options):\s*\[(.*?)\]/i.test(cleanNoBold) || (/\[(.*?)\]/.test(cleanNoBold) && cleanNoBold.includes('|'));
 
       if (hasOptions) {
         if (inList) { formattedHtml += '</ul>'; inList = false; }
@@ -976,34 +1001,36 @@ document.addEventListener('DOMContentLoaded', () => {
         let questionText = '';
         let options = [];
 
-        const opcMatch = cleanNoBold.match(/Opções:\s*\[(.*?)\]/i);
+        const opcMatch = cleanNoBold.match(/(Opções|Options):\s*\[(.*?)\]/i);
         if (opcMatch) {
-          options = opcMatch[1].split('|').map(s => s.trim()).filter(Boolean);
+          options = opcMatch[2].split('|').map(s => s.trim()).filter(Boolean);
           questionText = cleanNoBold.substring(0, opcMatch.index)
-            .replace(/^[-*•]?\s*(Pergunta:\s*)?/i, '')
+            .replace(/^[-*•]?\s*((Pergunta|Question):\s*)?/i, '')
             .trim();
         } else {
           const bracketMatch = cleanNoBold.match(/\[(.*?)\]/);
           if (bracketMatch && bracketMatch[1].includes('|')) {
             options = bracketMatch[1].split('|').map(s => s.trim()).filter(Boolean);
             questionText = cleanNoBold.replace(bracketMatch[0], '')
-              .replace(/^[-*•]?\s*(Pergunta:\s*)?/i, '')
-              .replace(/Opções:?/i, '')
+              .replace(/^[-*•]?\s*((Pergunta|Question):\s*)?/i, '')
+              .replace(/(Opções|Options):?/i, '')
               .trim();
           }
         }
 
         questionText = questionText.replace(/^[:\-\s]+/, '').trim();
-        if (!questionText) questionText = 'Identifique os sinais ou sintomas da vítima:';
+        if (!questionText) questionText = window.t('Identifique os sinais ou sintomas da vítima:', 'Identify the victim\'s signs or symptoms:');
 
-        // Modalidade A: Pergunta atómica binária Sim / Não
+        // Modalidade A: Pergunta atómica binária Sim / Não (ou Yes / No)
         const isBinarySimNao = options.length === 2 &&
-          options.some(o => /^sim$/i.test(o)) &&
-          options.some(o => /^não$|^nao$/i.test(o));
+          options.some(o => /^(sim|yes)$/i.test(o)) &&
+          options.some(o => /^(não|nao|no)$/i.test(o));
 
         const triageGroupId = 'triage-grp-' + Math.random().toString(36).substring(2, 9);
 
         if (isBinarySimNao) {
+          const yesResp = window.AppLang === 'en' ? `Yes (Confirms: ${escapeTriageHtml(questionText)})` : `Sim (Confirma: ${escapeTriageHtml(questionText)})`;
+          const noResp = window.AppLang === 'en' ? `No (Denies: ${escapeTriageHtml(questionText)})` : `Não (Nega: ${escapeTriageHtml(questionText)})`;
           formattedHtml += `
             <div class="my-2.5 p-3 bg-slate-900/90 border border-amber-500/40 rounded-xl shadow-sm">
               <div class="flex items-start gap-1.5 mb-2">
@@ -1011,11 +1038,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="text-xs text-yellow-200 font-semibold leading-snug">${escapeTriageHtml(questionText)}</p>
               </div>
               <div class="flex items-center gap-2">
-                <button type="button" class="triage-quick-chip flex-1 py-2 px-3 bg-emerald-950/80 hover:bg-emerald-800 text-emerald-300 border border-emerald-600 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" data-resp="Sim (Confirma: ${escapeTriageHtml(questionText)})">
-                  <span>✅</span> Sim
+                <button type="button" class="triage-quick-chip flex-1 py-2 px-3 bg-emerald-950/80 hover:bg-emerald-800 text-emerald-300 border border-emerald-600 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" data-resp="${yesResp}">
+                  <span>✅</span> ${window.t('Sim', 'Yes')}
                 </button>
-                <button type="button" class="triage-quick-chip flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" data-resp="Não (Nega: ${escapeTriageHtml(questionText)})">
-                  <span>❌</span> Não
+                <button type="button" class="triage-quick-chip flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" data-resp="${noResp}">
+                  <span>❌</span> ${window.t('Não', 'No')}
                 </button>
               </div>
             </div>
@@ -1026,14 +1053,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Modalidade B: Seleção discriminada de sintomas e sinais simultâneos
         let chipsHtml = '';
         options.forEach(opt => {
-          const isNone = /nenhum|nenhuma|nada|não sei|nenhum destes|nenhum dos anteriores/i.test(opt);
+          const isNone = /nenhum|nenhuma|nada|não sei|nenhum destes|nenhum dos anteriores|none of these|none|neither|not sure/i.test(opt);
           if (isNone) {
+            const noneResp = window.AppLang === 'en' ? `None of these signs (Denies all symptoms of: ${escapeTriageHtml(questionText)})` : `Nenhum destes sinais (Nega todos os sintomas de: ${escapeTriageHtml(questionText)})`;
             chipsHtml += `
               <button type="button" 
                 class="triage-none-chip w-full text-left py-2 px-3 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600/70 rounded-lg text-xs font-semibold transition flex items-center justify-between active:scale-[0.99]"
-                data-resp="Nenhum destes sinais (Nega todos os sintomas de: ${escapeTriageHtml(questionText)})">
+                data-resp="${noneResp}">
                 <span class="flex items-center gap-2"><span>⚪</span> ${escapeTriageHtml(opt)}</span>
-                <span class="text-[10px] bg-slate-700/80 text-slate-300 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Toque rápido</span>
+                <span class="text-[10px] bg-slate-700/80 text-slate-300 px-2 py-0.5 rounded font-bold uppercase tracking-wider">${window.t('Toque rápido', 'Quick tap')}</span>
               </button>
             `;
           } else {
@@ -1054,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="text-amber-400 text-sm">📋</span>
               <div>
                 <p class="text-xs text-yellow-200 font-bold leading-snug">${escapeTriageHtml(questionText)}</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Pode selecionar um ou vários sintomas simultâneos, ou tocar em "Nenhum":</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">${window.t('Pode selecionar um ou vários sintomas simultâneos, ou tocar em "Nenhum":', 'You may select one or several symptoms at once, or tap "None":')}</p>
               </div>
             </div>
             <div class="space-y-1.5 my-2">
@@ -1063,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="mt-2 pt-2 border-t border-slate-800 flex items-center justify-end">
               <button type="button" 
                 class="btn-confirm-symptoms w-full py-2.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-black transition disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1.5 shadow-md" disabled>
-                <span>Confirmar Sintomas Selecionados</span>
+                <span>${window.t('Confirmar Sintomas Selecionados', 'Confirm Selected Symptoms')}</span>
                 <span class="font-mono">➔</span>
               </button>
             </div>
@@ -1074,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let parsedLine = clean.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>');
       parsedLine = parsedLine.replace(/\*([^\*]+)\*/g, '<em class="text-slate-200">$1</em>');
-      parsedLine = parsedLine.replace(/\[Fonte:\s*([^\]]+)\]/gi, '<span class="bg-sky-950/90 text-sky-300 border border-sky-500/70 text-[10px] font-mono px-2 py-0.5 rounded-full inline-block my-0.5 shadow-sm">📖 Fonte: $1</span>');
+      parsedLine = parsedLine.replace(/\[(Fonte|Source):\s*([^\]]+)\]/gi, `<span class="bg-sky-950/90 text-sky-300 border border-sky-500/70 text-[10px] font-mono px-2 py-0.5 rounded-full inline-block my-0.5 shadow-sm">📖 ${window.t('Fonte', 'Source')}: $2</span>`);
 
       if (parsedLine.startsWith('- ') || parsedLine.startsWith('• ') || parsedLine.startsWith('* ')) {
         if (!inList) {
@@ -1091,18 +1119,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inList) formattedHtml += '</ul>';
 
     // Raciocínio Clínico de Triagem: Selecionar o canal e botão de contacto correto (112 vs SNS 24 vs CIAV)
-    const diagMatch = rawText.match(/1\.\s+.*?DIAGNÓSTICO.*?(?:\n|$)(.*?)(?:\n2\.|$)/is);
+    const diagMatch = rawText.match(/1\.\s+.*?(DIAGNÓSTICO|DIAGNOSIS).*?(?:\n|$)(.*?)(?:\n2\.|$)/is);
     const diagSection = diagMatch ? diagMatch[0] : rawText.substring(0, 350);
 
-    const isCritical = (/🔴|EMERGÊNCIA CRÍTICA/i.test(diagSection)) && !(/URGÊNCIA MODERADA|SITUAÇÃO LIGEIRA/i.test(diagSection));
-    const isModerateOrMild = (/🟡|URGÊNCIA MODERADA|🟢|SITUAÇÃO LIGEIRA/i.test(diagSection)) || (/SNS 24|Saúde 24|808\s*24\s*24\s*24/i.test(rawText));
-    const mentionsCIAV = /CIAV|800\s*250\s*250|antivenenos/i.test(rawText);
+    const isCritical = (/🔴|EMERGÊNCIA CRÍTICA|CRITICAL EMERGENCY/i.test(diagSection)) && !(/URGÊNCIA MODERADA|SITUAÇÃO LIGEIRA|MODERATE URGENCY|MINOR SITUATION/i.test(diagSection));
+    const isModerateOrMild = (/🟡|URGÊNCIA MODERADA|MODERATE URGENCY|🟢|SITUAÇÃO LIGEIRA|MINOR SITUATION/i.test(diagSection)) || (/SNS 24|Saúde 24|808\s*24\s*24\s*24/i.test(rawText));
+    const mentionsCIAV = /CIAV|800\s*250\s*250|antivenenos|poison/i.test(rawText);
 
     if (isCritical) {
       formattedHtml += `
         <div class="mt-4 pt-3 border-t border-red-500/40">
           <a href="tel:112" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-red-900/60 flex items-center justify-center gap-2 animate-pulse">
-            <span>🚨</span> LIGAR 112 AGORA (Emergência Médica INEM)
+            <span>🚨</span> ${window.t('LIGAR 112 AGORA (Emergência Médica INEM)', 'CALL 112 NOW (Medical Emergency)')}
           </a>
         </div>
       `;
@@ -1112,12 +1140,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="p-2.5 bg-emerald-950/60 border border-emerald-600/50 rounded-xl text-emerald-200 text-xs flex items-start gap-2">
             <span class="text-base">🟢</span>
             <div>
-              <strong class="text-emerald-300 block mb-0.5">Sem Critérios de Emergência Vital (112):</strong>
-              Para preservar os meios de socorro do INEM, a triagem não urgente e encaminhamento médico são efetuados pela <strong>Linha SNS 24 (808 24 24 24)</strong>.
+              <strong class="text-emerald-300 block mb-0.5">${window.t('Sem Critérios de Emergência Vital (112):', 'No Life-Threatening Emergency Criteria (112):')}</strong>
+              ${window.t('Para preservar os meios de socorro do INEM, a triagem não urgente e encaminhamento médico são efetuados pela', 'To preserve emergency ambulance services, non-urgent triage and medical routing are handled by the')} <strong>${window.t('Linha SNS 24 (808 24 24 24)', 'SNS 24 Health Line (808 24 24 24)')}</strong>.
             </div>
           </div>
           <a href="tel:808242424" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-center text-sm rounded-xl shadow-lg shadow-emerald-900/60 flex items-center justify-center gap-2">
-            <span>📞</span> LIGAR LINHA SNS 24 (808 24 24 24)
+            <span>📞</span> ${window.t('LIGAR LINHA SNS 24 (808 24 24 24)', 'CALL SNS 24 LINE (808 24 24 24)')}
           </a>
         </div>
       `;
@@ -1127,14 +1155,14 @@ document.addEventListener('DOMContentLoaded', () => {
       formattedHtml += `
         <div class="mt-2">
           <a href="tel:800250250" class="w-full py-2.5 bg-purple-700 hover:bg-purple-600 text-white font-bold text-center text-xs rounded-xl shadow-md flex items-center justify-center gap-2">
-            <span>🧪</span> LIGAR CIAV (800 250 250 - Antivenenos)
+            <span>🧪</span> ${window.t('LIGAR CIAV (800 250 250 - Antivenenos)', 'CALL CIAV POISON CENTER (800 250 250)')}
           </a>
         </div>
       `;
     }
 
     // ACOMPANHAMENTO CLÍNICO & FOLLOW-UP (TEMPORIZADOR + REAVALIAÇÃO DE SINTOMAS)
-    const suggestsWaiting = /(aguard|esper|repous|vigia|monitoriz|repouso|minutos|min\b)/i.test(rawText) || isModerateOrMild;
+    const suggestsWaiting = /(aguard|esper|repous|vigia|monitoriz|repouso|minutos|min\b|wait|rest|monitor|observ|minute)/i.test(rawText) || isModerateOrMild;
 
     if (suggestsWaiting && !isCritical) {
       let defaultMins = 10;
@@ -1252,12 +1280,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnAskAI) {
       btnAskAI.disabled = false;
       btnAskAI.classList.remove('opacity-50', 'pointer-events-none');
-      btnAskAI.innerHTML = '<span>🔍</span> <span>Analisar com Diretrizes</span>';
+      btnAskAI.innerHTML = `<span>🔍</span> <span>${window.t('Analisar com Diretrizes', 'Analyze with Guidelines')}</span>`;
     }
 
     // 7. Resetar caixa de resposta para o estado inicial
     if (aiResponseBox) {
-      aiResponseBox.innerHTML = '<span class="text-slate-500 italic">A análise segura da IA e os passos imediatos serão apresentados aqui.</span>';
+      aiResponseBox.innerHTML = `<span class="text-slate-500 italic">${window.t('A análise segura da IA e os passos imediatos serão apresentados aqui.', 'Safe AI analysis and immediate steps will be displayed here.')}</span>`;
     }
 
     // 8. Ocultar botão secundário de limpar resultados e caixas de partilha
@@ -1282,12 +1310,12 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAskAI.addEventListener('click', async () => {
       const text = aiTextPrompt.value.trim();
       if (!text && !currentImageBase64) {
-        alert('Tire uma foto ou descreva a situação por texto.');
+        alert(window.t('Tire uma foto ou descreva a situação por texto.', 'Take a photo or describe the situation in text.'));
         return;
       }
 
       if (!AIManager.getApiKey()) {
-        alert('Para usar a IA, insira a sua chave gratuita do Google AI Studio.');
+        alert(window.t('Para usar a IA, insira a sua chave gratuita do Google AI Studio.', 'To use AI, please enter your free Google AI Studio key.'));
         return;
       }
 
@@ -1295,15 +1323,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnAskAI) {
         btnAskAI.disabled = true;
         btnAskAI.classList.add('opacity-50', 'pointer-events-none');
-        btnAskAI.innerHTML = '<span>⏳</span> <span>A contactar triagem...</span>';
+        btnAskAI.innerHTML = `<span>⏳</span> <span>${window.t('A contactar triagem...', 'Contacting triage...')}</span>`;
       }
       if (aiResponseBox) {
-        aiResponseBox.innerHTML = '<span class="text-yellow-400/80 italic animate-pulse">A analisar com rapidez máxima...</span>';
+        aiResponseBox.innerHTML = `<span class="text-yellow-400/80 italic animate-pulse">${window.t('A analisar com rapidez máxima...', 'Analyzing at maximum speed...')}</span>`;
       }
 
       try {
+        const defaultPhotoPrompt = window.AppLang === 'en'
+          ? 'Analyze the image and indicate priority first aid measures according to INEM / ERC 2025 protocols.'
+          : 'Analise a imagem e indique as medidas prioritárias de primeiros socorros segundo os protocolos do INEM.';
         const resultMarkdown = await AIManager.analyzeSymptomOrImage({
-          textPrompt: text || 'Analise a imagem e indique as medidas prioritárias de primeiros socorros segundo os protocolos do INEM.',
+          textPrompt: text || defaultPhotoPrompt,
           imageBase64: currentImageBase64
         });
 
@@ -1322,7 +1353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (err) {
         if (aiResponseBox) {
-          aiResponseBox.innerHTML = `<span class="text-red-400 font-bold">Erro: ${err.message}. Em dúvida, ligue 112 imediatamente.</span>`;
+          aiResponseBox.innerHTML = `<span class="text-red-400 font-bold">${window.t('Erro:', 'Error:')} ${err.message}. ${window.t('Em dúvida, ligue 112 imediatamente.', 'When in doubt, call 112 immediately.')}</span>`;
           if (btnClearResults) btnClearResults.classList.remove('hidden');
         }
       } finally {
@@ -1330,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnAskAI) {
           btnAskAI.disabled = false;
           btnAskAI.classList.remove('opacity-50', 'pointer-events-none');
-          btnAskAI.innerHTML = '<span>🔍</span> <span>Analisar com Diretrizes</span>';
+          btnAskAI.innerHTML = `<span>🔍</span> <span>${window.t('Analisar com Diretrizes', 'Analyze with Guidelines')}</span>`;
         }
       }
     });
@@ -1342,11 +1373,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function initTriageDespisteListeners() {
     if (!aiResponseBox) return;
 
+    const despistePrefix = window.AppLang === 'en' ? '[Triage Narrowing:' : '[Despiste de Triagem:';
+
     // 1. Respostas atómicas binárias rápidas (Sim / Não)
     aiResponseBox.querySelectorAll('.triage-quick-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const resp = chip.dataset.resp;
-        aiTextPrompt.value += `\n[Despiste de Triagem: ${resp}]`;
+        aiTextPrompt.value += `\n${despistePrefix} ${resp}]`;
         if (btnAskAI) btnAskAI.click();
       });
     });
@@ -1355,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     aiResponseBox.querySelectorAll('.triage-none-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const resp = chip.dataset.resp;
-        aiTextPrompt.value += `\n[Despiste de Triagem: ${resp}]`;
+        aiTextPrompt.value += `\n${despistePrefix} ${resp}]`;
         if (btnAskAI) btnAskAI.click();
       });
     });
@@ -1389,12 +1422,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const count = selectedChips.length;
           const confirmBtn = groupEl.querySelector('.btn-confirm-symptoms');
           if (confirmBtn) {
+            const confirmLabel = window.t('Confirmar Sintomas Selecionados', 'Confirm Selected Symptoms');
             if (count > 0) {
               confirmBtn.disabled = false;
-              confirmBtn.innerHTML = `<span>Confirmar Sintomas Selecionados (${count})</span> <span class="font-mono">➔</span>`;
+              confirmBtn.innerHTML = `<span>${confirmLabel} (${count})</span> <span class="font-mono">➔</span>`;
             } else {
               confirmBtn.disabled = true;
-              confirmBtn.innerHTML = `<span>Confirmar Sintomas Selecionados</span> <span class="font-mono">➔</span>`;
+              confirmBtn.innerHTML = `<span>${confirmLabel}</span> <span class="font-mono">➔</span>`;
             }
           }
         }
@@ -1410,10 +1444,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selectedChips.length) return;
 
         const symptoms = Array.from(selectedChips).map(c => c.dataset.val.trim());
-        const question = groupEl.dataset.question || 'sintomas avaliados';
+        const question = groupEl.dataset.question || window.t('sintomas avaliados', 'assessed symptoms');
         const symptomStr = symptoms.join(' + ');
 
-        aiTextPrompt.value += `\n[Despiste de Triagem: Vítima confirma presença simultânea de: ${symptomStr} (em resposta a: ${question})]`;
+        const prefix = window.AppLang === 'en' ? '[Triage Narrowing:' : '[Despiste de Triagem:';
+        const msg = window.AppLang === 'en'
+          ? `Victim confirms simultaneous presence of: ${symptomStr} (in response to: ${question})`
+          : `Vítima confirma presença simultânea de: ${symptomStr} (em resposta a: ${question})`;
+        aiTextPrompt.value += `\n${prefix} ${msg}]`;
         if (btnAskAI) btnAskAI.click();
       });
     });
@@ -1477,7 +1515,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (typeof AudioManager !== 'undefined' && AudioManager.playChime) {
         AudioManager.playChime();
-        AudioManager.speak('Tempo de observação concluído. Por favor reavalie os sintomas da vítima.');
+        AudioManager.speak(window.t('Tempo de observação concluído. Por favor reavalie os sintomas da vítima.', 'Observation time finished. Please reassess the victim\'s symptoms.'));
       }
     }
 
@@ -1501,10 +1539,10 @@ document.addEventListener('DOMContentLoaded', () => {
       btnStart.addEventListener('click', () => {
         if (!followupTimerRunning) {
           followupTimerRunning = true;
-          btnStart.innerHTML = '<span>⏸️</span> Pausar';
+          btnStart.innerHTML = `<span>⏸️</span> ${window.t('Pausar', 'Pause')}`;
           btnStart.classList.replace('bg-emerald-600', 'bg-amber-600');
           if (badge) {
-            badge.textContent = '⏱️ Em Contagem';
+            badge.textContent = window.t('⏱️ Em Contagem', '⏱️ Counting');
             badge.className = 'text-[10px] text-sky-300 font-bold bg-sky-950 px-2 py-0.5 rounded border border-sky-600';
           }
           followupTimerInterval = setInterval(() => {
@@ -1518,9 +1556,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           followupTimerRunning = false;
           if (followupTimerInterval) clearInterval(followupTimerInterval);
-          btnStart.innerHTML = '<span>▶️</span> Retomar';
+          btnStart.innerHTML = `<span>▶️</span> ${window.t('Retomar', 'Resume')}`;
           btnStart.classList.replace('bg-amber-600', 'bg-emerald-600');
-          if (badge) badge.textContent = 'Pausa';
+          if (badge) badge.textContent = window.t('Pausa', 'Paused');
         }
       });
     }
@@ -1603,12 +1641,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnFollowupAI) {
           btnFollowupAI.addEventListener('click', () => {
             const outcomeLabels = {
-              improved: 'Vítima melhorou visivelmente dos sintomas após repouso',
-              unchanged: 'Sintomas mantêm-se iguais sem melhorias após período de espera',
-              worsened: 'Vítima piorou e surgiram novos sinais de alarme após o período de espera'
+              improved: window.t('Vítima melhorou visivelmente dos sintomas após repouso', 'Victim visibly improved symptoms after rest'),
+              unchanged: window.t('Sintomas mantêm-se iguais sem melhorias após período de espera', 'Symptoms remain unchanged without improvement after waiting period'),
+              worsened: window.t('Vítima piorou e surgiram novos sinais de alarme após o período de espera', 'Victim worsened and new warning signs appeared after waiting period')
             };
             if (aiTextPrompt) {
-              aiTextPrompt.value += `\n[Follow-up de Triagem: ${outcomeLabels[outcome]}]`;
+              const followPrefix = window.AppLang === 'en' ? '[Triage Follow-up:' : '[Follow-up de Triagem:';
+              aiTextPrompt.value += `\n${followPrefix} ${outcomeLabels[outcome]}]`;
               if (btnAskAI) btnAskAI.click();
             }
           });
@@ -1721,12 +1760,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const elMeds = document.getElementById('ice-summary-meds');
       const elContact = document.getElementById('ice-summary-contact');
 
-      if (elName) elName.textContent = data.name ? `${data.name} ${data.age ? '(' + data.age + ')' : ''}` : 'Pessoa / Familiar Registado';
-      if (elBlood) elBlood.textContent = data.blood || 'Desconhecido';
-      if (elAllergies) elAllergies.textContent = data.allergies || 'Nenhuma declarada';
-      if (elConditions) elConditions.textContent = data.conditions || 'Nenhum declarado';
-      if (elMeds) elMeds.textContent = data.medication || 'Nenhuma declarada';
-      if (elContact) elContact.textContent = data.contactName ? `${data.contactName} (${data.contactPhone})` : (data.contactPhone || 'Não configurado');
+      if (elName) elName.textContent = data.name ? `${data.name} ${data.age ? '(' + data.age + ')' : ''}` : window.t('Pessoa / Familiar Registado', 'Registered Person / Relative');
+      if (elBlood) elBlood.textContent = data.blood === 'Desconhecido' ? window.t('Desconhecido', 'Unknown') : (data.blood || window.t('Desconhecido', 'Unknown'));
+      if (elAllergies) elAllergies.textContent = data.allergies || window.t('Nenhuma declarada', 'None declared');
+      if (elConditions) elConditions.textContent = data.conditions || window.t('Nenhum declarado', 'None declared');
+      if (elMeds) elMeds.textContent = data.medication || window.t('Nenhuma declarada', 'None declared');
+      if (elContact) elContact.textContent = data.contactName ? `${data.contactName} (${data.contactPhone})` : (data.contactPhone || window.t('Não configurado', 'Not configured'));
 
       const inName = document.getElementById('input-ice-name');
       const inAge = document.getElementById('input-ice-age');
@@ -1767,7 +1806,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contactPhone: document.getElementById('input-ice-contact-phone')?.value.trim() || ''
       };
       saveMedicalId(data);
-      alert('Ficha Clínica ICE guardada com sucesso no telemóvel!');
+      alert(window.t('Ficha Clínica ICE guardada com sucesso no telemóvel!', 'ICE Medical Card successfully saved to your device!'));
       navigateTo('screen-emergency');
     });
   }
@@ -1776,48 +1815,62 @@ document.addEventListener('DOMContentLoaded', () => {
   function shareClinicalUpdateWithICE(mode = 'info') {
     const ice = getMedicalId();
     if (!ice.contactPhone) {
-      alert('Para alertar o seu contacto de emergência, preencha primeiro o número na Ficha Clínica ICE.');
+      alert(window.t('Para alertar o seu contacto de emergência, preencha primeiro o número na Ficha Clínica ICE.', 'To alert your emergency contact, first enter their phone number in the ICE Medical Card.'));
       navigateTo('screen-medical-id');
       return;
     }
 
     const aiText = document.getElementById('ai-response-box')?.innerText || '';
-    let diagSummary = 'Ponto de situação clínica e primeiros socorros prestados.';
-    const diagMatch = aiText.match(/DIAGNÓSTICO E GRAVIDADE:?([^\n\r]+)/i);
-    if (diagMatch && diagMatch[1]) {
-      diagSummary = diagMatch[1].replace(/\[Fonte:[^\]]+\]/gi, '').trim();
+    let diagSummary = window.t('Ponto de situação clínica e primeiros socorros prestados.', 'Clinical status update and first aid provided.');
+    const diagMatch = aiText.match(/(DIAGNÓSTICO E GRAVIDADE|DIAGNOSIS & SEVERITY):?([^\n\r]+)/i);
+    if (diagMatch && diagMatch[2]) {
+      diagSummary = diagMatch[2].replace(/\[(Fonte|Source):[^\]]+\]/gi, '').trim();
     }
 
     // Obter localização instantaneamente
     const loc = GeoManager.currentLocation;
     const lat = loc.lat || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lat') : null);
     const lon = loc.lon || (typeof localStorage !== 'undefined' ? localStorage.getItem('cached_gps_lon') : null);
-    const address = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('não suportado'))
+    const rawAddr = (loc.address && !loc.address.includes('A obter') && !loc.address.includes('Getting location') && !loc.address.includes('não suportado') && !loc.address.includes('not supported'))
       ? loc.address
       : (typeof localStorage !== 'undefined' ? (localStorage.getItem('cached_gps_address') || '') : '');
+    const address = normalizeGeoTextForLang(rawAddr);
 
     let locLine = '';
-    const refClean = loc.landmark && !loc.landmark.includes('A calcular') ? ` (Junto a ${loc.landmark.replace(/^Junto a /i, '')})` : '';
+    const refText = (loc.landmark && !loc.landmark.includes('A calcular') && !loc.landmark.includes('Calculating'))
+      ? normalizeGeoTextForLang(loc.landmark).replace(/^(Junto a |Next to )/i, '')
+      : '';
+    const refClean = refText ? ` (${window.t('Junto a', 'Near')} ${refText})` : '';
     if (lat && lon) {
       const latShort = Number(lat).toFixed(4);
       const lonShort = Number(lon).toFixed(4);
       const mapPinUrl = `https://maps.google.com/?q=${latShort},${lonShort}`;
-      const addressShort = address ? `\n📍 Local: ${address}${refClean}` : '';
-      locLine = `${addressShort}\n🗺️ Mapa: ${mapPinUrl}`;
+      const addressShort = address ? `\n📍 ${window.t('Local', 'Location')}: ${address}${refClean}` : '';
+      locLine = `${addressShort}\n🗺️ ${window.t('Mapa', 'Map')}: ${mapPinUrl}`;
     } else if (address) {
-      locLine = `\n📍 Local: ${address}${refClean}`;
+      locLine = `\n📍 ${window.t('Local', 'Location')}: ${address}${refClean}`;
     }
 
-    const patientName = ice.name || 'Eu';
-    const contactName = ice.contactName || 'Familiar';
+    const patientName = ice.name || window.t('Eu', 'Me');
+    const contactName = ice.contactName || window.t('Familiar', 'Family Contact');
     let messageBody = '';
 
-    if (mode === 'urgent') {
-      messageBody = `🚨 ALERTA DE EMERGÊNCIA (Cuidar em Emergência): Situação urgente com ${patientName}.\n- Estado: ${diagSummary}${locLine}\n- Pedido 112 em curso. Por favor vem ter comigo ou liga-me.`;
-    } else if (mode === 'direct') {
-      messageBody = `🚨 PONTO DE SITUAÇÃO (Cuidar em Emergência): Mensagem de socorro para ${contactName}.\n- Situação com: ${patientName}${locLine}\nEncontro-me a prestar assistência. Por favor liga-me ou vem ter a esta localização.`;
+    if (window.AppLang === 'en') {
+      if (mode === 'urgent') {
+        messageBody = `🚨 EMERGENCY ALERT (Care in Emergency): Urgent situation involving ${patientName}.\n- Status: ${diagSummary}${locLine}\n- 112 call in progress. Please come to me or call me immediately.`;
+      } else if (mode === 'direct') {
+        messageBody = `🚨 STATUS UPDATE (Care in Emergency): Emergency alert for ${contactName}.\n- Situation involving: ${patientName}${locLine}\nI am currently providing assistance. Please call me or come to this location.`;
+      } else {
+        messageBody = `Hi ${contactName}, status update via Care in Emergency:\n- Assessment: ${diagSummary}${locLine}\nI am stable and monitoring symptoms. I will contact you if needed.`;
+      }
     } else {
-      messageBody = `Olá ${contactName}, ponto de situação via Cuidar em Emergência:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
+      if (mode === 'urgent') {
+        messageBody = `🚨 ALERTA DE EMERGÊNCIA (Cuidar em Emergência): Situação urgente com ${patientName}.\n- Estado: ${diagSummary}${locLine}\n- Pedido 112 em curso. Por favor vem ter comigo ou liga-me.`;
+      } else if (mode === 'direct') {
+        messageBody = `🚨 PONTO DE SITUAÇÃO (Cuidar em Emergência): Mensagem de socorro para ${contactName}.\n- Situação com: ${patientName}${locLine}\nEncontro-me a prestar assistência. Por favor liga-me ou vem ter a esta localização.`;
+      } else {
+        messageBody = `Olá ${contactName}, ponto de situação via Cuidar em Emergência:\n- Avaliação: ${diagSummary}${locLine}\nEncontro-me estável a vigiar sintomas. Contactarei se precisar.`;
+      }
     }
 
     const rawPhone = ice.contactPhone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
@@ -1871,11 +1924,11 @@ document.addEventListener('DOMContentLoaded', () => {
         await navigator.clipboard.writeText(textToCopy);
         const copyLabel = document.getElementById('btn-copy-label');
         if (copyLabel) {
-          copyLabel.textContent = 'Mensagem Copiada! ✅';
-          setTimeout(() => { copyLabel.textContent = 'Copiar Mensagem'; }, 2500);
+          copyLabel.textContent = window.t('Mensagem Copiada! ✅', 'Message Copied! ✅');
+          setTimeout(() => { copyLabel.textContent = window.t('Copiar Mensagem', 'Copy Message'); }, 2500);
         }
       } catch (_) {
-        alert('Mensagem pronta a colar na sua aplicação de mensagens.');
+        alert(window.t('Mensagem pronta a colar na sua aplicação de mensagens.', 'Message ready to paste into your messaging app.'));
       }
     });
   }
@@ -1957,7 +2010,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function checkOfflineCacheStatus() {
     if (!('caches' in window)) {
-      if (offlineCacheStatus) offlineCacheStatus.textContent = 'Modo offline não suportado neste navegador.';
+      if (offlineCacheStatus) offlineCacheStatus.textContent = window.t('Modo offline não suportado neste navegador.', 'Offline mode is not supported in this browser.');
       return;
     }
     try {
@@ -1967,14 +2020,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const cache = await caches.open(currentCacheKey);
         const cachedRequests = await cache.keys();
         if (offlineCacheStatus) {
-          offlineCacheStatus.textContent = `✅ ${cachedRequests.length} recursos guardados na memória do telemóvel.`;
+          offlineCacheStatus.textContent = `✅ ${cachedRequests.length} ${window.t('recursos guardados na memória do telemóvel.', 'resources saved in device memory.')}`;
         }
         if (badgeOfflineReady) {
           badgeOfflineReady.className = 'text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1';
         }
-        if (badgeOfflineText) badgeOfflineText.textContent = navigator.onLine ? 'Pronto' : 'Offline Ativo';
+        if (badgeOfflineText) badgeOfflineText.textContent = navigator.onLine ? window.t('Pronto', 'Ready') : window.t('Offline Ativo', 'Offline Active');
       } else {
-        if (offlineCacheStatus) offlineCacheStatus.textContent = 'Toque em "Descarregar Info" para garantir acesso offline.';
+        if (offlineCacheStatus) offlineCacheStatus.textContent = window.t('Toque em "Descarregar Info" para garantir acesso offline.', 'Tap "Download Info" to ensure offline access.');
       }
     } catch (e) {
       console.warn('Erro ao verificar cache offline:', e);
@@ -1988,20 +2041,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (badgeOfflineReady) {
       badgeOfflineReady.className = 'text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1';
     }
-    if (badgeOfflineText) badgeOfflineText.textContent = 'Pronto';
+    if (badgeOfflineText) badgeOfflineText.textContent = window.t('Pronto', 'Ready');
   });
 
   window.addEventListener('offline', () => {
     if (badgeOfflineReady) {
       badgeOfflineReady.className = 'text-[10px] bg-amber-950/80 text-amber-300 border border-amber-600/60 px-2 py-0.5 rounded-full font-bold flex items-center gap-1';
     }
-    if (badgeOfflineText) badgeOfflineText.textContent = 'Offline Ativo';
+    if (badgeOfflineText) badgeOfflineText.textContent = window.t('Offline Ativo', 'Offline Active');
   });
 
   if (btnForceCache) {
     btnForceCache.addEventListener('click', async () => {
       if (!('caches' in window)) {
-        alert('O seu navegador não suporta a tecnologia de cache offline.');
+        alert(window.t('O seu navegador não suporta a tecnologia de cache offline.', 'Your browser does not support offline cache technology.'));
         return;
       }
       btnForceCache.disabled = true;
@@ -2009,26 +2062,28 @@ document.addEventListener('DOMContentLoaded', () => {
       btnForceCache.innerHTML = `
         <span class="text-lg animate-spin">⏳</span>
         <div class="min-w-0">
-          <strong class="text-white text-xs block font-bold truncate">A Descarregar...</strong>
-          <span class="text-[10px] text-yellow-300 block truncate">A guardar no telemóvel</span>
+          <strong class="text-white text-xs block font-bold truncate">${window.t('A Descarregar...', 'Downloading...')}</strong>
+          <span class="text-[10px] text-yellow-300 block truncate">${window.t('A guardar no telemóvel', 'Saving to phone')}</span>
         </div>
       `;
 
       try {
-        const cacheName = 'cuidar-emergencia-v27';
+        const cacheName = 'cuidar-emergencia-v54';
         const cache = await caches.open(cacheName);
         
         const urlsToCache = [
           './',
           './index.html',
           './manifest.json',
-          './css/styles.css?v=27',
-          './js/app.js?v=27',
-          './js/audio.js?v=27',
-          './js/geo.js?v=27',
-          './js/knowledge_base.js?v=27',
-          './js/rag.js?v=27',
-          './js/ai.js?v=27',
+          './css/styles.css?v=54',
+          './js/i18n_dict.js?v=54',
+          './js/i18n.js?v=54',
+          './js/app.js?v=54',
+          './js/audio.js?v=54',
+          './js/geo.js?v=54',
+          './js/knowledge_base.js?v=54',
+          './js/rag.js?v=54',
+          './js/ai.js?v=54',
           'https://cdn.tailwindcss.com/3.4.17',
           './assets/images/estrela_da_vida.jpg',
           './assets/images/cadeia_sobrevivencia.png',
@@ -2066,10 +2121,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await checkOfflineCacheStatus();
 
-        alert(`✅ Sucesso! Foram guardados ${successCount} recursos essenciais na memória local do seu dispositivo.\n\nA aplicação está 100% pronta para ser utilizada em zonas rurais, caves, montanha ou sem qualquer cobertura de rede móvel.`);
+        alert(window.AppLang === 'en'
+          ? `✅ Success! ${successCount} essential resources have been saved in your device's local memory.\n\nThe app is 100% ready to use in rural areas, basements, mountains, or with no mobile network coverage.`
+          : `✅ Sucesso! Foram guardados ${successCount} recursos essenciais na memória local do seu dispositivo.\n\nA aplicação está 100% pronta para ser utilizada em zonas rurais, caves, montanha ou sem qualquer cobertura de rede móvel.`);
       } catch (err) {
         console.error('Erro ao forçar cache:', err);
-        alert('Não foi possível concluir o descarregamento de todos os recursos. Verifique a ligação à internet e tente novamente.');
+        alert(window.t('Não foi possível concluir o descarregamento de todos os recursos. Verifique a ligação à internet e tente novamente.', 'Could not finish downloading all resources. Check your internet connection and try again.'));
       } finally {
         btnForceCache.disabled = false;
         btnForceCache.innerHTML = originalHtml;
@@ -2306,25 +2363,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!SpeechRec) {
       if (btnVoice) {
         btnVoice.addEventListener('click', () => {
-          alert('O reconhecimento de voz não é suportado pelo seu navegador atual. Por favor, utilize o teclado para descrever a situação.');
+          alert(window.t('O reconhecimento de voz não é suportado pelo seu navegador atual. Por favor, utilize o teclado para descrever a situação.', 'Speech recognition is not supported by your current browser. Please use the keyboard to describe the situation.'));
         });
       }
       return;
     }
 
     const recognition = new SpeechRec();
-    recognition.lang = 'pt-PT';
+    recognition.lang = window.AppLang === 'en' ? 'en-GB' : 'pt-PT';
     recognition.continuous = true;
     recognition.interimResults = false;
     let isListening = false;
 
     function startListening() {
       try {
+        recognition.lang = window.AppLang === 'en' ? 'en-GB' : 'pt-PT';
         recognition.start();
         isListening = true;
         if (voiceIndicator) voiceIndicator.classList.remove('hidden');
         if (micIcon) micIcon.textContent = '🔴';
-        if (micLabel) micLabel.textContent = 'A Ouvir...';
+        if (micLabel) micLabel.textContent = window.t('A Ouvir...', 'Listening...');
         if (btnVoice) {
           btnVoice.classList.add('bg-red-950', 'border-red-500', 'text-red-300');
           btnVoice.classList.remove('bg-slate-800', 'border-sky-500/50', 'text-sky-300');
@@ -2341,7 +2399,7 @@ document.addEventListener('DOMContentLoaded', () => {
       isListening = false;
       if (voiceIndicator) voiceIndicator.classList.add('hidden');
       if (micIcon) micIcon.textContent = '🎙️';
-      if (micLabel) micLabel.textContent = 'Modo Mãos Livres';
+      if (micLabel) micLabel.textContent = window.t('Modo Mãos Livres', 'Hands-Free Mode');
       if (btnVoice) {
         btnVoice.classList.remove('bg-red-950', 'border-red-500', 'text-red-300');
         btnVoice.classList.add('bg-slate-800', 'border-sky-500/50', 'text-sky-300');
@@ -3168,7 +3226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     container.querySelector('#btn-reset-kit')?.addEventListener('click', () => {
-      if (confirm('Deseja reiniciar a verificação desta mala?')) {
+      if (confirm(window.t('Deseja reiniciar a verificação desta mala?', 'Do you want to reset this kit checklist?'))) {
         localStorage.removeItem(`first_aid_kit_${locationKey}`);
         renderKitChecklist(locationKey);
       }
@@ -3204,38 +3262,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================================
-  // MODAL EM INGLÊS & APOIO A TURISTAS (ENGLISH GUIDE)
+  // TRADUÇÃO COMPLETA DA APP (PT-PT <-> EN)
   // ========================================================
-  const modalEnglishGuide = document.getElementById('modal-english-guide');
   const btnToggleLang = document.getElementById('btn-toggle-lang');
-  const btnCloseEnglishModal = document.getElementById('btn-close-english-modal');
-  const btnDismissEnglish = document.getElementById('btn-dismiss-english');
-  const enLocAddress = document.getElementById('en-loc-address');
-  const enLocRef = document.getElementById('en-loc-ref');
-
-  function openEnglishModal() {
-    if (!modalEnglishGuide) return;
-    const loc = GeoManager.currentLocation;
-    if (enLocAddress) {
-      enLocAddress.textContent = (loc.address && !loc.address.includes('A obter')) ? loc.address : 'GPS coordinates in Portugal';
-    }
-    if (enLocRef) {
-      enLocRef.textContent = loc.landmark || 'Nearby local enterprise / landmark';
-    }
-    modalEnglishGuide.classList.remove('hidden');
+  if (btnToggleLang) {
+    btnToggleLang.addEventListener('click', () => {
+      if (window.I18nManager && typeof window.I18nManager.toggleLanguage === 'function') {
+        window.I18nManager.toggleLanguage();
+      }
+    });
   }
 
-  function closeEnglishModal() {
-    if (modalEnglishGuide) modalEnglishGuide.classList.add('hidden');
-  }
-
-  if (btnToggleLang) btnToggleLang.addEventListener('click', openEnglishModal);
-  if (btnCloseEnglishModal) btnCloseEnglishModal.addEventListener('click', closeEnglishModal);
-  if (btnDismissEnglish) btnDismissEnglish.addEventListener('click', closeEnglishModal);
-
-  if (modalEnglishGuide) {
-    modalEnglishGuide.addEventListener('click', (e) => {
-      if (e.target === modalEnglishGuide) closeEnglishModal();
+  if (window.I18nManager && typeof window.I18nManager.onChange === 'function') {
+    window.I18nManager.onChange(() => {
+      if (typeof GeoManager !== 'undefined' && GeoManager.currentLocation) {
+        updateGeoUI(GeoManager.currentLocation);
+      }
+      if (typeof loadMedicalIdUI === 'function') {
+        loadMedicalIdUI();
+      }
+      if (typeof checkOfflineCacheStatus === 'function') {
+        checkOfflineCacheStatus();
+      }
+      if (AppState.tourniquetStartTime) {
+        if (labelTourniquetApplied) {
+          const tStr = AppState.tourniquetStartTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+          labelTourniquetApplied.textContent = window.t(`Aplicado às: ${tStr}`, `Applied at: ${tStr}`);
+        }
+        if (btnStartTourniquet) {
+          btnStartTourniquet.textContent = window.t('⏹ Parar / Registar Hora Final', '⏹ Stop / Record End Time');
+        }
+      }
+      if (AppState.strokeOnsetTime && labelStrokeTime) {
+        const sStr = AppState.strokeOnsetTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        labelStrokeTime.textContent = window.t(
+          `Início dos Sintomas: ${sStr} (Transmitir ao 112 para Via Verde)`,
+          `Symptom Onset: ${sStr} (Report to 112 for Fast-Track)`
+        );
+      }
+      if (AppState.burnInterval && btnStartBurn) {
+        btnStartBurn.textContent = window.t('⏹ Parar Arrefecimento', '⏹ Stop Cooling');
+      }
+      if (AppState.seizureInterval && btnSeizure) {
+        btnSeizure.textContent = window.t('⏹ Fim da Crise / Vítima Parou', '⏹ Seizure Ended / Stopped');
+      }
     });
   }
 
@@ -3320,47 +3390,55 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'step1_pancadas',
           speech: 'Incline a vítima para a frente com apoio no peito. Aplique até 5 pancadas secas entre as omoplatas. Diga "já fiz", "desobstruiu" ou "ficou inconsciente".',
+          speechEn: 'Lean the victim forward with chest support. Deliver up to 5 sharp back blows between the shoulder blades. Say "done", "cleared", or "unconscious".',
           display: '1. Incline a vítima para a frente com a mão de apoio no peito.<br>2. Aplique até <strong>5 pancadas secas entre as omoplatas</strong> com a base da mão.<br><span class="text-amber-300 font-bold">👉 Diga "Já fiz", "Desobstruiu" ou "Ficou inconsciente".</span>',
+          displayEn: '1. Lean the victim forward supporting their chest.<br>2. Deliver up to <strong>5 sharp back blows between the shoulder blades</strong> with the heel of your hand.<br><span class="text-amber-300 font-bold">👉 Say "Done", "Cleared", or "Unconscious".</span>',
           quickReplies: [
-            { label: '✓ Já fiz (não saiu)', action: 'step2_heimlich', cls: 'bg-amber-600 hover:bg-amber-500' },
-            { label: '🎉 Desobstruiu!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
-            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-600 hover:bg-red-500 col-span-2' }
+            { label: '✓ Já fiz (não saiu)', labelEn: '✓ Done (not cleared)', action: 'step2_heimlich', cls: 'bg-amber-600 hover:bg-amber-500' },
+            { label: '🎉 Desobstruiu!', labelEn: '🎉 Airway Cleared!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', labelEn: '🚨 Victim Unconscious!', action: 'unconscious', cls: 'bg-red-600 hover:bg-red-500 col-span-2' }
           ],
           triggers: {
-            step2_heimlich: ['fiz', 'ja fiz', 'já fiz', 'feito', 'continua', 'nao saiu', 'não saiu', 'proximo', 'próximo'],
-            resolved: ['desobstruiu', 'saiu', 'tosse', 'já tosse', 'ja tosse', 'respira', 'está a respirar', 'resolvido', 'melhorou'],
-            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'parou', 'chao', 'chão', 'colapso', 'apagou']
+            step2_heimlich: ['fiz', 'ja fiz', 'já fiz', 'feito', 'continua', 'nao saiu', 'não saiu', 'proximo', 'próximo', 'done', 'finished', 'did it', 'next', 'still stuck', 'not out', 'still choking'],
+            resolved: ['desobstruiu', 'saiu', 'tosse', 'já tosse', 'ja tosse', 'respira', 'está a respirar', 'resolvido', 'melhorou', 'cleared', 'came out', 'coughing', 'breathing', 'resolved', 'better'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'parou', 'chao', 'chão', 'colapso', 'apagou', 'unconscious', 'passed out', 'fainted', 'collapsed', 'fell', 'unresponsive']
           }
         },
         {
           id: 'step2_heimlich',
           speech: 'Coloque-se atrás da vítima. Feche o punho acima do umbigo e puxe com força para dentro e para cima até 5 vezes. Diga "já fiz", "desobstruiu" ou "ficou inconsciente".',
+          speechEn: 'Stand behind the victim. Place a clenched fist above the navel and pull sharply inward and upward up to 5 times. Say "done", "cleared", or "unconscious".',
           display: '1. Coloque-se atrás da vítima.<br>2. Punho fechado entre o umbigo e o esterno.<br>3. Puxe com força para dentro e para cima até <strong>5 vezes (Heimlich)</strong>.<br><span class="text-amber-300 font-bold">👉 Diga "Já fiz", "Desobstruiu" ou "Ficou inconsciente".</span>',
+          displayEn: '1. Stand behind the victim.<br>2. Clenched fist between navel and breastbone.<br>3. Pull sharply inward and upward up to <strong>5 times (Heimlich)</strong>.<br><span class="text-amber-300 font-bold">👉 Say "Done", "Cleared", or "Unconscious".</span>',
           quickReplies: [
-            { label: '↻ Repetir 5 pancadas', action: 'step1_pancadas', cls: 'bg-amber-600 hover:bg-amber-500' },
-            { label: '🎉 Desobstruiu!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
-            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-600 hover:bg-red-500 col-span-2' }
+            { label: '↻ Repetir 5 pancadas', labelEn: '↻ Repeat 5 back blows', action: 'step1_pancadas', cls: 'bg-amber-600 hover:bg-amber-500' },
+            { label: '🎉 Desobstruiu!', labelEn: '🎉 Airway Cleared!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', labelEn: '🚨 Victim Unconscious!', action: 'unconscious', cls: 'bg-red-600 hover:bg-red-500 col-span-2' }
           ],
           triggers: {
-            step1_pancadas: ['fiz', 'ja fiz', 'já fiz', 'feito', 'continua', 'repetir', 'mais', 'nao saiu', 'não saiu'],
-            resolved: ['desobstruiu', 'saiu', 'tosse', 'já tosse', 'ja tosse', 'respira', 'está a respirar', 'resolvido'],
-            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'parou', 'chao', 'chão', 'apagou']
+            step1_pancadas: ['fiz', 'ja fiz', 'já fiz', 'feito', 'continua', 'repetir', 'mais', 'nao saiu', 'não saiu', 'done', 'finished', 'did it', 'repeat', 'next', 'not out'],
+            resolved: ['desobstruiu', 'saiu', 'tosse', 'já tosse', 'ja tosse', 'respira', 'está a respirar', 'resolvido', 'cleared', 'came out', 'coughing', 'breathing', 'resolved', 'better'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'parou', 'chao', 'chão', 'apagou', 'unconscious', 'passed out', 'fainted', 'collapsed', 'fell', 'unresponsive']
           }
         },
         {
           id: 'resolved',
           speech: 'Excelente! A via aérea está desobstruída. Mantenha a vítima sentada, calma e vigie a respiração normal.',
+          speechEn: 'Excellent! The airway is clear. Keep the victim seated, calm, and monitor normal breathing.',
           display: '✅ <strong>Obstrução resolvida com sucesso!</strong><br>Mantenha a pessoa sentada, calma e observe a respiração. Se foram feitas compressões abdominais, deve ser avaliada por um médico.',
+          displayEn: '✅ <strong>Airway obstruction successfully cleared!</strong><br>Keep the person seated, calm, and monitor breathing. If abdominal thrusts were performed, they must be evaluated by a doctor.',
           quickReplies: [
-            { label: '⏹ Concluir Guia por Voz', action: 'stop', cls: 'bg-slate-700 hover:bg-slate-600 col-span-2' }
+            { label: '⏹ Concluir Guia por Voz', labelEn: '⏹ Finish Voice Guide', action: 'stop', cls: 'bg-slate-700 hover:bg-slate-600 col-span-2' }
           ]
         },
         {
           id: 'unconscious',
           speech: 'Atenção: Ampara a vítima até ao chão com cuidado. Liga 112 ou coloca em alta-voz de imediato. Vou abrir o suporte básico de vida para iniciares compressões no peito!',
+          speechEn: 'Attention: Carefully lower the victim to the ground. Call 112 or put on speakerphone immediately. Opening Basic Life Support to begin chest compressions!',
           display: '🚨 <strong>VÍTIMA FICOU INCONSCIENTE!</strong><br>1. Amparar a vítima até ao chão sem bater com a cabeça.<br>2. Ligar 112 em alta-voz.<br>3. A abrir o metrónomo de SBV (30 compressões no centro do peito)...',
+          displayEn: '🚨 <strong>VICTIM BECAME UNCONSCIOUS!</strong><br>1. Lower the victim safely to the floor without hitting their head.<br>2. Call 112 on speakerphone.<br>3. Opening BLS metronome (30 compressions at center of chest)...',
           quickReplies: [
-            { label: 'Abrir Suporte Básico de Vida (SBV) ➔', action: 'go_sbv', cls: 'bg-red-600 hover:bg-red-500 col-span-2 font-black' }
+            { label: 'Abrir Suporte Básico de Vida (SBV) ➔', labelEn: 'Open Basic Life Support (BLS) ➔', action: 'go_sbv', cls: 'bg-red-600 hover:bg-red-500 col-span-2 font-black' }
           ]
         }
       ]
@@ -3370,47 +3448,55 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'step1_pressao',
           speech: 'Aplique compressão direta e firme sobre o corte com uma compressa ou pano limpo. Mantenha sem aliviar. Diga "já parou", "continua a sangrar" ou "ficou inconsciente".',
+          speechEn: 'Apply firm, direct pressure over the wound using sterile gauze or a clean cloth. Do not release pressure. Say "stopped", "still bleeding", or "unconscious".',
           display: '1. Coloque compressas ou pano limpo sobre o ferimento.<br>2. Pressione com firmeza contínua durante 3 a 5 minutos sem aliviar.<br><span class="text-red-300 font-bold">👉 Diga "Já parou", "Continua a sangrar" ou "Ficou inconsciente".</span>',
+          displayEn: '1. Place gauze or a clean cloth over the wound.<br>2. Press firmly and continuously for 3 to 5 minutes without releasing.<br><span class="text-red-300 font-bold">👉 Say "Stopped", "Still bleeding", or "Unconscious".</span>',
           quickReplies: [
-            { label: '🩸 Continua a sangrar', action: 'step2_garrote', cls: 'bg-red-600 hover:bg-red-500' },
-            { label: '✓ Já parou o sangue', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
-            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-700 hover:bg-red-600 col-span-2' }
+            { label: '🩸 Continua a sangrar', labelEn: '🩸 Still bleeding', action: 'step2_garrote', cls: 'bg-red-600 hover:bg-red-500' },
+            { label: '✓ Já parou o sangue', labelEn: '✓ Bleeding stopped', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', labelEn: '🚨 Victim Unconscious!', action: 'unconscious', cls: 'bg-red-700 hover:bg-red-600 col-span-2' }
           ],
           triggers: {
-            step2_garrote: ['sangra', 'continua', 'continua a sangrar', 'muito sangue', 'jato', 'não para', 'nao para', 'ensopou'],
-            resolved: ['parou', 'já parou', 'ja parou', 'controlado', 'estancou', 'pouco'],
-            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'pálido', 'palido', 'caiu', 'apagou']
+            step2_garrote: ['sangra', 'continua', 'continua a sangrar', 'muito sangue', 'jato', 'não para', 'nao para', 'ensopou', 'bleeding', 'still bleeding', 'heavy bleeding', 'spurting', 'soaked'],
+            resolved: ['parou', 'já parou', 'ja parou', 'controlado', 'estancou', 'pouco', 'stopped', 'it stopped', 'controlled', 'under control'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'pálido', 'palido', 'caiu', 'apagou', 'unconscious', 'passed out', 'fainted', 'pale', 'collapsed', 'unresponsive']
           }
         },
         {
           id: 'step2_garrote',
           speech: 'Se for num membro e o sangue jorrar em jato sem parar, aplique o torniquete comercial 5 a 7 centímetros acima do corte. Rode o molinete até parar o sangue. Diga "já apliquei", "estancou" ou "ficou inconsciente".',
+          speechEn: 'If on a limb and blood is spurting continuously, apply a commercial tourniquet 5 to 7 centimeters above the wound. Twist the windlass until bleeding stops. Say "applied", "stopped", or "unconscious".',
           display: '1. Se for num membro com sangramento em jato contínuo, aplique o <strong>Torniquete (CAT)</strong> 5 a 7 cm acima da ferida.<br>2. Aperte e rode o molinete até parar o sangramento.<br>3. Registe a hora da aplicação.<br><span class="text-red-300 font-bold">👉 Diga "Já apliquei", "Estancou" ou "Ficou inconsciente".</span>',
+          displayEn: '1. If on a limb with continuous spurting, apply the <strong>Tourniquet (CAT)</strong> 5 to 7 cm above the wound.<br>2. Tighten and twist the windlass until bleeding stops.<br>3. Record the application time.<br><span class="text-red-300 font-bold">👉 Say "Applied", "Stopped", or "Unconscious".</span>',
           quickReplies: [
-            { label: '⏱ Registar hora do Garrote', action: 'record_tourniquet', cls: 'bg-amber-600 hover:bg-amber-500' },
-            { label: '✓ Estancou!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
-            { label: '🚨 Ficou inconsciente!', action: 'unconscious', cls: 'bg-red-700 hover:bg-red-600 col-span-2' }
+            { label: '⏱ Registar hora do Garrote', labelEn: '⏱ Record Tourniquet Time', action: 'record_tourniquet', cls: 'bg-amber-600 hover:bg-amber-500' },
+            { label: '✓ Estancou!', labelEn: '✓ Bleeding Stopped!', action: 'resolved', cls: 'bg-emerald-600 hover:bg-emerald-500' },
+            { label: '🚨 Ficou inconsciente!', labelEn: '🚨 Victim Unconscious!', action: 'unconscious', cls: 'bg-red-700 hover:bg-red-600 col-span-2' }
           ],
           triggers: {
-            record_tourniquet: ['apliquei', 'já apliquei', 'ja apliquei', 'garrote', 'torniquete', 'apertei', 'coloquei'],
-            resolved: ['parou', 'estancou', 'já parou', 'ja parou', 'controlado'],
-            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'chão', 'apagou']
+            record_tourniquet: ['apliquei', 'já apliquei', 'ja apliquei', 'garrote', 'torniquete', 'apertei', 'coloquei', 'applied', 'tourniquet', 'tightened', 'did it'],
+            resolved: ['parou', 'estancou', 'já parou', 'ja parou', 'controlado', 'stopped', 'it stopped', 'controlled'],
+            unconscious: ['inconsciente', 'ficou inconsciente', 'desmaiou', 'caiu', 'chão', 'apagou', 'unconscious', 'passed out', 'fainted', 'collapsed', 'unresponsive']
           }
         },
         {
           id: 'resolved',
           speech: 'Muito bem. Hemorragia controlada. Mantenha a compressão com ligadura sem apertar em demasia. Cubra a vítima com manta para prevenir o choque.',
+          speechEn: 'Well done. Bleeding is under control. Keep firm bandaging without over-tightening. Cover the victim with a blanket to prevent shock.',
           display: '✅ <strong>Hemorragia sob controlo.</strong><br>1. Mantenha a compressão com ligadura.<br>2. Aqueça a vítima com manta térmica para prevenir choque.<br>3. Vigie pulso e respiração.',
+          displayEn: '✅ <strong>Bleeding under control.</strong><br>1. Keep compression bandage in place.<br>2. Warm the victim with an emergency blanket to prevent shock.<br>3. Monitor pulse and breathing.',
           quickReplies: [
-            { label: '⏹ Concluir Guia por Voz', action: 'stop', cls: 'bg-slate-700 hover:bg-slate-600 col-span-2' }
+            { label: '⏹ Concluir Guia por Voz', labelEn: '⏹ Finish Voice Guide', action: 'stop', cls: 'bg-slate-700 hover:bg-slate-600 col-span-2' }
           ]
         },
         {
           id: 'unconscious',
           speech: 'Atenção: Deite a vítima no chão imediatamente. Mantenha a compressão da hemorragia. Se não responder e não respirar normalmente, inicie compressões torácicas no peito!',
+          speechEn: 'Attention: Lay the victim flat on the ground immediately. Keep compressing the bleed. If unresponsive and not breathing normally, begin chest compressions!',
           display: '🚨 <strong>VÍTIMA INCONSCIENTE!</strong><br>1. Deitar de costas no chão.<br>2. Manter a compressão da ferida.<br>3. Se não respirar normalmente, ligue 112 e inicie compressões torácicas imediatas.',
+          displayEn: '🚨 <strong>VICTIM UNCONSCIOUS!</strong><br>1. Lay flat on their back on the ground.<br>2. Maintain pressure on the wound.<br>3. If not breathing normally, call 112 and begin immediate chest compressions.',
           quickReplies: [
-            { label: 'Abrir Suporte Básico de Vida (SBV) ➔', action: 'go_sbv', cls: 'bg-red-600 hover:bg-red-500 col-span-2 font-black' }
+            { label: 'Abrir Suporte Básico de Vida (SBV) ➔', labelEn: 'Open Basic Life Support (BLS) ➔', action: 'go_sbv', cls: 'bg-red-600 hover:bg-red-500 col-span-2 font-black' }
           ]
         }
       ]
@@ -3427,7 +3513,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (SpeechRec) {
       try {
         coachRecognition = new SpeechRec();
-        coachRecognition.lang = 'pt-PT';
+        coachRecognition.lang = window.AppLang === 'en' ? 'en-GB' : 'pt-PT';
         coachRecognition.continuous = true;
         coachRecognition.interimResults = false;
 
@@ -3464,6 +3550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startListening() {
       if (!coachRecognition) return;
+      coachRecognition.lang = window.AppLang === 'en' ? 'en-GB' : 'pt-PT';
       isListening = true;
       try { coachRecognition.start(); } catch (_) {}
     }
@@ -3489,7 +3576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (panel) panel.classList.remove('hidden');
       if (toggleBtn) {
-        toggleBtn.textContent = '⏹ Parar Guia';
+        toggleBtn.textContent = window.t('⏹ Parar Guia', '⏹ Stop Guide');
         toggleBtn.classList.replace('bg-amber-500', 'bg-slate-700');
         toggleBtn.classList.replace('bg-red-600', 'bg-slate-700');
       }
@@ -3498,7 +3585,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const step = proto.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      if (bubble) bubble.innerHTML = step.display;
+      if (bubble) bubble.innerHTML = (window.AppLang === 'en' && step.displayEn) ? step.displayEn : step.display;
 
       if (actionsBox) {
         actionsBox.innerHTML = '';
@@ -3506,7 +3593,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = `py-2 px-2.5 rounded-xl text-white font-bold text-xs shadow transition cursor-pointer text-center ${qr.cls || 'bg-slate-800'}`;
-          btn.textContent = qr.label;
+          btn.textContent = (window.AppLang === 'en' && qr.labelEn) ? qr.labelEn : window.t(qr.label);
           btn.addEventListener('click', () => handleCoachAction(qr.action));
           actionsBox.appendChild(btn);
         });
@@ -3514,25 +3601,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Fala a instrução e escuta a resposta
       pauseListening();
-      if (statusLbl) statusLbl.textContent = 'A falar instrução... Aguarde.';
+      if (statusLbl) statusLbl.textContent = window.t('A falar instrução... Aguarde.', 'Speaking instruction... Please wait.');
 
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(step.speech);
-        utt.lang = 'pt-PT';
+        const speechText = (window.AppLang === 'en' && step.speechEn) ? step.speechEn : window.t(step.speech);
+        const utt = new SpeechSynthesisUtterance(speechText);
+        utt.lang = window.AppLang === 'en' ? 'en-GB' : 'pt-PT';
         utt.rate = 1.02;
         utt.onend = () => {
           startListening();
-          if (statusLbl) statusLbl.textContent = '🎤 A ouvir... Diga uma resposta ou toque num botão:';
+          if (statusLbl) statusLbl.textContent = window.t('🎤 A ouvir... Diga uma resposta ou toque num botão:', '🎤 Listening... Say a reply or tap a button:');
         };
         utt.onerror = () => {
           startListening();
-          if (statusLbl) statusLbl.textContent = '🎤 A ouvir... Diga uma resposta ou toque num botão:';
+          if (statusLbl) statusLbl.textContent = window.t('🎤 A ouvir... Diga uma resposta ou toque num botão:', '🎤 Listening... Say a reply or tap a button:');
         };
         window.speechSynthesis.speak(utt);
       } else {
         startListening();
-        if (statusLbl) statusLbl.textContent = '🎤 A ouvir... Diga uma resposta ou toque num botão:';
+        if (statusLbl) statusLbl.textContent = window.t('🎤 A ouvir... Diga uma resposta ou toque num botão:', '🎤 Listening... Say a reply or tap a button:');
       }
     }
 
@@ -3574,7 +3662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const toggleBtn = widget.querySelector('.btn-start-voice-coach');
         if (toggleBtn) {
           const proto = toggleBtn.dataset.protocol;
-          toggleBtn.textContent = '▶ Iniciar Guia por Voz';
+          toggleBtn.textContent = window.t('▶ Iniciar Guia por Voz', '▶ Start Voice Guide');
           if (proto === 'ova') {
             toggleBtn.className = 'btn-start-voice-coach px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1';
           } else {
@@ -3584,6 +3672,40 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       currentProtocol = null;
       currentStepId = null;
+    }
+
+    if (window.I18nManager && typeof window.I18nManager.onChange === 'function') {
+      window.I18nManager.onChange(() => {
+        document.querySelectorAll('.interactive-voice-coach-card').forEach(widget => {
+          const toggleBtn = widget.querySelector('.btn-start-voice-coach');
+          if (toggleBtn) {
+            const proto = toggleBtn.dataset.protocol;
+            toggleBtn.textContent = (currentProtocol === proto)
+              ? window.t('⏹ Parar Guia', '⏹ Stop Guide')
+              : window.t('▶ Iniciar Guia por Voz', '▶ Start Voice Guide');
+          }
+        });
+        if (currentProtocol && currentStepId) {
+          const widget = document.getElementById(`voice-coach-${currentProtocol}`);
+          const protoObj = VOICE_COACH_PROTOCOLS[currentProtocol];
+          const step = protoObj && protoObj.steps.find(s => s.id === currentStepId);
+          if (widget && step) {
+            const bubble = widget.querySelector('.voice-coach-bubble');
+            if (bubble) bubble.innerHTML = (window.AppLang === 'en' && step.displayEn) ? step.displayEn : step.display;
+            const actionsBox = widget.querySelector('.voice-coach-actions');
+            if (actionsBox) {
+              actionsBox.querySelectorAll('button').forEach((btn, idx) => {
+                const qr = step.quickReplies && step.quickReplies[idx];
+                if (qr) btn.textContent = (window.AppLang === 'en' && qr.labelEn) ? qr.labelEn : qr.label;
+              });
+            }
+            const statusLbl = widget.querySelector('.status-lbl');
+            if (statusLbl) {
+              statusLbl.textContent = window.t('🎤 A ouvir... Diga uma resposta ou toque num botão:', '🎤 Listening... Say a reply or tap a button:');
+            }
+          }
+        }
+      });
     }
 
     document.querySelectorAll('.btn-start-voice-coach').forEach(btn => {
@@ -3696,7 +3818,10 @@ document.addEventListener('DOMContentLoaded', () => {
           } catch (_) {}
         }
       } else {
-        alert('Para adicionar esta aplicação ao seu ecrã:\n\n• No telemóvel: abra o menu do navegador (três pontos ou partilhar) e toque em "Adicionar ao ecrã inicial" ou "Instalar aplicação".\n• No computador: clique no ícone de instalação na barra de endereço.');
+        alert(window.t(
+          'Para adicionar esta aplicação ao seu ecrã:\n\n• No telemóvel: abra o menu do navegador (três pontos ou partilhar) e toque em "Adicionar ao ecrã inicial" ou "Instalar aplicação".\n• No computador: clique no ícone de instalação na barra de endereço.',
+          'To add this app to your home screen:\n\n• On mobile: open the browser menu (three dots or Share icon) and tap "Add to Home Screen" or "Install app".\n• On desktop: click the install icon in the address bar.'
+        ));
       }
     }
 
