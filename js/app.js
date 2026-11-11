@@ -3603,6 +3603,156 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ========================================================
+  // TELEMETRIA PWA & INSTALAÇÃO NO ECRÃ PRINCIPAL (GOOGLE ANALYTICS)
+  // ========================================================
+  function initPWAInstallAndTracking() {
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const urlParams = new URLSearchParams(window.location.search);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true ||
+                         urlParams.get('utm_source') === 'homescreen' ||
+                         urlParams.get('source') === 'pwa';
+
+    // 1. Registo de abertura via Ecrã Principal no Google Analytics
+    if (isStandalone) {
+      if (typeof gtag === 'function') {
+        try {
+          gtag('event', 'pwa_open_standalone', {
+            event_category: 'PWA',
+            event_label: 'Abertura via Ecrã Principal',
+            platform: isIos ? 'ios_homescreen' : 'standalone_pwa',
+            non_interaction: true
+          });
+          gtag('set', 'user_properties', {
+            app_platform: isIos ? 'ios_pwa' : 'android_pwa',
+            is_installed_pwa: 'true'
+          });
+        } catch (_) {}
+      }
+      // Se já está a correr a partir do ecrã principal, nunca exibir o banner de instalação
+      return;
+    }
+
+    const installBanner = document.getElementById('pwa-install-banner');
+    const btnTriggerInstall = document.getElementById('btn-trigger-pwa-install');
+    const btnDismissBanner = document.getElementById('btn-dismiss-pwa-banner');
+    const modalIosGuide = document.getElementById('modal-ios-install-guide');
+    const btnCloseIosGuide = document.getElementById('btn-close-ios-install');
+    const btnAckIosGuide = document.getElementById('btn-ack-ios-install');
+    const btnManualInstall = document.getElementById('btn-manual-install-app');
+
+    const isBannerDismissed = localStorage.getItem('pwa_banner_dismissed_v53');
+    let deferredPrompt = null;
+
+    // 2. Capturar evento nativo do navegador para instalação PWA (Android / Chrome / Edge)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBanner && !isBannerDismissed) {
+        installBanner.classList.remove('hidden');
+      }
+      if (typeof gtag === 'function') {
+        try {
+          gtag('event', 'pwa_prompt_available', { event_category: 'PWA' });
+        } catch (_) {}
+      }
+    });
+
+    // 3. No Safari / iOS, exibir banner se ainda não foi descartado
+    if (isIos && installBanner && !isBannerDismissed) {
+      installBanner.classList.remove('hidden');
+    }
+
+    // 4. Ação ao carregar em "Instalar" / "Adicionar"
+    async function triggerInstallFlow() {
+      if (typeof gtag === 'function') {
+        try {
+          gtag('event', 'pwa_banner_click', {
+            event_category: 'PWA',
+            event_label: 'Clique em Instalar App'
+          });
+        } catch (_) {}
+      }
+
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (typeof gtag === 'function') {
+          try {
+            gtag('event', 'pwa_prompt_response', {
+              event_category: 'PWA',
+              outcome: choice.outcome
+            });
+          } catch (_) {}
+        }
+        deferredPrompt = null;
+        if (installBanner) installBanner.classList.add('hidden');
+      } else if (isIos) {
+        if (modalIosGuide) modalIosGuide.classList.remove('hidden');
+        if (typeof gtag === 'function') {
+          try {
+            gtag('event', 'pwa_ios_guide_viewed', { event_category: 'PWA' });
+          } catch (_) {}
+        }
+      } else {
+        alert('Para adicionar esta aplicação ao seu ecrã:\n\n• No telemóvel: abra o menu do navegador (três pontos ou partilhar) e toque em "Adicionar ao ecrã inicial" ou "Instalar aplicação".\n• No computador: clique no ícone de instalação na barra de endereço.');
+      }
+    }
+
+    if (btnTriggerInstall) btnTriggerInstall.addEventListener('click', triggerInstallFlow);
+    if (btnManualInstall) btnManualInstall.addEventListener('click', triggerInstallFlow);
+
+    // 5. Descartar banner
+    if (btnDismissBanner) {
+      btnDismissBanner.addEventListener('click', () => {
+        if (installBanner) installBanner.classList.add('hidden');
+        localStorage.setItem('pwa_banner_dismissed_v53', 'true');
+        if (typeof gtag === 'function') {
+          try {
+            gtag('event', 'pwa_banner_dismiss', { event_category: 'PWA' });
+          } catch (_) {}
+        }
+      });
+    }
+
+    // 6. Fechar modal iOS
+    if (btnCloseIosGuide) {
+      btnCloseIosGuide.addEventListener('click', () => {
+        if (modalIosGuide) modalIosGuide.classList.add('hidden');
+      });
+    }
+    if (btnAckIosGuide) {
+      btnAckIosGuide.addEventListener('click', () => {
+        if (modalIosGuide) modalIosGuide.classList.add('hidden');
+        if (installBanner) installBanner.classList.add('hidden');
+        localStorage.setItem('pwa_banner_dismissed_v53', 'true');
+      });
+    }
+    if (modalIosGuide) {
+      modalIosGuide.addEventListener('click', (e) => {
+        if (e.target === modalIosGuide) modalIosGuide.classList.add('hidden');
+      });
+    }
+
+    // 7. Evento de instalação concluída com sucesso (Android / Chrome)
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      if (installBanner) installBanner.classList.add('hidden');
+      localStorage.setItem('pwa_banner_dismissed_v53', 'true');
+      if (typeof gtag === 'function') {
+        try {
+          gtag('event', 'pwa_install', {
+            event_category: 'PWA',
+            event_label: 'App Instalada com Sucesso no Ecrã Principal',
+            platform: isIos ? 'ios' : 'android',
+            value: 1
+          });
+        } catch (_) {}
+      }
+    });
+  }
+
   // Inicializar novos módulos
   initCabulaSbar();
   initHandsFreeVoice();
@@ -3610,6 +3760,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFirstAidKitChecklist();
   initLearningHubSearch();
   initInteractiveVoiceCoach();
+  initPWAInstallAndTracking();
 
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));

@@ -9,7 +9,7 @@
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=52">
+  <link rel="stylesheet" href="./css/styles.css?v=53">
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE TAG / ANALYTICS (G-6702XQNFX2) -->
@@ -61,6 +61,23 @@
           </div>
         </div>
         <button type="button" id="btn-dismiss-disclaimer" class="text-amber-400 hover:text-white text-base font-bold leading-none px-1 py-0.5" title="Fechar aviso">&times;</button>
+      </div>
+    </div>
+
+    <!-- BANNER DE INSTALAÇÃO PWA (ADICIONAR AO ECRÃ PRINCIPAL) -->
+    <div id="pwa-install-banner" class="hidden mx-3 mb-2 p-2.5 bg-gradient-to-r from-sky-950/90 to-slate-900/90 border border-sky-500/60 rounded-xl text-xs text-sky-200 shadow-md flex items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl flex-shrink-0">📲</span>
+        <div>
+          <strong class="text-white text-xs block font-bold">Instalar Socorro 112</strong>
+          <p class="text-[10px] text-sky-200/90 leading-tight">Adicione ao ecrã para aceder offline num clique sem digitar o endereço.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button type="button" id="btn-trigger-pwa-install" class="py-1.5 px-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-lg shadow transition cursor-pointer">
+          Instalar
+        </button>
+        <button type="button" id="btn-dismiss-pwa-banner" class="text-slate-400 hover:text-white text-base font-bold px-1.5 py-0.5 leading-none cursor-pointer" title="Agora não">&times;</button>
       </div>
     </div>
 
@@ -2482,6 +2499,20 @@
           </div>
         </div>
 
+        <!-- ACESSO RÁPIDO: ADICIONAR APP AO ECRÃ DO TELEMÓVEL -->
+        <div class="mt-4 p-3.5 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between text-xs shadow-sm">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">📲</span>
+            <div>
+              <strong class="text-white text-xs block">Guardar Socorro 112 no Telemóvel</strong>
+              <span class="text-[10px] text-slate-400">Aceda instantaneamente em qualquer emergência mesmo sem internet</span>
+            </div>
+          </div>
+          <button type="button" id="btn-manual-install-app" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow transition cursor-pointer flex items-center gap-1">
+            <span>➕</span> <span>Adicionar</span>
+          </button>
+        </div>
+
         <!-- RODAPÉ DE CRÉDITOS: THINKED BY HUGO FONTE (ÚNICA REFERÊNCIA) -->
         <footer class="mt-10 mb-6 pt-5 border-t border-slate-800/80 text-center text-xs text-slate-500">
           <p class="font-semibold tracking-wide text-slate-400 text-sm">Thinked by Hugo Fonte</p>
@@ -2921,6 +2952,39 @@
       </div>
     </div>
 
+    <!-- MODAL DE INSTRUÇÕES DE INSTALAÇÃO NO IOS (IPHONE / IPAD) -->
+    <div id="modal-ios-install-guide" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-sky-500/60 rounded-2xl max-w-sm w-full p-4 shadow-2xl text-slate-200 space-y-3 animate-fade-in">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📲</span>
+            <h3 class="font-bold text-sm text-white">Adicionar ao Ecrã no iPhone</h3>
+          </div>
+          <button type="button" id="btn-close-ios-install" class="text-slate-400 hover:text-white text-2xl font-bold px-1.5 py-0.5 leading-none cursor-pointer">&times;</button>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Para aceder instantaneamente como uma app em qualquer emergência (mesmo sem internet):
+        </p>
+        <div class="space-y-2.5 text-xs bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div class="flex items-start gap-2.5">
+            <span class="text-sky-400 font-bold text-sm">1.</span>
+            <span>Toque no botão <strong>Partilhar</strong> <span class="inline-block px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-[11px] font-mono">⎋ / [↑]</span> na barra inferior do Safari.</span>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-sky-400 font-bold text-sm">2.</span>
+            <span>Deslize a lista para baixo e toque em <strong>«Ecrã principal»</strong> (ou <em>«Adicionar ao Ecrã Principal»</em> ➕).</span>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-sky-400 font-bold text-sm">3.</span>
+            <span>No canto superior direito, toque em <strong>«Adicionar»</strong>.</span>
+          </div>
+        </div>
+        <button type="button" id="btn-ack-ios-install" class="w-full py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-xl shadow cursor-pointer transition">
+          ✓ Entendido!
+        </button>
+      </div>
+    </div>
+
     <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APP NATIVA -->
     <nav class="bottom-nav">
       <button type="button" class="nav-item active" data-target="screen-emergency">
@@ -2967,11 +3031,11 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/audio.js?v=52"></script>
-  <script src="./js/geo.js?v=52"></script>
-  <script src="./js/knowledge_base.js?v=52"></script>
-  <script src="./js/rag.js?v=52"></script>
-  <script src="./js/ai.js?v=52"></script>
-  <script src="./js/app.js?v=52"></script>
+  <script src="./js/audio.js?v=53"></script>
+  <script src="./js/geo.js?v=53"></script>
+  <script src="./js/knowledge_base.js?v=53"></script>
+  <script src="./js/rag.js?v=53"></script>
+  <script src="./js/ai.js?v=53"></script>
+  <script src="./js/app.js?v=53"></script>
 </body>
 </html>
