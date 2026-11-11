@@ -1,5 +1,5 @@
 /**
- * i18n_dict.js - Full Offline PT-PT -> EN Dictionary for Socorro 112
+ * i18n_dict.js - Full Offline PT-PT -> EN Dictionary for Cuidar em Emergência
  */
 window.I18N_PT_TO_EN = {
   "Cuidar em Emergência · Guia Prático de Primeiros Socorros": "Emergency Care · Practical First Aid Guide",
@@ -12,7 +12,7 @@ window.I18N_PT_TO_EN = {
   "O recurso à aplicação nunca deve adiar a chamada de emergência.": "Using this app must never delay calling emergency services.",
   "Ver Termos de Responsabilidade Legal & Privacidade RGPD →": "View Legal Terms of Liability & GDPR Privacy →",
   "Fechar aviso": "Dismiss notice",
-  "Instalar Socorro 112": "Install Socorro 112",
+  "Instalar Cuidar em Emergência": "Install Care in Emergency",
   "Adicione ao ecrã para aceder offline num clique sem digitar o endereço.": "Add to your home screen for one-tap offline access without typing the web address.",
   "Instalar": "Install",
   "Agora não": "Not now",
@@ -1023,7 +1023,7 @@ window.I18N_PT_TO_EN = {
   "Gostou do projeto?": "Enjoyed the project?",
   "Se esta aplicação ou o manual lhe foram úteis e deseja contribuir para a sua continuidade e melhoria, pode apoiar o criador com um café simbólico através do PayPal (1 toque rápido sem precisar de digitar cartões).": "If this app or manual was helpful and you wish to support its continuation and improvement, you can buy the creator a symbolic coffee via PayPal (1 quick tap without entering card numbers).",
   "Apoiar via PayPal (paypal.me/hfont3)": "Support via PayPal (paypal.me/hfont3)",
-  "Guardar Socorro 112 no Telemóvel": "Save Socorro 112 to Your Phone",
+  "Guardar Cuidar em Emergência no Telemóvel": "Save Care in Emergency to Phone",
   "Aceda instantaneamente em qualquer emergência mesmo sem internet": "Instant access in any emergency even without internet",
   "Adicionar": "Add",
   "Cuidar em Emergência • Guia Prático de Primeiros Socorros & Apoio à Decisão": "Care in Emergency • Practical First Aid Guide & Decision Support",
@@ -1149,7 +1149,7 @@ window.I18N_PT_TO_EN = {
   ". Em caso de discrepância entre os conteúdos deste guia e as ordens transmitidas pelo operador ou médico do CODU/INEM, prevalecem sem exceção as instruções recebidas por voz das autoridades de emergência.": ". In case of any discrepancy between this guide's content and instructions given by a 112/CODU operator or physician, verbal instructions from emergency authorities always take precedence.",
   "Natureza Pedagógica & Auxiliar de Memória (MDR UE)": "Educational & Memory Aid Nature (EU MDR)",
   "A aplicação": "The application",
-  "«Cuidar em Emergência / Socorro 112»": "\"Cuidar em Emergência / Socorro 112\"",
+  "«Cuidar em Emergência»": "\"Care in Emergency\"",
   "foi concebida por": "was created by",
   "Hugo Fonte": "Hugo Fonte",
   "como uma plataforma digital de caráter exclusivamente pedagógico, formativo e de suporte de memória rápida para suporte básico de vida, primeiros socorros comunitários e preparação de kits institucionais.": "as a strictly educational, training, and quick memory-aid platform for basic life support, community first aid, and institutional kit preparation.",
@@ -1198,7 +1198,7 @@ window.I18N_PT_TO_EN = {
   "Para aceder instantaneamente como uma app em qualquer emergência (mesmo sem internet):": "For instant app-like access in any emergency (even offline):",
   "Toque no botão": "Tap the",
   "Partilhar": "Share",
-  "na barra inferior do Safari.": "button in Safari's bottom bar.",
+  "na barra inferior do Safari ou no topo direito do Chrome.": "in Safari's bottom bar or Chrome's top-right address bar.",
   "Deslize a lista para baixo e toque em": "Scroll down the list and tap",
   "«Ecrã principal»": "\"Home Screen\"",
   "(ou": "(or",
@@ -1783,5 +1783,18 @@ window.I18N_PT_TO_EN = {
   "Thinked by Hugo Fonte • Cuidar em Emergência": "Thinked by Hugo Fonte • Care in Emergency",
   "Cábula ao 112:": "112 Call Script:",
   "LIGAR 112 AGORA (Emergência INEM)": "CALL 112 NOW (INEM Emergency)",
-  "LIGAR LINHA SNS 24 (808 24 24 24)": "CALL SNS 24 LINE (808 24 24 24)"
+  "LIGAR LINHA SNS 24 (808 24 24 24)": "CALL SNS 24 LINE (808 24 24 24)",
+  "Instalar Aplicação no Dispositivo": "Install App on Device",
+  "Para adicionar como aplicação oficial (WebAPK) e aceder num clique mesmo sem internet:": "To add as an official app (WebAPK) for one-tap offline access:",
+  "No Android (Chrome / Edge):": "On Android (Chrome / Edge):",
+  "Toque no menu": "Tap the",
+  "no canto superior direito e selecione": "menu in the top-right corner and select",
+  "«Instalar aplicação»": "\"Install app\"",
+  "«Adicionar ao ecrã principal»": "\"Add to Home Screen\"",
+  ").": ").",
+  "No Computador (Chrome / Edge):": "On Desktop (Chrome / Edge):",
+  "Clique no ícone de instalação": "Click the install icon",
+  "no lado direito da barra de endereço.": "on the right side of the address bar.",
+  "💡 Se acabou de atualizar a página, aguarde alguns segundos ou recarregue uma vez para o Chrome ativar o diálogo automático de instalação.": "💡 If you just updated the page, wait a few seconds or reload once so Chrome activates the automatic install prompt.",
+  "Instalada": "Installed"
 };

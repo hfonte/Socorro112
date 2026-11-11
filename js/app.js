@@ -1,7 +1,9 @@
 // LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch((err) => {
+      console.warn('Falha ao registar Service Worker:', err);
+    });
   }
 
   const AppState = {
@@ -2015,7 +2017,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       const keys = await caches.keys();
-      const currentCacheKey = keys.find(k => k.startsWith('cuidar-emergencia') || k.startsWith('protocolo-tas') || k.startsWith('socorro112'));
+      const currentCacheKey = keys.find(k => k.startsWith('cuidar-emergencia') || k.startsWith('protocolo-tas'));
       if (currentCacheKey) {
         const cache = await caches.open(currentCacheKey);
         const cachedRequests = await cache.keys();
@@ -2068,23 +2070,27 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       try {
-        const cacheName = 'cuidar-emergencia-v54';
+        const cacheName = 'cuidar-emergencia-v55';
         const cache = await caches.open(cacheName);
         
         const urlsToCache = [
           './',
           './index.html',
           './manifest.json',
-          './css/styles.css?v=54',
-          './js/i18n_dict.js?v=54',
-          './js/i18n.js?v=54',
-          './js/app.js?v=54',
-          './js/audio.js?v=54',
-          './js/geo.js?v=54',
-          './js/knowledge_base.js?v=54',
-          './js/rag.js?v=54',
-          './js/ai.js?v=54',
+          './css/styles.css?v=55',
+          './js/i18n_dict.js?v=55',
+          './js/i18n.js?v=55',
+          './js/app.js?v=55',
+          './js/audio.js?v=55',
+          './js/geo.js?v=55',
+          './js/knowledge_base.js?v=55',
+          './js/rag.js?v=55',
+          './js/ai.js?v=55',
           'https://cdn.tailwindcss.com/3.4.17',
+          './assets/images/icon-192.png',
+          './assets/images/icon-512.png',
+          './assets/images/icon-192-maskable.png',
+          './assets/images/icon-512-maskable.png',
           './assets/images/estrela_da_vida.jpg',
           './assets/images/cadeia_sobrevivencia.png',
           './assets/images/sbv_consciencia.png',
@@ -2108,8 +2114,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let successCount = 0;
         await Promise.allSettled(urlsToCache.map(async (url) => {
           try {
-            await cache.add(url);
-            successCount++;
+            if (url.startsWith('http')) {
+              const resp = await fetch(new Request(url, { mode: 'no-cors' }));
+              if (resp) {
+                await cache.put(url, resp);
+                successCount++;
+              }
+            } else {
+              await cache.add(url);
+              successCount++;
+            }
           } catch (err) {
             console.warn('Falha pontual no pré-carregamento:', url, err);
           }
@@ -3729,15 +3743,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // TELEMETRIA PWA & INSTALAÇÃO NO ECRÃ PRINCIPAL (GOOGLE ANALYTICS)
   // ========================================================
   function initPWAInstallAndTracking() {
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const urlParams = new URLSearchParams(window.location.search);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                         window.navigator.standalone === true ||
-                         urlParams.get('utm_source') === 'homescreen' ||
-                         urlParams.get('source') === 'pwa';
+    const isRealStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                             window.navigator.standalone === true;
+    const launchedViaHomescreen = isRealStandalone ||
+                                  urlParams.get('utm_source') === 'homescreen' ||
+                                  urlParams.get('source') === 'pwa';
 
     // 1. Registo de abertura via Ecrã Principal no Google Analytics
-    if (isStandalone) {
+    if (launchedViaHomescreen) {
       if (typeof gtag === 'function') {
         try {
           gtag('event', 'pwa_open_standalone', {
@@ -3752,8 +3768,6 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         } catch (_) {}
       }
-      // Se já está a correr a partir do ecrã principal, nunca exibir o banner de instalação
-      return;
     }
 
     const installBanner = document.getElementById('pwa-install-banner');
@@ -3762,16 +3776,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalIosGuide = document.getElementById('modal-ios-install-guide');
     const btnCloseIosGuide = document.getElementById('btn-close-ios-install');
     const btnAckIosGuide = document.getElementById('btn-ack-ios-install');
+    const modalAndroidGuide = document.getElementById('modal-android-install-guide');
+    const btnCloseAndroidGuide = document.getElementById('btn-close-android-install');
+    const btnAckAndroidGuide = document.getElementById('btn-ack-android-install');
     const btnManualInstall = document.getElementById('btn-manual-install-app');
 
-    const isBannerDismissed = localStorage.getItem('pwa_banner_dismissed_v53');
-    let deferredPrompt = null;
+    const isBannerDismissed = localStorage.getItem('pwa_banner_dismissed_v55');
+    let deferredPrompt = window.__deferredInstallPrompt || null;
+
+    if (isRealStandalone) {
+      if (installBanner) installBanner.classList.add('hidden');
+      if (btnManualInstall) {
+        btnManualInstall.innerHTML = `<span>✅</span> <span>${window.t('Instalada', 'Installed')}</span>`;
+        btnManualInstall.classList.remove('bg-sky-600', 'hover:bg-sky-500');
+        btnManualInstall.classList.add('bg-emerald-700', 'hover:bg-emerald-600');
+      }
+    }
 
     // 2. Capturar evento nativo do navegador para instalação PWA (Android / Chrome / Edge)
+    if (!isRealStandalone && deferredPrompt && installBanner && !isBannerDismissed) {
+      installBanner.classList.remove('hidden');
+    }
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (installBanner && !isBannerDismissed) {
+      window.__deferredInstallPrompt = e;
+      if (!isRealStandalone && installBanner && !isBannerDismissed) {
         installBanner.classList.remove('hidden');
       }
       if (typeof gtag === 'function') {
@@ -3781,8 +3812,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 3. No Safari / iOS, exibir banner se ainda não foi descartado
-    if (isIos && installBanner && !isBannerDismissed) {
+    // 3. No Safari / iOS, exibir banner se ainda não foi descartado nem instalado
+    if (!isRealStandalone && isIos && installBanner && !isBannerDismissed) {
       installBanner.classList.remove('hidden');
     }
 
@@ -3797,19 +3828,34 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (_) {}
       }
 
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (typeof gtag === 'function') {
-          try {
-            gtag('event', 'pwa_prompt_response', {
-              event_category: 'PWA',
-              outcome: choice.outcome
-            });
-          } catch (_) {}
+      const promptEvt = deferredPrompt || window.__deferredInstallPrompt;
+
+      if (isRealStandalone) {
+        alert(window.t(
+          '✅ A aplicação Cuidar em Emergência já está instalada e a correr a partir do seu ecrã principal!',
+          '✅ Care in Emergency is already installed and running from your home screen!'
+        ));
+      } else if (promptEvt) {
+        try {
+          promptEvt.prompt();
+          const choice = await promptEvt.userChoice;
+          if (typeof gtag === 'function') {
+            try {
+              gtag('event', 'pwa_prompt_response', {
+                event_category: 'PWA',
+                outcome: choice.outcome
+              });
+            } catch (_) {}
+          }
+          deferredPrompt = null;
+          window.__deferredInstallPrompt = null;
+          if (choice && choice.outcome === 'accepted') {
+            if (installBanner) installBanner.classList.add('hidden');
+          }
+        } catch (err) {
+          console.warn('Erro ao abrir prompt PWA:', err);
+          if (modalAndroidGuide) modalAndroidGuide.classList.remove('hidden');
         }
-        deferredPrompt = null;
-        if (installBanner) installBanner.classList.add('hidden');
       } else if (isIos) {
         if (modalIosGuide) modalIosGuide.classList.remove('hidden');
         if (typeof gtag === 'function') {
@@ -3817,10 +3863,12 @@ document.addEventListener('DOMContentLoaded', () => {
             gtag('event', 'pwa_ios_guide_viewed', { event_category: 'PWA' });
           } catch (_) {}
         }
+      } else if (modalAndroidGuide) {
+        modalAndroidGuide.classList.remove('hidden');
       } else {
         alert(window.t(
-          'Para adicionar esta aplicação ao seu ecrã:\n\n• No telemóvel: abra o menu do navegador (três pontos ou partilhar) e toque em "Adicionar ao ecrã inicial" ou "Instalar aplicação".\n• No computador: clique no ícone de instalação na barra de endereço.',
-          'To add this app to your home screen:\n\n• On mobile: open the browser menu (three dots or Share icon) and tap "Add to Home Screen" or "Install app".\n• On desktop: click the install icon in the address bar.'
+          'Para adicionar esta aplicação ao seu ecrã:\n\n• No telemóvel: abra o menu do navegador (⋮) e toque em "Instalar aplicação" ou "Adicionar ao ecrã principal".\n• No computador: clique no ícone de instalação na barra de endereço.',
+          'To add this app to your home screen:\n\n• On mobile: open the browser menu (⋮) and tap "Install app" or "Add to Home Screen".\n• On desktop: click the install icon in the address bar.'
         ));
       }
     }
@@ -3832,7 +3880,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnDismissBanner) {
       btnDismissBanner.addEventListener('click', () => {
         if (installBanner) installBanner.classList.add('hidden');
-        localStorage.setItem('pwa_banner_dismissed_v53', 'true');
+        localStorage.setItem('pwa_banner_dismissed_v55', 'true');
         if (typeof gtag === 'function') {
           try {
             gtag('event', 'pwa_banner_dismiss', { event_category: 'PWA' });
@@ -3841,7 +3889,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 6. Fechar modal iOS
+    // 6. Fechar modais de instalação (iOS e Android/Desktop)
     if (btnCloseIosGuide) {
       btnCloseIosGuide.addEventListener('click', () => {
         if (modalIosGuide) modalIosGuide.classList.add('hidden');
@@ -3851,7 +3899,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnAckIosGuide.addEventListener('click', () => {
         if (modalIosGuide) modalIosGuide.classList.add('hidden');
         if (installBanner) installBanner.classList.add('hidden');
-        localStorage.setItem('pwa_banner_dismissed_v53', 'true');
+        localStorage.setItem('pwa_banner_dismissed_v55', 'true');
       });
     }
     if (modalIosGuide) {
@@ -3860,11 +3908,33 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    if (btnCloseAndroidGuide) {
+      btnCloseAndroidGuide.addEventListener('click', () => {
+        if (modalAndroidGuide) modalAndroidGuide.classList.add('hidden');
+      });
+    }
+    if (btnAckAndroidGuide) {
+      btnAckAndroidGuide.addEventListener('click', () => {
+        if (modalAndroidGuide) modalAndroidGuide.classList.add('hidden');
+      });
+    }
+    if (modalAndroidGuide) {
+      modalAndroidGuide.addEventListener('click', (e) => {
+        if (e.target === modalAndroidGuide) modalAndroidGuide.classList.add('hidden');
+      });
+    }
+
     // 7. Evento de instalação concluída com sucesso (Android / Chrome)
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
+      window.__deferredInstallPrompt = null;
       if (installBanner) installBanner.classList.add('hidden');
-      localStorage.setItem('pwa_banner_dismissed_v53', 'true');
+      localStorage.setItem('pwa_banner_dismissed_v55', 'true');
+      if (btnManualInstall) {
+        btnManualInstall.innerHTML = `<span>✅</span> <span>${window.t('Instalada', 'Installed')}</span>`;
+        btnManualInstall.classList.remove('bg-sky-600', 'hover:bg-sky-500');
+        btnManualInstall.classList.add('bg-emerald-700', 'hover:bg-emerald-600');
+      }
       if (typeof gtag === 'function') {
         try {
           gtag('event', 'pwa_install', {

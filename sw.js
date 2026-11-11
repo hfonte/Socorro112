@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuidar-emergencia-v54';
+const CACHE_NAME = 'cuidar-emergencia-v55';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,9 +12,12 @@ const ASSETS_TO_CACHE = [
   './js/knowledge_base.js',
   './js/rag.js',
   './js/ai.js',
-  'https://cdn.tailwindcss.com/3.4.17',
   './assets/docs/Ficha_Medica_Individual_ERPI.docx',
   './assets/docs/Plano_Individual_Saude_Creche.docx',
+  './assets/images/icon-192.png',
+  './assets/images/icon-512.png',
+  './assets/images/icon-192-maskable.png',
+  './assets/images/icon-512-maskable.png',
   './assets/images/estrela_da_vida.jpg',
   './assets/images/cadeia_sobrevivencia.png',
   './assets/images/sbv_consciencia.png',
@@ -35,10 +38,23 @@ const ASSETS_TO_CACHE = [
   './assets/images/avc_hemorragico.png'
 ];
 
+const EXTERNAL_ASSETS_TO_CACHE = [
+  'https://cdn.tailwindcss.com/3.4.17'
+];
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(ASSETS_TO_CACHE);
+      // Cache externo no-cors separado para não bloquear instalação do SW em caso de CORS/rede
+      await Promise.allSettled(
+        EXTERNAL_ASSETS_TO_CACHE.map(async (url) => {
+          try {
+            const resp = await fetch(new Request(url, { mode: 'no-cors' }));
+            if (resp) await cache.put(url, resp);
+          } catch (_) {}
+        })
+      );
     })
   );
   self.skipWaiting();
@@ -60,8 +76,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Para scripts JS e navegação principal: Network-First com fallback para cache
-  if (event.request.url.includes('.js') || event.request.mode === 'navigate') {
+  if (event.request.method !== 'GET') return;
+  const reqUrl = new URL(event.request.url);
+  if (reqUrl.origin !== self.location.origin && reqUrl.hostname !== 'cdn.tailwindcss.com') return;
+
+  // Para scripts JS locais e navegação principal: Network-First com fallback para cache
+  if ((reqUrl.origin === self.location.origin && reqUrl.pathname.endsWith('.js')) || event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then((networkResponse) => {
@@ -76,12 +96,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Para imagens e restantes ficheiros estáticos: Cache-First
+  // Para imagens, Tailwind CDN e restantes ficheiros estáticos: Cache-First
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request).catch(() => {
-        return caches.match('./index.html');
-      });
+      return cachedResponse || fetch(event.request).then((networkResponse) => {
+        if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return networkResponse;
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });

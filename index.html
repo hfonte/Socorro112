@@ -6,10 +6,21 @@
   <meta name="theme-color" content="#0b1120">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cuidar em Emergência">
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/styles.css?v=54">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/images/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./assets/images/icon-512.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/icon-192.png">
+  <link rel="stylesheet" href="./css/styles.css?v=55">
+  <script>
+    window.__deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__deferredInstallPrompt = e;
+    });
+  </script>
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
   
   <!-- GOOGLE TAG / ANALYTICS (G-6702XQNFX2) -->
@@ -69,7 +80,7 @@
       <div class="flex items-center gap-2.5">
         <span class="text-xl flex-shrink-0">📲</span>
         <div>
-          <strong class="text-white text-xs block font-bold">Instalar Socorro 112</strong>
+          <strong class="text-white text-xs block font-bold">Instalar Cuidar em Emergência</strong>
           <p class="text-[10px] text-sky-200/90 leading-tight">Adicione ao ecrã para aceder offline num clique sem digitar o endereço.</p>
         </div>
       </div>
@@ -2504,7 +2515,7 @@
           <div class="flex items-center gap-2.5">
             <span class="text-xl">📲</span>
             <div>
-              <strong class="text-white text-xs block">Guardar Socorro 112 no Telemóvel</strong>
+              <strong class="text-white text-xs block">Guardar Cuidar em Emergência no Telemóvel</strong>
               <span class="text-[10px] text-slate-400">Aceda instantaneamente em qualquer emergência mesmo sem internet</span>
             </div>
           </div>
@@ -2799,7 +2810,7 @@
                 <span>1.</span> <span>Natureza Pedagógica &amp; Auxiliar de Memória (MDR UE)</span>
               </h4>
               <p class="mt-1 text-slate-300">
-                A aplicação <em>«Cuidar em Emergência / Socorro 112»</em> foi concebida por <strong>Hugo Fonte</strong> como uma plataforma digital de caráter exclusivamente pedagógico, formativo e de suporte de memória rápida para suporte básico de vida, primeiros socorros comunitários e preparação de kits institucionais.
+                A aplicação <em>«Cuidar em Emergência»</em> foi concebida por <strong>Hugo Fonte</strong> como uma plataforma digital de caráter exclusivamente pedagógico, formativo e de suporte de memória rápida para suporte básico de vida, primeiros socorros comunitários e preparação de kits institucionais.
               </p>
               <p class="mt-1 text-slate-300">
                 A aplicação <strong>não constitui um dispositivo médico de diagnóstico ou tratamento</strong> ao abrigo do Regulamento (UE) 2017/745 do Parlamento Europeu e do Conselho, não prescreve terapêuticas nem substitui o julgamento clínico presencial de médicos, enfermeiros ou técnicos de emergência pré-hospitalar.
@@ -2894,7 +2905,7 @@
         <div class="space-y-2.5 text-xs bg-slate-950 p-3 rounded-xl border border-slate-800">
           <div class="flex items-start gap-2.5">
             <span class="text-sky-400 font-bold text-sm">1.</span>
-            <span>Toque no botão <strong>Partilhar</strong> <span class="inline-block px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-[11px] font-mono">⎋ / [↑]</span> na barra inferior do Safari.</span>
+            <span>Toque no botão <strong>Partilhar</strong> <span class="inline-block px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-[11px] font-mono">⎋ / [↑]</span> na barra inferior do Safari ou no topo direito do Chrome.</span>
           </div>
           <div class="flex items-start gap-2.5">
             <span class="text-sky-400 font-bold text-sm">2.</span>
@@ -2906,6 +2917,38 @@
           </div>
         </div>
         <button type="button" id="btn-ack-ios-install" class="w-full py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-xl shadow cursor-pointer transition">
+          ✓ Entendido!
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL DE INSTRUÇÕES DE INSTALAÇÃO NO ANDROID / COMPUTADOR -->
+    <div id="modal-android-install-guide" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-sky-500/60 rounded-2xl max-w-sm w-full p-4 shadow-2xl text-slate-200 space-y-3 animate-fade-in">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📲</span>
+            <h3 class="font-bold text-sm text-white">Instalar Aplicação no Dispositivo</h3>
+          </div>
+          <button type="button" id="btn-close-android-install" class="text-slate-400 hover:text-white text-2xl font-bold px-1.5 py-0.5 leading-none cursor-pointer">&times;</button>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Para adicionar como aplicação oficial (WebAPK) e aceder num clique mesmo sem internet:
+        </p>
+        <div class="space-y-2.5 text-xs bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div class="flex items-start gap-2.5">
+            <span class="text-sky-400 font-bold text-sm">🤖</span>
+            <span><strong>No Android (Chrome / Edge):</strong> Toque no menu <span class="inline-block px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-[11px] font-mono">⋮</span> no canto superior direito e selecione <strong>«Instalar aplicação»</strong> (ou <em>«Adicionar ao ecrã principal»</em>).</span>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-sky-400 font-bold text-sm">💻</span>
+            <span><strong>No Computador (Chrome / Edge):</strong> Clique no ícone de instalação <span class="inline-block px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-[11px] font-mono">⊕ / 📲</span> no lado direito da barra de endereço.</span>
+          </div>
+        </div>
+        <p class="text-[11px] text-amber-300/90 leading-snug">
+          💡 Se acabou de atualizar a página, aguarde alguns segundos ou recarregue uma vez para o Chrome ativar o diálogo automático de instalação.
+        </p>
+        <button type="button" id="btn-ack-android-install" class="w-full py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-xl shadow cursor-pointer transition">
           ✓ Entendido!
         </button>
       </div>
@@ -2957,13 +3000,13 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/i18n_dict.js?v=54"></script>
-  <script src="./js/i18n.js?v=54"></script>
-  <script src="./js/audio.js?v=54"></script>
-  <script src="./js/geo.js?v=54"></script>
-  <script src="./js/knowledge_base.js?v=54"></script>
-  <script src="./js/rag.js?v=54"></script>
-  <script src="./js/ai.js?v=54"></script>
-  <script src="./js/app.js?v=54"></script>
+  <script src="./js/i18n_dict.js?v=55"></script>
+  <script src="./js/i18n.js?v=55"></script>
+  <script src="./js/audio.js?v=55"></script>
+  <script src="./js/geo.js?v=55"></script>
+  <script src="./js/knowledge_base.js?v=55"></script>
+  <script src="./js/rag.js?v=55"></script>
+  <script src="./js/ai.js?v=55"></script>
+  <script src="./js/app.js?v=55"></script>
 </body>
 </html>

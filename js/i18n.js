@@ -1,15 +1,16 @@
 /**
- * i18n.js - Offline-First PT-PT <-> EN Translation Engine for Socorro 112
+ * i18n.js - Offline-First PT-PT <-> EN Translation Engine for Cuidar em Emergência
  * Preserves medical acronyms (112, SNS 24, ERC 2025) and works 100% offline.
  */
 
 (function (global) {
   'use strict';
 
-  const STORAGE_KEY = 'socorro112_lang';
+  const STORAGE_KEY = 'cuidar_emergencia_lang';
   const saved = (() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'pt';
+      const val = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('socorro112_lang');
+      return val === 'en' ? 'en' : 'pt';
     } catch (e) {
       return 'pt';
     }

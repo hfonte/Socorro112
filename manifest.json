@@ -1,7 +1,7 @@
 {
   "id": "cuidar-em-emergencia-pwa",
   "name": "Cuidar em Emergência - Guia Prático de Primeiros Socorros",
-  "short_name": "Socorro 112",
+  "short_name": "Cuidar em Emergência",
   "description": "Guia prático e inclusivo de primeiros socorros, suporte básico de vida (Diretrizes ERC 2025), pediatria e apoio comunitário à decisão.",
   "start_url": "./index.html?utm_source=homescreen&utm_medium=pwa&utm_campaign=homescreen_app",
   "scope": "./",
@@ -11,16 +11,28 @@
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "./assets/images/estrela_da_vida.jpg",
+      "src": "./assets/images/icon-192.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "./assets/images/estrela_da_vida.jpg",
+      "src": "./assets/images/icon-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./assets/images/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
