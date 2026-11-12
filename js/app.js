@@ -1,7 +1,25 @@
 // LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
+const APP_VERSION = '57';
+const APP_VERSION_DATE = '12/11/2026';
+let swRegistrationRef = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' }).then((reg) => {
+      swRegistrationRef = reg;
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            const badge = document.getElementById('badge-whats-new');
+            if (badge) {
+              badge.textContent = window.t('NOVO', 'NEW');
+              badge.classList.remove('hidden');
+            }
+          }
+        });
+      });
       reg.update().catch(() => {});
     }).catch((err) => {
       console.warn('Falha ao registar Service Worker:', err);
@@ -2072,27 +2090,27 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       try {
-        const cacheName = 'cuidar-emergencia-v56';
+        const cacheName = `cuidar-emergencia-v${APP_VERSION}`;
         const cache = await caches.open(cacheName);
         
         const urlsToCache = [
           './',
           './index.html',
-          './manifest.json?v=56',
-          './css/styles.css?v=56',
-          './js/i18n_dict.js?v=56',
-          './js/i18n.js?v=56',
-          './js/app.js?v=56',
-          './js/audio.js?v=56',
-          './js/geo.js?v=56',
-          './js/knowledge_base.js?v=56',
-          './js/rag.js?v=56',
-          './js/ai.js?v=56',
+          `./manifest.json?v=${APP_VERSION}`,
+          `./css/styles.css?v=${APP_VERSION}`,
+          `./js/i18n_dict.js?v=${APP_VERSION}`,
+          `./js/i18n.js?v=${APP_VERSION}`,
+          `./js/app.js?v=${APP_VERSION}`,
+          `./js/audio.js?v=${APP_VERSION}`,
+          `./js/geo.js?v=${APP_VERSION}`,
+          `./js/knowledge_base.js?v=${APP_VERSION}`,
+          `./js/rag.js?v=${APP_VERSION}`,
+          `./js/ai.js?v=${APP_VERSION}`,
           'https://cdn.tailwindcss.com/3.4.17',
-          './assets/images/icon-192.png?v=56',
-          './assets/images/icon-512.png?v=56',
-          './assets/images/icon-192-maskable.png?v=56',
-          './assets/images/icon-512-maskable.png?v=56',
+          `./assets/images/icon-192.png?v=${APP_VERSION}`,
+          `./assets/images/icon-512.png?v=${APP_VERSION}`,
+          `./assets/images/icon-192-maskable.png?v=${APP_VERSION}`,
+          `./assets/images/icon-512-maskable.png?v=${APP_VERSION}`,
           './assets/images/estrela_da_vida.jpg',
           './assets/images/cadeia_sobrevivencia.png',
           './assets/images/sbv_consciencia.png',
@@ -3950,6 +3968,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function initWhatsNewAndVersion() {
+    const modal = document.getElementById('modal-whats-new');
+    const btnOpenGlobal = document.getElementById('btn-open-whats-new');
+    const btnOpenFooter = document.getElementById('btn-footer-whats-new');
+    const btnClose = document.getElementById('btn-close-whats-new');
+    const btnAck = document.getElementById('btn-ack-whats-new');
+    const btnCheckUpdate = document.getElementById('btn-check-app-update');
+    const statusBox = document.getElementById('update-check-status');
+    const badge = document.getElementById('badge-whats-new');
+
+    const SEEN_KEY = 'cuidar_seen_version';
+    const lastSeen = localStorage.getItem(SEEN_KEY);
+    if (lastSeen !== APP_VERSION && badge) {
+      badge.classList.remove('hidden');
+    }
+
+    const openWhatsNew = () => {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      localStorage.setItem(SEEN_KEY, APP_VERSION);
+      if (badge) badge.classList.add('hidden');
+    };
+
+    const closeWhatsNew = () => {
+      if (modal) modal.classList.add('hidden');
+    };
+
+    if (btnOpenGlobal) btnOpenGlobal.addEventListener('click', openWhatsNew);
+    if (btnOpenFooter) btnOpenFooter.addEventListener('click', openWhatsNew);
+    if (btnClose) btnClose.addEventListener('click', closeWhatsNew);
+    if (btnAck) btnAck.addEventListener('click', closeWhatsNew);
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeWhatsNew();
+      });
+    }
+
+    if (btnCheckUpdate) {
+      btnCheckUpdate.addEventListener('click', async () => {
+        if (!navigator.onLine) {
+          if (statusBox) {
+            statusBox.textContent = window.t('Sem ligação à internet para verificar atualizações.', 'Offline — unable to check for updates right now.');
+            statusBox.className = 'text-[11px] text-amber-300 text-center';
+          }
+          return;
+        }
+        if (statusBox) {
+          statusBox.textContent = window.t('A verificar se existe nova atualização...', 'Checking for a new update...');
+          statusBox.className = 'text-[11px] text-sky-300 text-center';
+        }
+        btnCheckUpdate.disabled = true;
+        try {
+          let reg = swRegistrationRef;
+          if (!reg && 'serviceWorker' in navigator) {
+            reg = await navigator.serviceWorker.getRegistration('./');
+          }
+          if (reg) {
+            await reg.update();
+            if (reg.waiting || reg.installing) {
+              if (statusBox) {
+                statusBox.textContent = window.t('Nova versão disponível! A aplicar atualização...', 'New version available! Applying update...');
+                statusBox.className = 'text-[11px] text-emerald-300 font-semibold text-center';
+              }
+              setTimeout(() => window.location.reload(), 900);
+              return;
+            }
+          }
+          if (statusBox) {
+            statusBox.textContent = window.t('Já está a usar a versão mais recente (v57).', 'You are already running the latest version (v57).');
+            statusBox.className = 'text-[11px] text-emerald-300 text-center';
+          }
+        } catch (err) {
+          if (statusBox) {
+            statusBox.textContent = window.t('Já está a usar a versão mais recente (v57).', 'You are already running the latest version (v57).');
+            statusBox.className = 'text-[11px] text-slate-300 text-center';
+          }
+        } finally {
+          btnCheckUpdate.disabled = false;
+        }
+      });
+    }
+  }
+
   // Inicializar novos módulos
   initCabulaSbar();
   initHandsFreeVoice();
@@ -3958,6 +4059,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLearningHubSearch();
   initInteractiveVoiceCoach();
   initPWAInstallAndTracking();
+  initWhatsNewAndVersion();
 
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));

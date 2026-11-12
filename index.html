@@ -9,11 +9,11 @@
   <meta name="apple-mobile-web-app-title" content="Cuidar em Emergência">
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
-  <link rel="manifest" href="./manifest.json?v=56">
-  <link rel="icon" type="image/png" sizes="192x192" href="./assets/images/icon-192.png?v=56">
-  <link rel="icon" type="image/png" sizes="512x512" href="./assets/images/icon-512.png?v=56">
-  <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/icon-192.png?v=56">
-  <link rel="stylesheet" href="./css/styles.css?v=56">
+  <link rel="manifest" href="./manifest.json?v=57">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/images/icon-192.png?v=57">
+  <link rel="icon" type="image/png" sizes="512x512" href="./assets/images/icon-512.png?v=57">
+  <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/icon-192.png?v=57">
+  <link rel="stylesheet" href="./css/styles.css?v=57">
   <script>
     window.__deferredInstallPrompt = null;
     window.addEventListener('beforeinstallprompt', function (e) {
@@ -43,7 +43,7 @@
     <!-- CABEÇALHO SUPERIOR FIXO -->
     <header class="top-header">
       <div class="brand">
-        <img src="./assets/images/icon-192.png?v=56" alt="Cuidar em Emergência" class="brand-icon">
+        <img src="./assets/images/icon-192.png?v=57" alt="Cuidar em Emergência" class="brand-icon">
         <div class="brand-text">
           <span class="brand-title">CUIDAR EM EMERGÊNCIA</span>
           <span class="brand-subtitle" translate="no">Hugo Fonte</span>
@@ -2531,11 +2531,27 @@
         <footer class="mt-10 mb-6 pt-5 border-t border-slate-800/80 text-center text-xs text-slate-500">
           <p class="font-semibold tracking-wide text-slate-400 text-sm">Thinked by Hugo Fonte</p>
           <p class="text-[11px] text-slate-500 mt-1">Cuidar em Emergência &bull; Guia Prático de Primeiros Socorros &amp; Apoio à Decisão</p>
+          <div class="mt-2.5 flex items-center justify-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-400 font-medium">Versão v57 · Atualizado a 12/11/2026</span>
+            <button type="button" id="btn-footer-whats-new" class="text-[11px] text-sky-400 hover:text-sky-300 underline font-semibold cursor-pointer">
+              ✨ O que há de novo
+            </button>
+          </div>
           <button type="button" id="btn-show-disclaimer" class="text-[11px] text-amber-400/80 hover:text-amber-300 underline mt-2 block mx-auto">
             ⚖️ Aviso Legal &amp; Isenção de Responsabilidade Médica
           </button>
         </footer>
       </section>
+
+      <!-- BARRA DISCRETA DE VERSÃO E NOVIDADES NO FUNDO DE TODAS AS PÁGINAS -->
+      <div id="global-version-bar" class="mt-6 mb-2 pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2 text-[11px] text-slate-500">
+        <span class="truncate">Versão v57 &bull; 12/11/2026</span>
+        <button type="button" id="btn-open-whats-new" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-sky-400 font-semibold transition cursor-pointer flex-shrink-0">
+          <span>✨</span>
+          <span>Novidades</span>
+          <span id="badge-whats-new" class="hidden px-1.5 py-0.5 bg-sky-500 text-slate-950 rounded-full text-[9px] font-black tracking-wide leading-none">NOVO</span>
+        </button>
+      </div>
 
     </main>
 
@@ -2957,6 +2973,80 @@
       </div>
     </div>
 
+    <!-- MODAL DE NOVIDADES & ATUALIZAÇÕES (WHAT'S NEW) -->
+    <div id="modal-whats-new" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-sky-500/60 rounded-2xl max-w-md w-full max-h-[88vh] flex flex-col shadow-2xl text-slate-200 animate-fade-in">
+        <div class="flex items-center justify-between p-4 border-b border-slate-800 flex-shrink-0">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">✨</span>
+            <div>
+              <h3 class="font-bold text-sm text-white">Novidades &amp; Atualizações</h3>
+              <p class="text-[11px] text-slate-400">Histórico recente de melhorias da aplicação web</p>
+            </div>
+          </div>
+          <button type="button" id="btn-close-whats-new" class="text-slate-400 hover:text-white text-2xl font-bold px-1.5 py-0.5 leading-none cursor-pointer">&times;</button>
+        </div>
+
+        <div class="p-4 overflow-y-auto space-y-3 text-xs">
+          <div class="bg-sky-950/50 border border-sky-500/40 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-black text-sky-300 text-xs">v57 &bull; 12/11/2026</span>
+              <span class="px-2 py-0.5 bg-sky-500 text-slate-950 rounded-full text-[10px] font-black">Versão Atual</span>
+            </div>
+            <p class="font-bold text-white mb-1">Transparência &amp; Atualizações</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-300 text-[11px]">
+              <li>Nova barra de versão visível no fundo de todos os ecrãs para saber sempre qual a edição em uso.</li>
+              <li>Janela «O que há de novo» (What's New) com histórico das melhorias e verificação manual de atualização.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-slate-300 text-xs">v56 &bull; 11/11/2026</span>
+            </div>
+            <p class="font-semibold text-white mb-1">Novo Logótipo Unificado &amp; Identidade</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
+              <li>Novo ícone oficial em escudo «Cuidar em Emergência» unificado no iPhone, Android e cabeçalho da app com assinatura Hugo Fonte.</li>
+              <li>Melhorias de cache do manifesto e Service Worker para receber atualizações mais rapidamente.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-slate-300 text-xs">v55 &bull; 11/11/2026</span>
+            </div>
+            <p class="font-semibold text-white mb-1">Instalação Android/iPhone &amp; Marca</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
+              <li>Suporte corrigido para instalação no ecrã principal no Android (WebAPK) e instruções atualizadas para iOS/Chrome.</li>
+              <li>Correção do botão Adicionar no Modo Formação e uniformização da marca Cuidar em Emergência.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-slate-300 text-xs">v54 &bull; 11/11/2026</span>
+            </div>
+            <p class="font-semibold text-white mb-1">Tradução Completa Offline (EN)</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
+              <li>O botão 🌐 EN passou a traduzir integralmente todos os ecrãs, protocolos, manual e assistente offline.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="p-3.5 border-t border-slate-800 bg-slate-950/60 space-y-2 flex-shrink-0">
+          <div id="update-check-status" class="text-[11px] text-slate-400 text-center min-h-[16px]"></div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-check-app-update" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 font-bold text-xs rounded-xl cursor-pointer transition">
+              🔄 Verificar Atualização
+            </button>
+            <button type="button" id="btn-ack-whats-new" class="flex-1 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-xl shadow cursor-pointer transition">
+              ✓ Entendido!
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APP NATIVA -->
     <nav class="bottom-nav">
       <button type="button" class="nav-item active" data-target="screen-emergency">
@@ -3003,13 +3093,13 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/i18n_dict.js?v=56"></script>
-  <script src="./js/i18n.js?v=56"></script>
-  <script src="./js/audio.js?v=56"></script>
-  <script src="./js/geo.js?v=56"></script>
-  <script src="./js/knowledge_base.js?v=56"></script>
-  <script src="./js/rag.js?v=56"></script>
-  <script src="./js/ai.js?v=56"></script>
-  <script src="./js/app.js?v=56"></script>
+  <script src="./js/i18n_dict.js?v=57"></script>
+  <script src="./js/i18n.js?v=57"></script>
+  <script src="./js/audio.js?v=57"></script>
+  <script src="./js/geo.js?v=57"></script>
+  <script src="./js/knowledge_base.js?v=57"></script>
+  <script src="./js/rag.js?v=57"></script>
+  <script src="./js/ai.js?v=57"></script>
+  <script src="./js/app.js?v=57"></script>
 </body>
 </html>
