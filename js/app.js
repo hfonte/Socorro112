@@ -1,6 +1,6 @@
 // LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
-const APP_VERSION = '57';
-const APP_VERSION_DATE = '12/11/2026';
+const APP_VERSION = '58';
+const APP_VERSION_DATE = '23/11/2026';
 let swRegistrationRef = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3358,13 +3358,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function runSearch(query) {
       const q = (query || '').trim().toLowerCase();
+      const unitDividers = document.querySelectorAll('#screen-learning-hub .unit-divider');
       if (!q) {
         chapters.forEach(ch => ch.classList.remove('hidden'));
+        unitDividers.forEach(u => u.classList.remove('hidden'));
         if (clearBtn) clearBtn.classList.add('hidden');
         if (resultsInfo) resultsInfo.classList.add('hidden');
         return;
       }
 
+      unitDividers.forEach(u => u.classList.add('hidden'));
       if (clearBtn) clearBtn.classList.remove('hidden');
       if (resultsInfo) resultsInfo.classList.remove('hidden');
 
@@ -4051,6 +4054,189 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function initPedagogicalHub() {
+    const hub = document.getElementById('screen-learning-hub');
+    const chapters = Array.from(document.querySelectorAll('#screen-learning-hub .chapter-accordion'));
+    const progressLabel = document.getElementById('learning-progress-label');
+    const progressBar = document.getElementById('learning-progress-bar');
+    const statusPill = document.getElementById('training-status-pill');
+
+    const MODULES_KEY = 'cuidar_completed_modules_v1';
+    const TRAINING_DONE_KEY = 'cuidar_training_completed_v1';
+    const FONT_KEY = 'cuidar_manual_font_scale_v1';
+    const FEEDBACK_KEY = 'cuidar_training_feedback_v1';
+
+    let completedSet = new Set();
+    try {
+      const saved = JSON.parse(localStorage.getItem(MODULES_KEY) || '[]');
+      if (Array.isArray(saved)) completedSet = new Set(saved);
+    } catch (_) {}
+
+    function markTrainingCompleted(source) {
+      const alreadyRecorded = localStorage.getItem(TRAINING_DONE_KEY) === 'true';
+      localStorage.setItem(TRAINING_DONE_KEY, 'true');
+      if (statusPill) {
+        statusPill.textContent = window.t('Concluído', 'Completed');
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-900/80 text-emerald-300 border border-emerald-500/60';
+      }
+      const btnComplete = document.getElementById('btn-complete-training');
+      if (btnComplete) {
+        btnComplete.textContent = window.t('✓ Formação Concluída', '✓ Training Completed');
+        btnComplete.classList.remove('bg-sky-600', 'hover:bg-sky-500');
+        btnComplete.classList.add('bg-emerald-700', 'hover:bg-emerald-600');
+      }
+      if (!alreadyRecorded && typeof gtag === 'function') {
+        try {
+          gtag('event', 'training_completed', {
+            event_category: 'Formação',
+            event_label: source || 'manual',
+            modules_completed: completedSet.size,
+            app_version: APP_VERSION,
+            value: 1
+          });
+        } catch (_) {}
+      }
+    }
+
+    function updateProgressUI() {
+      const total = chapters.length || 13;
+      const done = completedSet.size;
+      const pct = Math.min(100, Math.round((done / total) * 100));
+      if (progressLabel) {
+        progressLabel.textContent = window.AppLang === 'en'
+          ? `${done} / ${total} modules (${pct}%)`
+          : `${done} / ${total} módulos (${pct}%)`;
+      }
+      if (progressBar) {
+        progressBar.style.width = `${pct}%`;
+      }
+      if (done >= total || localStorage.getItem(TRAINING_DONE_KEY) === 'true') {
+        markTrainingCompleted(done >= total ? 'all_modules' : 'stored');
+      }
+    }
+
+    chapters.forEach((ch, idx) => {
+      const body = ch.querySelector('.accordion-body');
+      if (!body || body.querySelector('.module-done-bar')) return;
+      const modId = `mod_${idx + 1}`;
+      const bar = document.createElement('div');
+      bar.className = 'module-done-bar';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-toggle-module-done';
+      const refreshBtn = () => {
+        const isDone = completedSet.has(modId);
+        btn.classList.toggle('is-done', isDone);
+        btn.textContent = isDone
+          ? window.t('✓ Módulo concluído', '✓ Module completed')
+          : window.t('Marcar módulo como concluído', 'Mark module as completed');
+      };
+      refreshBtn();
+      btn.addEventListener('click', () => {
+        if (completedSet.has(modId)) {
+          completedSet.delete(modId);
+        } else {
+          completedSet.add(modId);
+        }
+        localStorage.setItem(MODULES_KEY, JSON.stringify(Array.from(completedSet)));
+        refreshBtn();
+        updateProgressUI();
+      });
+      bar.appendChild(btn);
+      body.appendChild(bar);
+    });
+
+    updateProgressUI();
+
+    // Controlos de Acessibilidade DUA (Tamanho de letra)
+    const scales = ['sm', 'md', 'lg', 'xl'];
+    let currentScale = localStorage.getItem(FONT_KEY) || 'md';
+    if (!scales.includes(currentScale)) currentScale = 'md';
+    const applyFontScale = (scale) => {
+      currentScale = scale;
+      if (hub) hub.setAttribute('data-font-scale', scale);
+      localStorage.setItem(FONT_KEY, scale);
+    };
+    applyFontScale(currentScale);
+
+    const btnDec = document.getElementById('btn-font-dec');
+    const btnReset = document.getElementById('btn-font-reset');
+    const btnInc = document.getElementById('btn-font-inc');
+    if (btnDec) btnDec.addEventListener('click', () => applyFontScale(scales[Math.max(0, scales.indexOf(currentScale) - 1)]));
+    if (btnReset) btnReset.addEventListener('click', () => applyFontScale('md'));
+    if (btnInc) btnInc.addEventListener('click', () => applyFontScale(scales[Math.min(scales.length - 1, scales.indexOf(currentScale) + 1)]));
+
+    // Botão de conclusão manual
+    const btnCompleteTraining = document.getElementById('btn-complete-training');
+    if (btnCompleteTraining) {
+      btnCompleteTraining.addEventListener('click', () => markTrainingCompleted('manual_button'));
+    }
+
+    // Submissão de avaliação (4 dimensões) & comentários/melhorias
+    const btnSubmitFeedback = document.getElementById('btn-submit-training-feedback');
+    const feedbackResult = document.getElementById('training-feedback-result');
+    const btnEmailFeedback = document.getElementById('btn-email-feedback');
+
+    if (btnSubmitFeedback) {
+      btnSubmitFeedback.addEventListener('click', () => {
+        const ped = parseInt(document.getElementById('eval-dim-pedagogical')?.value || '5', 10);
+        const tech = parseInt(document.getElementById('eval-dim-tech')?.value || '5', 10);
+        const cog = parseInt(document.getElementById('eval-dim-cognitive')?.value || '5', 10);
+        const psy = parseInt(document.getElementById('eval-dim-psychological')?.value || '5', 10);
+        const role = document.getElementById('eval-learner-role')?.value || 'cidadao';
+        const comment = (document.getElementById('eval-comments')?.value || '').trim();
+        const avg = Number(((ped + tech + cog + psy) / 4).toFixed(2));
+
+        const payload = {
+          pedagogical: ped,
+          tech,
+          cognitive: cog,
+          psychological: psy,
+          avg,
+          role,
+          comment,
+          version: APP_VERSION,
+          date: new Date().toISOString()
+        };
+        localStorage.setItem(FEEDBACK_KEY, JSON.stringify(payload));
+        markTrainingCompleted('evaluation_submitted');
+
+        if (typeof gtag === 'function') {
+          try {
+            gtag('event', 'training_feedback_submitted', {
+              event_category: 'Formação',
+              rating_pedagogical: ped,
+              rating_tech: tech,
+              rating_cognitive: cog,
+              rating_psychological: psy,
+              rating_avg: avg,
+              has_comment: comment.length > 0 ? 'yes' : 'no',
+              learner_role: role,
+              app_version: APP_VERSION
+            });
+          } catch (_) {}
+        }
+
+        if (feedbackResult) {
+          feedbackResult.classList.remove('hidden');
+        }
+        if (btnEmailFeedback) {
+          const subject = encodeURIComponent(`[Cuidar em Emergência v${APP_VERSION}] Avaliação & Melhoria`);
+          const body = encodeURIComponent(
+            `Perfil: ${role}\n` +
+            `Dimensão Pedagógica: ${ped}/5\n` +
+            `Dimensão Tecnológica: ${tech}/5\n` +
+            `Dimensão Cognitiva: ${cog}/5\n` +
+            `Dimensão Psicológica: ${psy}/5\n` +
+            `Média: ${avg}/5\n\n` +
+            `Comentários / Sugestões de Melhoria:\n${comment || '(Sem comentário adicional)'}`
+          );
+          btnEmailFeedback.href = `mailto:mtc.hfonte@gmail.com?subject=${subject}&body=${body}`;
+        }
+      });
+    }
+  }
+
   // Inicializar novos módulos
   initCabulaSbar();
   initHandsFreeVoice();
@@ -4060,6 +4246,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initInteractiveVoiceCoach();
   initPWAInstallAndTracking();
   initWhatsNewAndVersion();
+  initPedagogicalHub();
 
   window.triggerGeoDemo = () => {
     GeoManager.simulateDemo((loc) => updateGeoUI(loc));

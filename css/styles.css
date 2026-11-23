@@ -887,3 +887,81 @@ body {
     margin: 1cm;
   }
 }
+
+/* MODO FORMAÇÃO — DESIGN INSTRUCIONAL, UNIDADES E ACESSIBILIDADE (DUA) */
+.unit-divider {
+  margin: 18px 0 10px;
+  padding: 9px 12px;
+  border-left: 3px solid #38bdf8;
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 0 10px 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.unit-divider-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: 0.01em;
+}
+
+.unit-divider-meta {
+  font-size: 10px;
+  font-weight: 600;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+.module-done-bar {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(51, 65, 85, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.btn-toggle-module-done {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-module-done:hover {
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.btn-toggle-module-done.is-done {
+  background: rgba(6, 78, 59, 0.75);
+  border-color: #10b981;
+  color: #a7f3d0;
+}
+
+#screen-learning-hub[data-font-scale="sm"] .accordion-body {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#screen-learning-hub[data-font-scale="lg"] .accordion-body,
+#screen-learning-hub[data-font-scale="lg"] .accordion-body p,
+#screen-learning-hub[data-font-scale="lg"] .accordion-body li {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+#screen-learning-hub[data-font-scale="xl"] .accordion-body,
+#screen-learning-hub[data-font-scale="xl"] .accordion-body p,
+#screen-learning-hub[data-font-scale="xl"] .accordion-body li {
+  font-size: 16px;
+  line-height: 1.7;
+}
