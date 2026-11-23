@@ -1,0 +1,108 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: feedbacks
+    // Document ID: Auto-generated client ID (e.g. firestore document ID)
+    // Purpose: Anonymous submission of training evaluation and app feedback
+    //
+    // Fields:
+    //   - pedagogical: int (required, range 1..5) - Pedagogical quality score
+    //   - tech: int (required, range 1..5) - Technical quality score
+    //   - cognitive: int (required, range 1..5) - Cognitive load score
+    //   - psychological: int (required, range 1..5) - Psychological reassurance score
+    //   - avg: number (required, range 1.0..5.0) - Overall average score
+    //   - role: string (required, enum ['cidadao', 'cuidador', 'educador', 'formando', 'outro'])
+    //   - comment: string (required, 0..2000 chars) - Improvement comment / observation
+    //   - version: string (required, 1..20 chars) - App release version tag
+    //   - createdAt: timestamp (required, server timestamp equal to request.time)
+    //   - userAgent: string (optional, 0..300 chars) - Browser client user agent
+    //
+    // Access:
+    //   - create: Public / anonymous create allowed ONLY IF schema is strictly validated
+    //   - read, update, delete: Strictly denied (if false;) - accessible only via Firebase Console/Admin SDK
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions & Domain Validators
+    // ===============================================================
+
+    function hasRequiredFeedbackFields(data) {
+      return data.keys().hasAll([
+        'pedagogical',
+        'tech',
+        'cognitive',
+        'psychological',
+        'avg',
+        'role',
+        'comment',
+        'version',
+        'createdAt'
+      ]);
+    }
+
+    function hasOnlyAllowedFeedbackFields(data) {
+      return data.keys().hasOnly([
+        'pedagogical',
+        'tech',
+        'cognitive',
+        'psychological',
+        'avg',
+        'role',
+        'comment',
+        'version',
+        'createdAt',
+        'userAgent'
+      ]);
+    }
+
+    function isValidRating(val) {
+      return val is int && val >= 1 && val <= 5;
+    }
+
+    function isValidFeedback(data) {
+      return hasRequiredFeedbackFields(data) &&
+        hasOnlyAllowedFeedbackFields(data) &&
+        isValidRating(data.pedagogical) &&
+        isValidRating(data.tech) &&
+        isValidRating(data.cognitive) &&
+        isValidRating(data.psychological) &&
+        data.avg is number &&
+        data.avg >= 1.0 &&
+        data.avg <= 5.0 &&
+        data.role is string &&
+        data.role in ['cidadao', 'cuidador', 'educador', 'formando', 'outro'] &&
+        data.comment is string &&
+        data.comment.size() <= 2000 &&
+        data.version is string &&
+        data.version.size() > 0 &&
+        data.version.size() <= 20 &&
+        data.createdAt is timestamp &&
+        data.createdAt == request.time &&
+        (!('userAgent' in data) || (data.userAgent is string && data.userAgent.size() <= 300));
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /feedbacks/{feedbackId} {
+      // Anonymous submission of training feedback with strict schema validation
+      allow create: if isValidFeedback(request.resource.data);
+
+      // Feedback records cannot be read, updated, or deleted by client apps
+      allow read, update, delete: if false;
+    }
+
+    // Default deny for all other documents/collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

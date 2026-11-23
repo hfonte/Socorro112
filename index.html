@@ -9,11 +9,11 @@
   <meta name="apple-mobile-web-app-title" content="Cuidar em Emergência">
   <title>Cuidar em Emergência · Guia Prático de Primeiros Socorros</title>
   
-  <link rel="manifest" href="./manifest.json?v=58">
-  <link rel="icon" type="image/png" sizes="192x192" href="./assets/images/icon-192.png?v=58">
-  <link rel="icon" type="image/png" sizes="512x512" href="./assets/images/icon-512.png?v=58">
-  <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/icon-192.png?v=58">
-  <link rel="stylesheet" href="./css/styles.css?v=58">
+  <link rel="manifest" href="./manifest.json?v=59">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/images/icon-192.png?v=59">
+  <link rel="icon" type="image/png" sizes="512x512" href="./assets/images/icon-512.png?v=59">
+  <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/icon-192.png?v=59">
+  <link rel="stylesheet" href="./css/styles.css?v=59">
   <script>
     window.__deferredInstallPrompt = null;
     window.addEventListener('beforeinstallprompt', function (e) {
@@ -43,7 +43,7 @@
     <!-- CABEÇALHO SUPERIOR FIXO -->
     <header class="top-header">
       <div class="brand">
-        <img src="./assets/images/icon-192.png?v=58" alt="Cuidar em Emergência" class="brand-icon">
+        <img src="./assets/images/icon-192.png?v=59" alt="Cuidar em Emergência" class="brand-icon">
         <div class="brand-text">
           <span class="brand-title">CUIDAR EM EMERGÊNCIA</span>
           <span class="brand-subtitle" translate="no">Hugo Fonte</span>
@@ -2627,8 +2627,9 @@
 
           <div id="training-feedback-result" class="hidden p-3 bg-emerald-950/60 border border-emerald-500/50 rounded-xl text-center space-y-2">
             <p class="text-xs font-bold text-emerald-300">Obrigado! A sua conclusão e avaliação foram registadas.</p>
+            <p id="training-feedback-cloud-status" class="text-[11px] text-sky-300 font-semibold hidden"></p>
             <a id="btn-email-feedback" href="mailto:mtc.hfonte@gmail.com" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 rounded-lg text-[11px] font-semibold">
-              ✉️ Enviar Comentário por Email ao Formador
+              ✉️ Enviar Cópia por Email ao Formador
             </a>
           </div>
         </div>
@@ -2682,7 +2683,7 @@
           <p class="font-semibold tracking-wide text-slate-400 text-sm">Thinked by Hugo Fonte</p>
           <p class="text-[11px] text-slate-500 mt-1">Cuidar em Emergência &bull; Guia Prático de Primeiros Socorros &amp; Apoio à Decisão</p>
           <div class="mt-2.5 flex items-center justify-center gap-2 flex-wrap">
-            <span class="text-[11px] text-slate-400 font-medium">Versão v58 · Atualizado a 23/11/2026</span>
+            <span class="text-[11px] text-slate-400 font-medium">Versão v59 · Atualizado a 23/11/2026</span>
             <button type="button" id="btn-footer-whats-new" class="text-[11px] text-sky-400 hover:text-sky-300 underline font-semibold cursor-pointer">
               ✨ O que há de novo
             </button>
@@ -2695,7 +2696,7 @@
 
       <!-- BARRA DISCRETA DE VERSÃO E NOVIDADES NO FUNDO DE TODAS AS PÁGINAS -->
       <div id="global-version-bar" class="mt-6 mb-2 pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2 text-[11px] text-slate-500">
-        <span class="truncate">Versão v58 &bull; 23/11/2026</span>
+        <span class="truncate">Versão v59 &bull; 23/11/2026</span>
         <button type="button" id="btn-open-whats-new" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-sky-400 font-semibold transition cursor-pointer flex-shrink-0">
           <span>✨</span>
           <span>Novidades</span>
@@ -3140,11 +3141,21 @@
         <div class="p-4 overflow-y-auto space-y-3 text-xs">
           <div class="bg-sky-950/50 border border-sky-500/40 rounded-xl p-3">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="font-black text-sky-300 text-xs">v58 &bull; 23/11/2026</span>
+              <span class="font-black text-sky-300 text-xs">v59 &bull; 23/11/2026</span>
               <span class="px-2 py-0.5 bg-sky-500 text-slate-950 rounded-full text-[10px] font-black">Versão Atual</span>
             </div>
-            <p class="font-bold text-white mb-1">Rigor Pedagógico, Progresso &amp; Avaliação</p>
+            <p class="font-bold text-white mb-1">Base de Dados Firestore Integrada</p>
             <ul class="list-disc pl-4 space-y-1 text-slate-300 text-[11px]">
+              <li>Gravação automática e segura dos comentários e avaliações dos formandos na nuvem Cloud Firestore.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-slate-300 text-xs">v58 &bull; 23/11/2026</span>
+            </div>
+            <p class="font-semibold text-white mb-1">Rigor Pedagógico, Progresso &amp; Avaliação</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
               <li>Modo Formação estruturado em 4 Unidades Temáticas com Plano de Formação (Design Instrucional &amp; DUA) e controlo de tamanho de texto (A-/A+).</li>
               <li>Progresso de leitura por módulo, registo de conclusão da formação e formulário de avaliação e sugestões de melhoria.</li>
             </ul>
@@ -3254,13 +3265,13 @@
   </div>
 
   <!-- SCRIPTS MODULARES (COM CACHE-BUSTER) -->
-  <script src="./js/i18n_dict.js?v=58"></script>
-  <script src="./js/i18n.js?v=58"></script>
-  <script src="./js/audio.js?v=58"></script>
-  <script src="./js/geo.js?v=58"></script>
-  <script src="./js/knowledge_base.js?v=58"></script>
-  <script src="./js/rag.js?v=58"></script>
-  <script src="./js/ai.js?v=58"></script>
-  <script src="./js/app.js?v=58"></script>
+  <script src="./js/i18n_dict.js?v=59"></script>
+  <script src="./js/i18n.js?v=59"></script>
+  <script src="./js/audio.js?v=59"></script>
+  <script src="./js/geo.js?v=59"></script>
+  <script src="./js/knowledge_base.js?v=59"></script>
+  <script src="./js/rag.js?v=59"></script>
+  <script src="./js/ai.js?v=59"></script>
+  <script src="./js/app.js?v=59"></script>
 </body>
 </html>

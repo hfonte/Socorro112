@@ -1,6 +1,11 @@
 // LÓGICA PRINCIPAL DA APLICAÇÃO CUIDAR EM EMERGÊNCIA & GUIA PRÁTICO DE PRIMEIROS SOCORROS (ERC 2025)
-const APP_VERSION = '58';
+const APP_VERSION = '59';
 const APP_VERSION_DATE = '23/11/2026';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCWoOfpomIn5bt5LcFtCTKHvCmXtMATZF0',
+  projectId: 'formar112',
+  appId: '1:836154990833:web:deef34b9f95444f3358950'
+};
 let swRegistrationRef = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -4200,6 +4205,41 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         localStorage.setItem(FEEDBACK_KEY, JSON.stringify(payload));
         markTrainingCompleted('evaluation_submitted');
+
+        // Gravação direta no Cloud Firestore (REST API segura sem inflar bundle offline)
+        (async () => {
+          try {
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/feedbacks?key=${FIREBASE_CONFIG.apiKey}`;
+            const firestoreDoc = {
+              fields: {
+                pedagogical: { integerValue: String(ped) },
+                tech: { integerValue: String(tech) },
+                cognitive: { integerValue: String(cog) },
+                psychological: { integerValue: String(psy) },
+                avg: { doubleValue: avg },
+                role: { stringValue: role },
+                comment: { stringValue: comment },
+                version: { stringValue: APP_VERSION },
+                createdAt: { timestampValue: new Date().toISOString() },
+                userAgent: { stringValue: (navigator.userAgent || '').slice(0, 250) }
+              }
+            };
+            const fResp = await fetch(firestoreUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(firestoreDoc)
+            });
+            if (fResp.ok) {
+              const statusTxt = document.getElementById('training-feedback-cloud-status');
+              if (statusTxt) {
+                statusTxt.textContent = window.t('☁️ Guardado diretamente na base de dados com sucesso!', '☁️ Saved directly to cloud database successfully!');
+                statusTxt.classList.remove('hidden');
+              }
+            }
+          } catch (e) {
+            console.warn('Envio secundário Firestore offline ou falhou:', e);
+          }
+        })();
 
         if (typeof gtag === 'function') {
           try {
