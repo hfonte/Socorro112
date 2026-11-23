@@ -1839,7 +1839,7 @@ window.I18N_PT_TO_EN = {
   "Executar sequências de Suporte Básico de Vida (110 bpm) e desobstrução da via aérea (adulto, criança e lactente) com segurança técnica.": "Perform Basic Life Support (110 bpm) and airway obstruction sequences (adult, child, and infant) with technical safety.",
   "Aplicar primeiros socorros iniciais em emergências médicas e trauma até à chegada de meios diferenciados.": "Apply initial first aid in medical and trauma emergencies until specialized EMS teams arrive.",
   "Avaliar a tomada de decisão através de casos clínicos simulados e autoavaliação formativa.": "Evaluate decision-making through simulated clinical cases and formative self-assessment.",
-  "Nota de rigor: este recurso apoia a capacitação comunitária; a certificação presencial oficial compete às entidades acreditadas (INEM / DGERT).": "Rigor notice: this resource supports community training; official in-person certification belongs to accredited bodies (INEM / DGERT).",
+  "Esta formação não é certificada, servindo para capacitação da população.": "This training is not certified, serving for community capacity building.",
   "Unidade I · Fundamentos, SIEM & Avaliação Inicial": "Unit I · Foundations, EMS System & Initial Assessment",
   "Unidade II · Suporte Básico de Vida & Via Aérea": "Unit II · Basic Life Support & Airway Management",
   "Unidade III · Emergências Médicas & Trauma": "Unit III · Medical Emergencies & Trauma",
